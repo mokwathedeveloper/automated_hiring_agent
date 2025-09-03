@@ -15,17 +15,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing job description or resumes' }, { status: 400 });
     }
 
-    const parseFile = async (file: File) => {
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      if (file.type === 'application/pdf') {
-        const data = await pdf(buffer);
-        return data.text;
-      } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-        const { value } = await mammoth.extractRawText({ buffer });
-        return value;
-      } else {
-        return new TextDecoder().decode(arrayBuffer);
+    const parseFile = async (file: File): Promise<string> => {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        if (file.type === 'application/pdf') {
+          const data = await pdf(buffer);
+          return data.text;
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+          const { value } = await mammoth.extractRawText({ buffer });
+          return value;
+        } else {
+          return new TextDecoder().decode(arrayBuffer);
+        }
+      } catch (error) {
+        throw new Error(`Failed to parse file ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     };
 
