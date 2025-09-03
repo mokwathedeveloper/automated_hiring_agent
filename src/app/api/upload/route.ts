@@ -10,6 +10,9 @@ const MIME_TYPES = {
   DOCX: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 } as const;
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_CONCURRENT_FILES = 5;
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -22,6 +25,10 @@ export async function POST(req: NextRequest) {
 
     const parseFile = async (file: File): Promise<string> => {
       try {
+        if (file.size > MAX_FILE_SIZE) {
+          throw new Error(`File ${file.name} exceeds maximum size of ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+        }
+        
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         if (file.type === MIME_TYPES.PDF) {
@@ -38,8 +45,18 @@ export async function POST(req: NextRequest) {
       }
     };
 
+    const processBatch = async (files: File[]): Promise<string[]> => {
+      const results: string[] = [];
+      for (let i = 0; i < files.length; i += MAX_CONCURRENT_FILES) {
+        const batch = files.slice(i, i + MAX_CONCURRENT_FILES);
+        const batchResults = await Promise.all(batch.map(parseFile));
+        results.push(...batchResults);
+      }
+      return results;
+    };
+
     const jobDescriptionText = await parseFile(jobDescriptionFile);
-    const resumesText = await Promise.all(resumeFiles.map(parseFile));
+    const resumesText = await processBatch(resumeFiles);
 
     const feedback = await analyze(jobDescriptionText, resumesText);
 
