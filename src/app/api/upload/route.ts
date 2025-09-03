@@ -5,6 +5,11 @@ import pdf from 'pdf-parse';
 import mammoth from 'mammoth';
 import { analyze } from '@/lib/ai';
 
+const MIME_TYPES = {
+  PDF: 'application/pdf',
+  DOCX: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+} as const;
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -19,10 +24,10 @@ export async function POST(req: NextRequest) {
       try {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        if (file.type === 'application/pdf') {
+        if (file.type === MIME_TYPES.PDF) {
           const data = await pdf(buffer);
           return data.text;
-        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        } else if (file.type === MIME_TYPES.DOCX) {
           const { value } = await mammoth.extractRawText({ buffer });
           return value;
         } else {
