@@ -3,6 +3,7 @@
 'use client';
 
 import { useState } from 'react';
+import PricingDisplay from '@/components/PricingDisplay';
 
 interface PricingPlan {
   id: string;
@@ -180,6 +181,42 @@ export default function SubscriptionPage() {
             <span>✓ Secure payments with Paystack</span>
             <span>✓ No setup fees</span>
             <span>✓ Cancel anytime</span>
+          </div>
+        </div>
+
+        {/* Additional Pricing Information */}
+        <div className="mt-16 bg-gray-50 rounded-2xl p-8">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              Pricing Breakdown
+            </h3>
+            <p className="text-gray-600">
+              Transparent pricing with no hidden fees
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">What's Included</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li>• AI-powered resume analysis</li>
+                <li>• Job matching algorithms</li>
+                <li>• Detailed candidate reports</li>
+                <li>• WhatsApp integration (Pro+)</li>
+                <li>• API access (Enterprise)</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">Payment Options</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Monthly or annual billing</li>
+                <li>• Secure Paystack payments</li>
+                <li>• Nigerian Naira (NGN) pricing</li>
+                <li>• Instant activation</li>
+                <li>• 30-day money-back guarantee</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
