@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 // import { sendWhatsAppMessage } from '@/lib/twilio';
+import { processWhatsAppMediaForAnalysis, isSupportedMediaType } from '@/lib/whatsapp-media';
 
 interface WhatsAppMessage {
   From: string;
@@ -62,32 +63,40 @@ export async function POST(req: NextRequest) {
 async function handleMediaMessage(message: WhatsAppMessage, phoneNumber: string) {
   try {
     const mediaType = message.MediaContentType0;
+    const mediaUrl = message.MediaUrl0;
     
-    if (mediaType === 'application/pdf' || 
-        mediaType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      
-      // await sendWhatsAppMessage(
-      //   phoneNumber,
-      //   '📄 Resume received! I\'ll analyze it shortly. Please also send the job description if you haven\'t already.'
-      // );
+    if (!mediaType || !mediaUrl) {
+      console.log('Would send: Missing media information to', phoneNumber);
+      return;
+    }
+    
+    if (isSupportedMediaType(mediaType)) {
       console.log('Would send: Resume received message to', phoneNumber);
       
-      // TODO: Process the media file for resume analysis
-      console.log('Processing resume file:', message.MediaUrl0);
+      // Process the media file for text extraction
+      console.log('Processing media file:', mediaUrl);
+      const processResult = await processWhatsAppMediaForAnalysis(mediaUrl, mediaType);
+      
+      if (processResult.success && processResult.text) {
+        console.log('Successfully extracted text from media file');
+        console.log('Text length:', processResult.text.length);
+        
+        // Store the extracted text for analysis
+        // TODO: Integrate with resume analysis API
+        // TODO: Store user session data
+        
+        console.log('Would send: File processed successfully message to', phoneNumber);
+      } else {
+        console.error('Failed to process media:', processResult.error);
+        console.log('Would send: Processing error message to', phoneNumber);
+      }
       
     } else {
-      // await sendWhatsAppMessage(
-      //   phoneNumber,
-      //   '❌ Please send only PDF or DOCX files for resume analysis.'
-      // );
       console.log('Would send: File type error to', phoneNumber);
+      console.log('Unsupported media type:', mediaType);
     }
   } catch (error) {
     console.error('Error handling media message:', error);
-    // await sendWhatsAppMessage(
-    //   phoneNumber,
-    //   '⚠️ Sorry, there was an error processing your file. Please try again.'
-    // );
     console.log('Would send: Error message to', phoneNumber);
   }
 }
