@@ -70,11 +70,34 @@ export default function SubscriptionPage() {
   const handleSubscribe = async (planId: string) => {
     setIsLoading(true);
     try {
-      // TODO: Integrate with Paystack
-      console.log('Subscribing to plan:', planId);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      const plan = PRICING_PLANS.find(p => p.id === planId);
+      if (!plan) throw new Error('Plan not found');
+
+      const { initializePaystackPayment, generatePaymentReference, verifyPaystackPayment } = await import('@/lib/paystack');
+      
+      const paymentData = {
+        email: 'user@example.com', // TODO: Get from auth
+        amount: plan.price,
+        currency: plan.currency,
+        reference: generatePaymentReference('SUB'),
+        plan: planId,
+        metadata: {
+          planName: plan.name,
+          planId: planId
+        }
+      };
+
+      const result = await initializePaystackPayment(paymentData);
+      
+      if (result.status) {
+        const verification = await verifyPaystackPayment(result.data.reference);
+        if (verification.status) {
+          alert('Payment successful! Subscription activated.');
+        }
+      }
     } catch (error) {
       console.error('Subscription error:', error);
+      alert('Payment failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
