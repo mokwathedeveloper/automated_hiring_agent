@@ -156,3 +156,51 @@ This series transforms the basic file upload interface into a modern, user-frien
 - **Real-time Feedback**: Immediate validation on file selection
 
 The upload interface now provides a professional, secure, and user-friendly file upload experience with comprehensive validation and modern drag-and-drop functionality.
+
+## [Text Extraction Enhancement Series] - 2024-01-XX
+
+### Added
+
+#### 2024-01-XX - Text Extraction Utility Functions
+- **Commit**: `322bc95` - feat(utils/extract): add PDF/DOCX text extraction utility functions
+- **Branch**: `feature/text-extraction`
+- **Description**: Created comprehensive text extraction library with specialized functions for PDF and DOCX processing. Includes universal extraction interface, batch processing capabilities, error isolation, and comprehensive metadata collection for robust document text extraction workflows.
+
+#### 2024-01-XX - Nigerian Resume Extraction Tests
+- **Commit**: `5393c59` - test(utils/extract): add tests for PDF/DOCX text extraction using Nigerian resumes
+- **Branch**: `feature/extraction-tests`
+- **Description**: Developed extensive test suite specifically for Nigerian resume formats and content patterns. Tests validate extraction of local companies, universities, phone formats, locations, currency symbols, and cultural elements. Includes realistic Nigerian professional profiles for comprehensive validation.
+
+### Text Extraction Enhancement Summary
+This series establishes robust document processing capabilities optimized for the Nigerian job market:
+
+**Key Improvements:**
+- **Modular Architecture**: Separate functions for PDF and DOCX with universal interface
+- **Error Isolation**: Individual file processing prevents batch failures
+- **Metadata Tracking**: Comprehensive audit trails with timestamps and file information
+- **Nigerian Market Focus**: Specialized testing for local resume formats and content
+- **Cultural Context**: Validation of Nigerian companies, universities, and language patterns
+
+**Technical Achievements:**
+- Universal text extraction interface with automatic type detection
+- Batch processing with individual error handling and reporting
+- Comprehensive metadata collection for each extraction operation
+- Nigerian-specific content pattern recognition and validation
+- Test coverage for major Nigerian cities, companies, and institutions
+
+**Extraction Capabilities:**
+- **PDF Processing**: pdf-parse library integration with proper buffer handling
+- **DOCX Processing**: mammoth library integration for Microsoft Word documents
+- **Batch Operations**: Multiple file processing with success/failure separation
+- **Error Handling**: Detailed error messages with context information
+- **Type Safety**: Full TypeScript integration with proper interfaces
+
+**Nigerian Market Validation:**
+- **Geographic Coverage**: Lagos, Abuja, Kano, Ibadan, Port Harcourt, FCT
+- **Company Recognition**: Flutterwave, Paystack, Andela, NNPC, major banks
+- **Educational Institutions**: University of Lagos, Ahmadu Bello University, others
+- **Phone Formats**: +234 XXX XXX XXXX Nigerian international format
+- **Currency Support**: Nigerian Naira (₦) symbol recognition
+- **Language Diversity**: English, Yoruba, Hausa, Igbo, Arabic
+
+The text extraction system now provides production-ready document processing capabilities specifically optimized for Nigerian resume formats and local market context.
