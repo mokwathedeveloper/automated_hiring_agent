@@ -3,6 +3,10 @@
 import OpenAI from 'openai';
 import { JobDescription, Resume, Feedback } from '@/types';
 
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error('OPENAI_API_KEY environment variable is required');
+}
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -30,7 +34,12 @@ export async function analyze(jobDescription: string, resumes: string[]): Promis
       if (!content) {
         throw new Error('No content in response');
       }
-      return JSON.parse(content);
+      
+      try {
+        return JSON.parse(content);
+      } catch (parseError) {
+        throw new Error(`Failed to parse OpenAI response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+      }
     })
   );
 
