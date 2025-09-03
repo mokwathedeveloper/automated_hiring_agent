@@ -142,18 +142,24 @@ export default function FileUploadForm() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Upload Documents</h2>
+        <p className="text-gray-600">Upload a job description and candidate resumes to begin the analysis process.</p>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-8">
         <div>
-          <label htmlFor="jobDescription" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="jobDescription" className="block text-base font-semibold text-gray-900 mb-2">
             Job Description
           </label>
+          <p className="text-sm text-gray-600 mb-3">Upload the job posting or description document (PDF or DOCX, max 5MB)</p>
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, 'job')}
-            className={`mt-1 border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-              isDragOver ? 'border-violet-500 bg-violet-50' : 'border-gray-300'
+            className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
+              isDragOver ? 'border-indigo-400 bg-indigo-50 scale-105' : 'border-gray-300 hover:border-gray-400'
             }`}
           >
             {jobDescription ? (
@@ -193,15 +199,16 @@ export default function FileUploadForm() {
           </div>
         </div>
         <div>
-          <label htmlFor="resumes" className="block text-sm font-medium text-gray-700">
-            Resumes
+          <label htmlFor="resumes" className="block text-base font-semibold text-gray-900 mb-2">
+            Candidate Resumes
           </label>
+          <p className="text-sm text-gray-600 mb-3">Upload one or more candidate resumes (PDF or DOCX, max 5MB each)</p>
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, 'resume')}
-            className={`mt-1 border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-              isDragOver ? 'border-violet-500 bg-violet-50' : 'border-gray-300'
+            className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
+              isDragOver ? 'border-indigo-400 bg-indigo-50 scale-105' : 'border-gray-300 hover:border-gray-400'
             }`}
           >
             {resumes && resumes.length > 0 ? (
