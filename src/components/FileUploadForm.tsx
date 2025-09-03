@@ -10,6 +10,22 @@ export default function FileUploadForm() {
   const [feedback, setFeedback] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const validateFile = useCallback((file: File): string | null => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    
+    if (!allowedTypes.includes(file.type)) {
+      return 'Only PDF and DOCX files are allowed';
+    }
+    
+    if (file.size > maxSize) {
+      return `File size must be under 5MB. Current size: ${(file.size / 1024 / 1024).toFixed(2)}MB`;
+    }
+    
+    return null;
+  }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -24,16 +40,29 @@ export default function FileUploadForm() {
   const handleDrop = useCallback((e: React.DragEvent, type: 'job' | 'resume') => {
     e.preventDefault();
     setIsDragOver(false);
+    setValidationError(null);
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       if (type === 'job') {
+        const error = validateFile(files[0]);
+        if (error) {
+          setValidationError(error);
+          return;
+        }
         setJobDescription(files[0]);
       } else {
+        for (let i = 0; i < files.length; i++) {
+          const error = validateFile(files[i]);
+          if (error) {
+            setValidationError(`${files[i].name}: ${error}`);
+            return;
+          }
+        }
         setResumes(files);
       }
     }
-  }, []);
+  }, [validateFile]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -101,8 +130,19 @@ export default function FileUploadForm() {
                 <input
                   id="jobDescription"
                   type="file"
-                  accept=".pdf,.doc,.docx,.txt"
-                  onChange={(e) => setJobDescription(e.target.files ? e.target.files[0] : null)}
+                  accept=".pdf,.docx"
+                  onChange={(e) => {
+                    setValidationError(null);
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const error = validateFile(file);
+                      if (error) {
+                        setValidationError(error);
+                        return;
+                      }
+                      setJobDescription(file);
+                    }
+                  }}
                   className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
                 />
               </div>
@@ -138,9 +178,22 @@ export default function FileUploadForm() {
                 <input
                   id="resumes"
                   type="file"
-                  accept=".pdf,.doc,.docx,.txt"
+                  accept=".pdf,.docx"
                   multiple
-                  onChange={(e) => setResumes(e.target.files)}
+                  onChange={(e) => {
+                    setValidationError(null);
+                    const files = e.target.files;
+                    if (files) {
+                      for (let i = 0; i < files.length; i++) {
+                        const error = validateFile(files[i]);
+                        if (error) {
+                          setValidationError(`${files[i].name}: ${error}`);
+                          return;
+                        }
+                      }
+                      setResumes(files);
+                    }
+                  }}
                   className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
                 />
               </div>
@@ -154,6 +207,11 @@ export default function FileUploadForm() {
         >
           {isLoading ? 'Analyzing...' : 'Analyze'}
         </button>
+        {validationError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">{validationError}</p>
+          </div>
+        )}
       </form>
       {feedback && (
         <div className="mt-8 p-4 border rounded-md">
