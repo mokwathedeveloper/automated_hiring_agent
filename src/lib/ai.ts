@@ -3,6 +3,11 @@
 import OpenAI from 'openai';
 import { JobDescription, Resume, Feedback } from '@/types';
 
+const AI_CONFIG = {
+  MODEL: 'gpt-3.5-turbo',
+  DEFAULT_JOB_ID: 'job-1',
+} as const;
+
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY environment variable is required');
 }
@@ -26,7 +31,7 @@ export async function analyze(jobDescription: string, resumes: string[]): Promis
       `;
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: AI_CONFIG.MODEL,
         messages: [{ role: 'user', content: prompt }],
       });
 
@@ -46,7 +51,7 @@ export async function analyze(jobDescription: string, resumes: string[]): Promis
   return responses.map((response, index) => ({
     id: `${Date.now()}-${index}`,
     candidateId: `candidate-${index}`,
-    jobDescriptionId: 'job-1',
+    jobDescriptionId: AI_CONFIG.DEFAULT_JOB_ID,
     ...response,
   }));
 }
