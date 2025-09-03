@@ -16,15 +16,16 @@ export async function POST(req: NextRequest) {
     }
 
     const parseFile = async (file: File) => {
-      const buffer = await file.arrayBuffer();
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
       if (file.type === 'application/pdf') {
-        const data = await pdf(Buffer.from(buffer));
+        const data = await pdf(buffer);
         return data.text;
       } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         const { value } = await mammoth.extractRawText({ buffer });
         return value;
       } else {
-        return new TextDecoder().decode(buffer);
+        return new TextDecoder().decode(arrayBuffer);
       }
     };
 
