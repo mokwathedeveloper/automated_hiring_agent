@@ -1,6 +1,7 @@
 // src/lib/ai.ts
 
 import OpenAI from 'openai';
+import { randomUUID } from 'crypto';
 import { JobDescription, Resume, Feedback } from '@/types';
 
 const AI_CONFIG = {
@@ -49,8 +50,8 @@ export async function analyze(jobDescription: string, resumes: string[]): Promis
   );
 
   return responses.map((response, index) => ({
-    id: `${Date.now()}-${index}`,
-    candidateId: `candidate-${index}`,
+    id: randomUUID(),
+    candidateId: `candidate-${randomUUID()}`,
     jobDescriptionId: AI_CONFIG.DEFAULT_JOB_ID,
     ...response,
   }));
