@@ -3,6 +3,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+// Type definitions for structured API responses
+interface ResumeAnalysis {
+  score: number;
+  summary: string;
+  pros: string[];
+  cons: string[];
+}
+
+interface ParseRequest {
+  jobDescription: string;
+  resume: string;
+}
+
+interface ParseResponse {
+  success: boolean;
+  data?: ResumeAnalysis;
+  error?: string;
+}
+
+interface OpenAIChoice {
+  message?: {
+    content?: string | null;
+  };
+}
+
+interface OpenAIResponse {
+  choices: OpenAIChoice[];
+}
+
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY environment variable is required');
 }
@@ -39,13 +68,14 @@ RESUME:
 Provide your analysis in the exact JSON format specified above:`,
 } as const;
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse<ParseResponse>> {
   try {
-    const { jobDescription, resume } = await req.json();
+    const body: ParseRequest = await req.json();
+    const { jobDescription, resume } = body;
 
     if (!jobDescription || !resume) {
-      return NextResponse.json(
-        { error: 'Missing required fields: jobDescription and resume' },
+      return NextResponse.json<ParseResponse>(
+        { success: false, error: 'Missing required fields: jobDescription and resume' },
         { status: 400 }
       );
     }
@@ -54,7 +84,7 @@ export async function POST(req: NextRequest) {
       .replace('{jobDescription}', jobDescription)
       .replace('{resume}', resume);
 
-    const completion = await openai.chat.completions.create({
+    const completion: OpenAIResponse = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3,
@@ -66,17 +96,17 @@ export async function POST(req: NextRequest) {
       throw new Error('No content received from OpenAI');
     }
 
-    const analysis = JSON.parse(content);
+    const analysis: ResumeAnalysis = JSON.parse(content);
     
-    return NextResponse.json({
+    return NextResponse.json<ParseResponse>({
       success: true,
       data: analysis,
     });
 
   } catch (error) {
     console.error('Parse API error:', error);
-    return NextResponse.json(
-      { error: 'Failed to analyze resume' },
+    return NextResponse.json<ParseResponse>(
+      { success: false, error: 'Failed to analyze resume' },
       { status: 500 }
     );
   }
