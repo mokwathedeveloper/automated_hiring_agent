@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { z } from 'zod';
+import { supabaseAdmin, db } from '@/lib/supabase';
 
 // Zod schemas for robust validation
 const ParseRequestSchema = z.object({
@@ -213,6 +214,27 @@ export async function POST(req: NextRequest): Promise<NextResponse<ParseResponse
         throw new JSONParseError(`OpenAI response validation failed: ${error.message}`);
       }
       throw error;
+    }
+
+    // Store resume analysis in database if user is authenticated
+    const authHeader = req.headers.get('authorization');
+    if (authHeader && supabaseAdmin) {
+      try {
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user } } = await supabaseAdmin.auth.getUser(token);
+        
+        if (user) {
+          await db.insertResume(user.id, {
+            content: resume,
+            analysis: validatedAnalysis,
+            filename: 'uploaded_resume.txt',
+            file_type: 'text/plain'
+          });
+        }
+      } catch (dbError) {
+        console.error('Database storage error:', dbError);
+        // Continue without failing the request
+      }
     }
     
     return NextResponse.json<ParseResponse>({
