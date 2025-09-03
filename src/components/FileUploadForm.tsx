@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import ResultsDisplay from './ResultsDisplay';
 
 export default function FileUploadForm() {
   const [jobDescription, setJobDescription] = useState<File | null>(null);
@@ -11,6 +12,7 @@ export default function FileUploadForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const validateFile = useCallback((file: File): string | null => {
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -64,35 +66,76 @@ export default function FileUploadForm() {
     }
   }, [validateFile]);
 
+  const extractTextFromFile = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = reader.result as string;
+        resolve(text);
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsText(file);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!jobDescription || !resumes) {
-      alert('Please select a job description and at least one resume.');
+    if (!jobDescription || !resumes || resumes.length === 0) {
+      setApiError('Please select a job description and at least one resume.');
       return;
     }
 
     setIsLoading(true);
-    const formData = new FormData();
-    formData.append('jobDescription', jobDescription);
-    for (let i = 0; i < resumes.length; i++) {
-      formData.append('resumes', resumes[i]);
-    }
+    setApiError(null);
+    setFeedback(null);
 
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      // Extract text from job description
+      const jobDescriptionText = await extractTextFromFile(jobDescription);
+      
+      // Process each resume individually using the parse API
+      const results = [];
+      for (let i = 0; i < resumes.length; i++) {
+        const resume = resumes[i];
+        try {
+          const resumeText = await extractTextFromFile(resume);
+          
+          const response = await fetch('/api/parse', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              jobDescription: jobDescriptionText,
+              resume: resumeText,
+            }),
+          });
 
-      if (response.ok) {
-        const data = await response.json();
-        setFeedback(data);
-      } else {
-        alert('File upload failed.');
+          const result = await response.json();
+          
+          if (result.success && result.data) {
+            results.push({
+              fileName: resume.name,
+              analysis: result.data,
+            });
+          } else {
+            results.push({
+              fileName: resume.name,
+              error: result.error || 'Analysis failed',
+            });
+          }
+        } catch (error) {
+          results.push({
+            fileName: resume.name,
+            error: `Failed to process: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          });
+        }
       }
+      
+      setFeedback(results);
     } catch (error) {
-      console.error('Error uploading files:', error);
-      alert('An error occurred while uploading the files.');
+      console.error('Error processing files:', error);
+      setApiError(`Processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsLoading(false);
     }
@@ -202,22 +245,53 @@ export default function FileUploadForm() {
         </div>
         <button
           type="submit"
-          disabled={isLoading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          disabled={isLoading || !jobDescription || !resumes}
+          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isLoading ? 'Analyzing...' : 'Analyze'}
+          {isLoading ? (
+            <div className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Analyzing Resumes...
+            </div>
+          ) : (
+            'Analyze Resumes'
+          )}
         </button>
         {validationError && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{validationError}</p>
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-600">{validationError}</p>
+              </div>
+            </div>
+          </div>
+        )}
+        {apiError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-600">{apiError}</p>
+              </div>
+            </div>
           </div>
         )}
       </form>
-      {feedback && (
-        <div className="mt-8 p-4 border rounded-md">
-          <h2 className="text-xl font-bold">Analysis Results</h2>
-          <pre className="mt-4 whitespace-pre-wrap">{JSON.stringify(feedback, null, 2)}</pre>
-        </div>
+      
+      {feedback && feedback.length > 0 && (
+        <ResultsDisplay results={feedback} />
       )}
     </div>
   );
