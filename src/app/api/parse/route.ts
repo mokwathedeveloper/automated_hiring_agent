@@ -111,31 +111,50 @@ const openai = new OpenAI({
 });
 
 const PROMPT_TEMPLATES = {
-  RESUME_ANALYSIS: `You are an expert HR professional and resume analyst. Analyze the provided resume against the job description with precision and objectivity.
+  RESUME_ANALYSIS: `You are a senior HR professional with 15+ years of experience in talent acquisition and resume evaluation. Your expertise spans multiple industries and you excel at objective candidate assessment.
 
-INSTRUCTIONS:
-- Provide a numerical score from 1-100 based on job fit
-- Write a concise 2-3 sentence summary
-- List 3-5 specific strengths (pros) with evidence from the resume
-- List 2-4 areas for improvement (cons) or missing qualifications
-- Focus on skills, experience, and qualifications relevant to the job
-- Be objective and constructive in your assessment
+CONTEXT & ROLE:
+- Evaluate candidates with fairness and precision
+- Focus on job-relevant qualifications and transferable skills
+- Consider both technical competencies and cultural fit indicators
+- Provide actionable feedback for candidate improvement
 
-RESPONSE FORMAT (JSON only):
+ANALYSIS FRAMEWORK:
+1. RELEVANCE SCORING (40%): Direct job requirement alignment
+2. EXPERIENCE QUALITY (30%): Depth, progression, and achievements
+3. SKILLS MATCH (20%): Technical and soft skills compatibility
+4. POTENTIAL INDICATORS (10%): Growth trajectory and adaptability
+
+EVALUATION CRITERIA:
+- Score 90-100: Exceptional fit, exceeds most requirements
+- Score 75-89: Strong candidate, meets key requirements with minor gaps
+- Score 60-74: Good potential, some important requirements missing
+- Score 45-59: Moderate fit, significant skill/experience gaps
+- Score 1-44: Poor match, major misalignment with role requirements
+
+OUTPUT REQUIREMENTS:
+- Provide numerical score (1-100) with clear justification
+- Write 2-3 sentence executive summary highlighting key findings
+- List 3-5 specific strengths with concrete evidence from resume
+- Identify 2-4 improvement areas or missing qualifications
+- Maintain professional, constructive tone throughout
+- Base all assessments on factual resume content
+
+RESPONSE FORMAT (Valid JSON only):
 {
-  "score": <number 1-100>,
-  "summary": "<brief assessment>",
-  "pros": ["<specific strength 1>", "<specific strength 2>", ...],
-  "cons": ["<area for improvement 1>", "<missing qualification 1>", ...]
+  "score": <integer between 1-100>,
+  "summary": "<concise professional assessment>",
+  "pros": ["<specific strength with evidence>", "<another strength>", ...],
+  "cons": ["<improvement area or gap>", "<another consideration>", ...]
 }
 
 JOB DESCRIPTION:
 {jobDescription}
 
-RESUME:
+RESUME TO ANALYZE:
 {resume}
 
-Provide your analysis in the exact JSON format specified above:`,
+Provide your professional analysis in the exact JSON format specified:`,
 } as const;
 
 export async function POST(req: NextRequest): Promise<NextResponse<ParseResponse>> {
