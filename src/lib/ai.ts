@@ -1,7 +1,17 @@
 // src/lib/ai.ts
 
 import OpenAI from 'openai';
+import { randomUUID } from 'crypto';
 import { JobDescription, Resume, Feedback } from '@/types';
+
+const AI_CONFIG = {
+  MODEL: 'gpt-3.5-turbo',
+  DEFAULT_JOB_ID: 'job-1',
+} as const;
+
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error('OPENAI_API_KEY environment variable is required');
+}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -22,7 +32,7 @@ export async function analyze(jobDescription: string, resumes: string[]): Promis
       `;
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: AI_CONFIG.MODEL,
         messages: [{ role: 'user', content: prompt }],
       });
 
@@ -30,14 +40,19 @@ export async function analyze(jobDescription: string, resumes: string[]): Promis
       if (!content) {
         throw new Error('No content in response');
       }
-      return JSON.parse(content);
+      
+      try {
+        return JSON.parse(content);
+      } catch (parseError) {
+        throw new Error(`Failed to parse OpenAI response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+      }
     })
   );
 
   return responses.map((response, index) => ({
-    id: `${Date.now()}-${index}`,
-    candidateId: `candidate-${index}`,
-    jobDescriptionId: 'job-1',
+    id: randomUUID(),
+    candidateId: `candidate-${randomUUID()}`,
+    jobDescriptionId: AI_CONFIG.DEFAULT_JOB_ID,
     ...response,
   }));
 }
