@@ -3,6 +3,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+// Validation schemas for request/response consistency
+const VALIDATION_RULES = {
+  jobDescription: {
+    minLength: 10,
+    maxLength: 10000,
+    required: true,
+  },
+  resume: {
+    minLength: 50,
+    maxLength: 20000,
+    required: true,
+  },
+  score: {
+    min: 1,
+    max: 100,
+    type: 'number',
+  },
+  summary: {
+    minLength: 10,
+    maxLength: 500,
+    type: 'string',
+  },
+  pros: {
+    minItems: 1,
+    maxItems: 10,
+    type: 'array',
+  },
+  cons: {
+    minItems: 1,
+    maxItems: 10,
+    type: 'array',
+  },
+} as const;
+
 // Type definitions for structured API responses
 interface ResumeAnalysis {
   score: number;
@@ -20,6 +54,113 @@ interface ParseResponse {
   success: boolean;
   data?: ResumeAnalysis;
   error?: string;
+}
+
+// Validation functions
+function validateRequest(data: any): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  if (!data || typeof data !== 'object') {
+    errors.push('Request body must be a valid object');
+    return { isValid: false, errors };
+  }
+  
+  // Validate jobDescription
+  if (!data.jobDescription) {
+    errors.push('jobDescription is required');
+  } else if (typeof data.jobDescription !== 'string') {
+    errors.push('jobDescription must be a string');
+  } else {
+    const jobDesc = data.jobDescription.trim();
+    if (jobDesc.length < VALIDATION_RULES.jobDescription.minLength) {
+      errors.push(`jobDescription must be at least ${VALIDATION_RULES.jobDescription.minLength} characters`);
+    }
+    if (jobDesc.length > VALIDATION_RULES.jobDescription.maxLength) {
+      errors.push(`jobDescription must not exceed ${VALIDATION_RULES.jobDescription.maxLength} characters`);
+    }
+  }
+  
+  // Validate resume
+  if (!data.resume) {
+    errors.push('resume is required');
+  } else if (typeof data.resume !== 'string') {
+    errors.push('resume must be a string');
+  } else {
+    const resume = data.resume.trim();
+    if (resume.length < VALIDATION_RULES.resume.minLength) {
+      errors.push(`resume must be at least ${VALIDATION_RULES.resume.minLength} characters`);
+    }
+    if (resume.length > VALIDATION_RULES.resume.maxLength) {
+      errors.push(`resume must not exceed ${VALIDATION_RULES.resume.maxLength} characters`);
+    }
+  }
+  
+  return { isValid: errors.length === 0, errors };
+}
+
+function validateAnalysis(data: any): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  if (!data || typeof data !== 'object') {
+    errors.push('Analysis must be a valid object');
+    return { isValid: false, errors };
+  }
+  
+  // Validate score
+  if (typeof data.score !== 'number') {
+    errors.push('score must be a number');
+  } else if (data.score < VALIDATION_RULES.score.min || data.score > VALIDATION_RULES.score.max) {
+    errors.push(`score must be between ${VALIDATION_RULES.score.min} and ${VALIDATION_RULES.score.max}`);
+  }
+  
+  // Validate summary
+  if (!data.summary || typeof data.summary !== 'string') {
+    errors.push('summary must be a non-empty string');
+  } else {
+    const summary = data.summary.trim();
+    if (summary.length < VALIDATION_RULES.summary.minLength) {
+      errors.push(`summary must be at least ${VALIDATION_RULES.summary.minLength} characters`);
+    }
+    if (summary.length > VALIDATION_RULES.summary.maxLength) {
+      errors.push(`summary must not exceed ${VALIDATION_RULES.summary.maxLength} characters`);
+    }
+  }
+  
+  // Validate pros
+  if (!Array.isArray(data.pros)) {
+    errors.push('pros must be an array');
+  } else {
+    if (data.pros.length < VALIDATION_RULES.pros.minItems) {
+      errors.push(`pros must have at least ${VALIDATION_RULES.pros.minItems} item`);
+    }
+    if (data.pros.length > VALIDATION_RULES.pros.maxItems) {
+      errors.push(`pros must not exceed ${VALIDATION_RULES.pros.maxItems} items`);
+    }
+    data.pros.forEach((pro: any, index: number) => {
+      if (typeof pro !== 'string' || pro.trim().length === 0) {
+        errors.push(`pros[${index}] must be a non-empty string`);
+      }
+    });
+  }
+  
+  // Validate cons
+  if (!Array.isArray(data.cons)) {
+    errors.push('cons must be an array');
+  } else {
+    if (data.cons.length < VALIDATION_RULES.cons.minItems) {
+      errors.push(`cons must have at least ${VALIDATION_RULES.cons.minItems} item`);
+    }
+    if (data.cons.length > VALIDATION_RULES.cons.maxItems) {
+      errors.push(`cons must not exceed ${VALIDATION_RULES.cons.maxItems} items`);
+    }
+    data.cons.forEach((con: any, index: number) => {
+      if (typeof con !== 'string' || con.trim().length === 0) {
+        errors.push(`cons[${index}] must be a non-empty string`);
+      }
+    });
+  }
+  
+  return { isValid: errors.length === 0, errors };
 }
 
 interface OpenAIChoice {
@@ -103,32 +244,21 @@ Provide your analysis in the exact JSON format specified above:`,
 
 export async function POST(req: NextRequest): Promise<NextResponse<ParseResponse>> {
   try {
-    // Validate request body
-    let body: ParseRequest;
+    // Parse and validate request body
+    let body: any;
     try {
       body = await req.json();
     } catch (error) {
       throw new ValidationError('Invalid JSON in request body');
     }
 
-    const { jobDescription, resume } = body;
-
-    // Comprehensive input validation
-    if (!jobDescription || typeof jobDescription !== 'string') {
-      throw new ValidationError('jobDescription is required and must be a string');
-    }
-    
-    if (!resume || typeof resume !== 'string') {
-      throw new ValidationError('resume is required and must be a string');
+    // Use validation schema for request validation
+    const requestValidation = validateRequest(body);
+    if (!requestValidation.isValid) {
+      throw new ValidationError(`Request validation failed: ${requestValidation.errors.join(', ')}`);
     }
 
-    if (jobDescription.trim().length < 10) {
-      throw new ValidationError('jobDescription must be at least 10 characters long');
-    }
-
-    if (resume.trim().length < 50) {
-      throw new ValidationError('resume must be at least 50 characters long');
-    }
+    const { jobDescription, resume }: ParseRequest = body;
 
     const prompt = PROMPT_TEMPLATES.RESUME_ANALYSIS
       .replace('{jobDescription}', jobDescription)
@@ -157,29 +287,24 @@ export async function POST(req: NextRequest): Promise<NextResponse<ParseResponse
     }
 
     // Parse and validate JSON response
-    let analysis: ResumeAnalysis;
+    let analysis: any;
     try {
       analysis = JSON.parse(content);
     } catch (error) {
       throw new JSONParseError(`Failed to parse OpenAI response as JSON: ${error instanceof Error ? error.message : 'Invalid JSON'}`);
     }
 
-    // Validate analysis structure
-    if (typeof analysis.score !== 'number' || analysis.score < 1 || analysis.score > 100) {
-      throw new JSONParseError('Invalid score in analysis response');
+    // Use validation schema for response validation
+    const analysisValidation = validateAnalysis(analysis);
+    if (!analysisValidation.isValid) {
+      throw new JSONParseError(`Analysis validation failed: ${analysisValidation.errors.join(', ')}`);
     }
 
-    if (!analysis.summary || typeof analysis.summary !== 'string') {
-      throw new JSONParseError('Invalid summary in analysis response');
-    }
-
-    if (!Array.isArray(analysis.pros) || !Array.isArray(analysis.cons)) {
-      throw new JSONParseError('Invalid pros/cons format in analysis response');
-    }
+    const validatedAnalysis: ResumeAnalysis = analysis;
     
     return NextResponse.json<ParseResponse>({
       success: true,
-      data: analysis,
+      data: validatedAnalysis,
     });
 
   } catch (error) {
