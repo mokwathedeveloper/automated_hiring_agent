@@ -251,3 +251,36 @@ This series completes the Day 2 tasks with professional backend enhancements and
 - **Real-time Feedback**: Immediate visual responses to user interactions and processing states
 
 The application now provides a complete, professional hiring assistant experience with AI-powered resume analysis, modern UI design, and comprehensive error handling.
+
+## [File Text Extraction Utility] - 2024-01-XX
+
+### Added
+
+#### 2024-01-XX - Text Extraction Utility Implementation
+- **Commit**: `d009393` - feat(utils): implement extractTextFromFile — adds robust, type-safe text extraction for PDF/DOCX files
+- **Branch**: `feature/utils-extract-text`
+- **Description**: Implemented comprehensive text extraction utility with support for PDF and DOCX formats. Added extractTextFromPdf helper using pdf-parse library, extractTextFromDocx helper using mammoth library, comprehensive error handling with descriptive messages, type safety with TypeScript interfaces, and clear error propagation for unsupported file types.
+
+### File Text Extraction Summary
+This implementation provides a centralized, robust text extraction utility for the hiring agent:
+
+**Key Features:**
+- **Format Support**: PDF and DOCX file processing with dedicated helper functions
+- **Type Safety**: Full TypeScript implementation with proper error typing
+- **Error Handling**: Comprehensive try/catch blocks with descriptive error messages
+- **MIME Type Validation**: Clear errors for unsupported file types
+- **Library Integration**: pdf-parse for PDFs, mammoth for DOCX files
+
+**Technical Achievements:**
+- Centralized text extraction logic in `src/lib/utils.ts`
+- Consistent error handling across all parsing operations
+- Type-safe implementation with proper TypeScript support
+- Clear separation of concerns with dedicated helper functions
+- Extensible architecture for future file format support
+
+**Dependencies:**
+- `pdf-parse`: PDF text extraction library
+- `mammoth`: DOCX text extraction library
+- `@types/pdf-parse`: TypeScript definitions for pdf-parse
+
+The text extraction utility now provides production-ready document processing capabilities with robust error handling and type safety.
