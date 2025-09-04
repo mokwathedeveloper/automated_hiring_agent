@@ -82,10 +82,11 @@ export default function WhatsAppButton({ resumeData }: WhatsAppButtonProps) {
       {showInput && (
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-green-700 mb-1">
+            <label htmlFor="phone-input" className="block text-sm font-medium text-green-700 mb-1">
               Phone Number (with country code)
             </label>
             <input
+              id="phone-input"
               type="tel"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
