@@ -1,32 +1,23 @@
-// src/app/layout.tsx
-
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import "./globals.css";
-import Layout from '@/components/Layout';
+import './globals.css';
 
-const inter = Inter({ 
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter'
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Automated Hiring Agent",
-  description: "AI-powered resume analysis platform for the Nigerian job market",
+  title: 'HiringAgent',
+  description: 'AI-powered hiring platform',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className={`${inter.className} bg-gray-50 text-gray-900 antialiased`}>
-        <Layout>
-          {children}
-        </Layout>
+    <html lang="en">
+      <body className={inter.className}>
+        {children}
       </body>
     </html>
   );
