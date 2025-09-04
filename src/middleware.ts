@@ -1,54 +1,48 @@
-// src/middleware.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 
-// Rate limiting store (in production, use Redis or similar)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+// Rate limiting store (in production, use Redis)
+const rateLimit = new Map<string, { count: number; resetTime: number }>();
 
-const RATE_LIMIT = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 100, // requests per window
-};
-
-function getRateLimitKey(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0] : request.ip || 'unknown';
-  return `rate_limit:${ip}`;
-}
-
-function isRateLimited(key: string): boolean {
-  const now = Date.now();
-  const record = rateLimitStore.get(key);
-
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(key, {
-      count: 1,
-      resetTime: now + RATE_LIMIT.windowMs,
-    });
-    return false;
-  }
-
-  if (record.count >= RATE_LIMIT.maxRequests) {
-    return true;
-  }
-
-  record.count++;
-  return false;
-}
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_MAX_REQUESTS = 100; // 100 requests per window
 
 export function middleware(request: NextRequest) {
-  // Apply rate limiting to API routes
+  // Only apply rate limiting to API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    const key = getRateLimitKey(request);
+    const ip = request.ip || request.headers.get('x-forwarded-for') || 'anonymous';
+    const now = Date.now();
     
-    if (isRateLimited(key)) {
+    // Clean up expired entries
+    for (const [key, value] of rateLimit.entries()) {
+      if (now > value.resetTime) {
+        rateLimit.delete(key);
+      }
+    }
+    
+    // Get or create rate limit entry
+    const entry = rateLimit.get(ip) || { count: 0, resetTime: now + RATE_LIMIT_WINDOW };
+    
+    // Check if rate limit exceeded
+    if (entry.count >= RATE_LIMIT_MAX_REQUESTS && now < entry.resetTime) {
       return NextResponse.json(
-        { error: 'Too many requests. Please try again later.' },
+        { success: false, error: 'Rate limit exceeded. Please try again later.' },
         { status: 429 }
       );
     }
+    
+    // Increment counter
+    entry.count++;
+    rateLimit.set(ip, entry);
+    
+    // Add rate limit headers
+    const response = NextResponse.next();
+    response.headers.set('X-RateLimit-Limit', RATE_LIMIT_MAX_REQUESTS.toString());
+    response.headers.set('X-RateLimit-Remaining', Math.max(0, RATE_LIMIT_MAX_REQUESTS - entry.count).toString());
+    response.headers.set('X-RateLimit-Reset', entry.resetTime.toString());
+    
+    return response;
   }
-
+  
   return NextResponse.next();
 }
 
