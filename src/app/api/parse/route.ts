@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import openai from '@/lib/openai';
 import { extractTextFromFile } from '@/lib/utils';
 import { ParsedResume, ParseResponse } from '@/types';
+import { ParsedResumeSchema } from '@/lib/validation';
 
 export async function POST(request: NextRequest): Promise<NextResponse<ParseResponse>> {
   try {
@@ -48,9 +49,15 @@ ${text}`;
       return NextResponse.json({ success: false, error: 'Failed to parse resume' }, { status: 500 });
     }
 
-    const parsedData: ParsedResume = JSON.parse(content);
+    const rawData = JSON.parse(content);
+    const validationResult = ParsedResumeSchema.safeParse(rawData);
+    
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error);
+      return NextResponse.json({ success: false, error: 'Invalid resume data format' }, { status: 500 });
+    }
 
-    return NextResponse.json({ success: true, data: parsedData });
+    return NextResponse.json({ success: true, data: validationResult.data });
   } catch (error) {
     console.error('Parse error:', error);
     return NextResponse.json({ success: false, error: 'Failed to parse resume' }, { status: 500 });
