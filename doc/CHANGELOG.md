@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - **Navbar Icons & Styling**: Integrated `react-icons` for navigation links and authentication buttons, and applied the new color scheme for a polished look.
   - Commit: `8b8b7049`
 - **Hero Section Styling**: Updated color scheme and refined responsive classes for the Hero section.
+  - Commit: `a7a6bd26`
 - **Footer Styling**: Applied the new color scheme to the Footer.
 - **Resume Uploader Icon & Styling**: Replaced inline SVG with `react-icons` component and updated color scheme for the Resume Uploader.
 

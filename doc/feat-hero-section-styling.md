@@ -8,4 +8,4 @@ Existing color classes in `Hero.tsx` were not updated to use the new custom pale
 Updated color classes in `Hero.tsx` to use the new `primary` and `gray` palette, and reviewed responsive classes for optimal display on different screen sizes, enhancing the overall visual appeal and consistency.
 
 ### Commit Ref
-[Commit hash will be added here after commit]
+`a7a6bd26`
