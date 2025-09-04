@@ -2,10 +2,12 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { extractTextFromFile } from '@/lib/utils';
+import ErrorMessage from './ErrorMessage';
 
 export default function ResumeUploader() {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
@@ -26,12 +28,13 @@ export default function ResumeUploader() {
   };
 
   const processFile = async (file: File) => {
-    const error = validateFile(file);
-    if (error) {
-      alert(error);
+    const validationError = validateFile(file);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
+    setError(null);
     setIsLoading(true);
     try {
       const buffer = Buffer.from(await file.arrayBuffer());
@@ -39,7 +42,7 @@ export default function ResumeUploader() {
       console.log('Extracted text:', text);
     } catch (error) {
       console.error('Text extraction failed:', error);
-      alert('Failed to extract text from file');
+      setError('Failed to extract text from file. Please ensure the file is not corrupted.');
     } finally {
       setIsLoading(false);
     }
@@ -77,11 +80,18 @@ export default function ResumeUploader() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto space-y-4">
+      {error && (
+        <ErrorMessage 
+          message={error} 
+          onRetry={() => setError(null)}
+        />
+      )}
+      
       <div
         className={`
-          border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-          ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 hover:border-gray-400'}
+          border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200
+          ${isDragging ? 'border-indigo-500 bg-indigo-50 scale-105' : 'border-gray-300 hover:border-gray-400'}
           ${isLoading ? 'pointer-events-none opacity-50' : ''}
         `}
         onDragOver={handleDragOver}
