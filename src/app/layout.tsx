@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
-import { SessionProvider } from 'next-auth/react';
 import { authOptions } from '@/lib/nextauth';
 
 import './globals.css';
@@ -8,8 +7,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ClientSessionProvider from '@/components/ClientSessionProvider';
 import QueryProvider from '@/components/QueryProvider';
-
-
 
 export const metadata: Metadata = {
   title: 'HiringAgent',

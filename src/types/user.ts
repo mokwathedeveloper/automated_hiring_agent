@@ -1,13 +1,2 @@
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  premium: boolean;
-  createdAt: Date;
-}
-
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-}
+// Custom user types - currently using Supabase User type instead
+// Keep this file for future custom user extensions if needed
