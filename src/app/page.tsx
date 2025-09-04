@@ -1,7 +1,11 @@
+import Hero from '@/components/Hero';
+import ResumeUploader from '@/components/ResumeUploader';
+
 export default function HomePage() {
   return (
     <main>
-      <h1>Welcome to HiringAgent</h1>
+      <Hero />
+      <ResumeUploader />
     </main>
   );
 }
