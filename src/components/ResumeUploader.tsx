@@ -1,11 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { FaCloudUploadAlt } from 'react-icons/fa'; // Import upload icon
+import { FaCloudUploadAlt } from 'react-icons/fa';
+import { ParsedResume, ParseResponse } from '@/types';
+import ResumeDisplay from './ResumeDisplay';
 
 export default function ResumeUploader() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [parsedData, setParsedData] = useState<ParsedResume | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -29,10 +34,32 @@ export default function ResumeUploader() {
     setSelectedFile(file);
   };
 
-  const handleUpload = () => {
-    if (selectedFile) {
-      console.log('Uploading file:', selectedFile.name);
-      // Upload logic will be implemented later
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      const response = await fetch('/api/parse', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result: ParseResponse = await response.json();
+
+      if (result.success && result.data) {
+        setParsedData(result.data);
+      } else {
+        setError(result.error || 'Failed to parse resume');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -86,17 +113,30 @@ export default function ResumeUploader() {
           </div>
         </div>
 
+        {error && (
+          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 text-center">{error}</p>
+          </div>
+        )}
+
         {selectedFile && (
           <div className="mt-8 text-center">
             <button
               onClick={handleUpload}
-              className="bg-primary-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
+              disabled={isLoading}
+              className="bg-primary-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Analyze Resume
+              {isLoading ? 'Parsing Resume...' : 'Analyze Resume'}
             </button>
           </div>
         )}
       </div>
+      
+      {parsedData && (
+        <div className="mt-12">
+          <ResumeDisplay data={parsedData} />
+        </div>
+      )}
     </section>
   );
 }
