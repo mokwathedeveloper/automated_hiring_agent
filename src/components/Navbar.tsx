@@ -2,10 +2,14 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { FaCheckCircle, FaBars, FaHome, FaTachometerAlt, FaDollarSign, FaSignInAlt, FaUserPlus } from 'react-icons/fa'; // Import icons
+import { useSession, signOut } from 'next-auth/react';
+import { FaCheckCircle, FaBars, FaHome, FaTachometerAlt, FaDollarSign, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import AuthModal from './AuthModal';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [authModal, setAuthModal] = useState<{ isOpen: boolean; mode: 'login' | 'signup' }>({ isOpen: false, mode: 'login' });
+  const { data: session } = useSession();
 
   return (
     <nav className="bg-gray-50/95 backdrop-blur-sm shadow-lg border-b border-gray-200 sticky top-0 z-50">
@@ -33,12 +37,34 @@ export default function Navbar() {
           
           <div className="flex items-center space-x-4">
             <div className="hidden md:flex md:items-center md:space-x-4">
-              <button className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center">
-                <FaSignInAlt className="mr-1" /> Login
-              </button>
-              <button className="bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 px-6 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center">
-                <FaUserPlus className="mr-1" /> Sign Up
-              </button>
+              {session ? (
+                <>
+                  <span className="text-gray-700 flex items-center">
+                    <FaUser className="mr-1" /> {session.user?.name}
+                  </span>
+                  <button 
+                    onClick={() => signOut()}
+                    className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
+                  >
+                    <FaSignOutAlt className="mr-1" /> Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => setAuthModal({ isOpen: true, mode: 'login' })}
+                    className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
+                  >
+                    <FaSignInAlt className="mr-1" /> Login
+                  </button>
+                  <button 
+                    onClick={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+                    className="bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 px-6 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center"
+                  >
+                    <FaUserPlus className="mr-1" /> Sign Up
+                  </button>
+                </>
+              )}
             </div>
             
             <div className="md:hidden">
@@ -65,17 +91,45 @@ export default function Navbar() {
                 <FaDollarSign className="mr-2" /> Pricing
               </Link>
               <div className="pt-4 pb-3 border-t border-gray-200">
-                <button className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 flex items-center">
-                  <FaSignInAlt className="mr-2" /> Login
-                </button>
-                <button className="block w-full text-left px-3 py-2 text-base font-medium bg-primary-600 text-white rounded-md mt-2 flex items-center">
-                  <FaUserPlus className="mr-2" /> Sign Up
-                </button>
+                {session ? (
+                  <>
+                    <span className="block px-3 py-2 text-base font-medium text-gray-700 flex items-center">
+                      <FaUser className="mr-2" /> {session.user?.name}
+                    </span>
+                    <button 
+                      onClick={() => signOut()}
+                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 flex items-center"
+                    >
+                      <FaSignOutAlt className="mr-2" /> Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button 
+                      onClick={() => setAuthModal({ isOpen: true, mode: 'login' })}
+                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 flex items-center"
+                    >
+                      <FaSignInAlt className="mr-2" /> Login
+                    </button>
+                    <button 
+                      onClick={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+                      className="block w-full text-left px-3 py-2 text-base font-medium bg-primary-600 text-white rounded-md mt-2 flex items-center"
+                    >
+                      <FaUserPlus className="mr-2" /> Sign Up
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
         )}
       </div>
+      
+      <AuthModal 
+        isOpen={authModal.isOpen}
+        onClose={() => setAuthModal({ ...authModal, isOpen: false })}
+        mode={authModal.mode}
+      />
     </nav>
   );
 }
