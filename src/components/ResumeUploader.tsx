@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 import { ParsedResume, ParseResponse } from '@/types';
 import ResumeDisplay from './ResumeDisplay';
+import { UploadSkeleton } from './LoadingSkeleton';
 
 export default function ResumeUploader() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -75,7 +77,13 @@ export default function ResumeUploader() {
           </p>
         </div>
 
-        <div
+        {isLoading ? (
+          <UploadSkeleton />
+        ) : (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
           className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
             isDragOver
               ? 'border-primary-500 bg-primary-50 shadow-lg'
@@ -111,7 +119,8 @@ export default function ResumeUploader() {
               Choose File
             </label>
           </div>
-        </div>
+        </motion.div>
+        )}
 
         {error && (
           <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">

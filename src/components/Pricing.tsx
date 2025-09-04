@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { FaCheck, FaCreditCard } from 'react-icons/fa';
+import { PricingSkeleton } from './LoadingSkeleton';
 
 declare global {
   interface Window {
@@ -71,9 +73,17 @@ export default function Pricing() {
           </p>
         </div>
 
+        {isLoading ? (
+          <PricingSkeleton />
+        ) : (
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Free Plan */}
-          <div className="bg-white rounded-lg shadow-lg p-8 border-2 border-gray-200">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-lg shadow-lg p-8 border-2 border-gray-200"
+          >
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Free Plan</h3>
               <div className="text-4xl font-bold text-gray-900 mb-2">₦0</div>
@@ -101,10 +111,15 @@ export default function Pricing() {
             >
               Current Plan
             </button>
-          </div>
+          </motion.div>
 
           {/* Pro Plan */}
-          <div className="bg-white rounded-lg shadow-lg p-8 border-2 border-blue-500 relative">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-white rounded-lg shadow-lg p-8 border-2 border-blue-500 relative"
+          >
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
               <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
                 Most Popular
@@ -148,8 +163,9 @@ export default function Pricing() {
               <FaCreditCard className="mr-2" />
               {isLoading ? 'Processing...' : 'Upgrade to Pro'}
             </button>
-          </div>
+          </motion.div>
         </div>
+        )}
       </div>
 
       {/* Paystack Script */}
