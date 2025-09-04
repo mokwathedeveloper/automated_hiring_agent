@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Custom Color Palette**: Defined a custom color palette in `tailwind.config.ts` for consistent and professional UI styling.
+  - Commit: `dc72f5ef`
 - **Navbar Icons & Styling**: Integrated `react-icons` for navigation links and authentication buttons, and applied the new color scheme for a polished look.
 - **Hero Section Styling**: Updated color scheme and refined responsive classes for the Hero section.
 - **Footer Styling**: Applied the new color scheme to the Footer.

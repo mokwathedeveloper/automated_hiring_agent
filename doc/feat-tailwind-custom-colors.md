@@ -8,4 +8,4 @@ No explicit custom color palette was defined in `tailwind.config.ts`.
 Defined a custom color palette (`primary`, `secondary`, `gray`) in `tailwind.config.ts` to ensure consistent and professional UI styling across the application.
 
 ### Commit Ref
-[Commit hash will be added here after commit]
+`dc72f5ef`
