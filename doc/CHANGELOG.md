@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2025-09-04] - UI/Styling Enhancements
+
+### Fixed
+- **Missing PostCSS Configuration**: Created `postcss.config.js` to enable proper processing of Tailwind CSS, resolving issues with styles not being applied in the UI.
+
+### Added
+- **Custom Color Palette**: Defined a custom color palette in `tailwind.config.ts` for consistent and professional UI styling.
+- **Navbar Icons & Styling**: Integrated `react-icons` for navigation links and authentication buttons, and applied the new color scheme for a polished look.
+- **Hero Section Styling**: Updated color scheme and refined responsive classes for the Hero section.
+- **Footer Styling**: Applied the new color scheme to the Footer.
+- **Resume Uploader Icon & Styling**: Replaced inline SVG with `react-icons` component and updated color scheme for the Resume Uploader.
+
 ## [Day 1] - 2024-12-19
 
 ### Added
@@ -39,4 +51,3 @@ All notable changes to this project will be documented in this file.
 - `9acb0e03`: feat(ui): create Footer with copyright + nav links
 - `8d7dcb41`: feat(ui): implement Hero with CTA buttons and scroll link
 - `b3004dab`: feat(ui): add responsive Navbar with placeholder auth buttons
-
