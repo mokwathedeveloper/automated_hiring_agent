@@ -284,3 +284,37 @@ This implementation provides a centralized, robust text extraction utility for t
 - `@types/pdf-parse`: TypeScript definitions for pdf-parse
 
 The text extraction utility now provides production-ready document processing capabilities with robust error handling and type safety.
+
+## [ResumeUploader Component] - 2024-01-XX
+
+### Added
+
+#### 2024-01-XX - ResumeUploader Component Implementation
+- **Commit**: `ba2c88f` - feat(components): add ResumeUploader with drag-and-drop + file input support — enables intuitive resume upload with validation
+- **Branch**: `feature/resume-uploader`
+- **Description**: Created comprehensive ResumeUploader component with drag-and-drop functionality and traditional file input support. Integrated extractTextFromFile for PDF/DOCX text extraction, added file validation for type and size limits, implemented Tailwind styling with drag-over feedback and loading states, and included responsive design with clear user instructions.
+
+### ResumeUploader Component Summary
+This implementation provides a modern, user-friendly resume upload interface:
+
+**Key Features:**
+- **Drag-and-Drop Support**: Full drag-over, drag-leave, and drop event handling
+- **File Browser Fallback**: Hidden file input with click-to-browse functionality
+- **File Validation**: PDF/DOCX type checking and 5MB size limit enforcement
+- **Text Extraction Integration**: Direct integration with extractTextFromFile utility
+- **Loading States**: Visual feedback during file processing with spinner animation
+
+**Technical Achievements:**
+- Modern drag-and-drop UX pattern implementation
+- Seamless integration with existing text extraction infrastructure
+- Comprehensive client-side validation reducing server load
+- Performance-optimized event handling with useCallback hooks
+- Responsive design ensuring cross-device compatibility
+
+**UI/UX Features:**
+- **Visual Feedback**: Dynamic styling for drag-over states and loading indicators
+- **Clear Instructions**: User guidance for supported formats and file size limits
+- **Error Handling**: Alert-based feedback for validation failures and processing errors
+- **Responsive Design**: Mobile-friendly layout with Tailwind CSS
+
+The ResumeUploader component now provides a professional, intuitive file upload experience with comprehensive validation and modern interaction patterns.
