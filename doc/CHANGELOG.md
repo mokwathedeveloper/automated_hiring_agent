@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - **Missing PostCSS Configuration**: Created `postcss.config.js` to enable proper processing of Tailwind CSS, resolving issues with styles not being applied in the UI.
+  - Commit: `82cf6b8c`
 
 ### Added
 - **Custom Color Palette**: Defined a custom color palette in `tailwind.config.ts` for consistent and professional UI styling.
