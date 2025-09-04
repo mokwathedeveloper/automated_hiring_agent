@@ -112,50 +112,33 @@ const openai = new OpenAI({
 });
 
 const PROMPT_TEMPLATES = {
-  RESUME_ANALYSIS: `You are a senior HR professional with 15+ years of experience in talent acquisition and resume evaluation. Your expertise spans multiple industries and you excel at objective candidate assessment.
+  RESUME_ANALYSIS: `HR Expert: Analyze resume vs job requirements. Score 1-100.
 
-CONTEXT & ROLE:
-- Evaluate candidates with fairness and precision
-- Focus on job-relevant qualifications and transferable skills
-- Consider both technical competencies and cultural fit indicators
-- Provide actionable feedback for candidate improvement
+FRAMEWORK:
+- Relevance (40%): Job alignment
+- Experience (30%): Quality & progression  
+- Skills (20%): Technical & soft skills
+- Potential (10%): Growth indicators
 
-ANALYSIS FRAMEWORK:
-1. RELEVANCE SCORING (40%): Direct job requirement alignment
-2. EXPERIENCE QUALITY (30%): Depth, progression, and achievements
-3. SKILLS MATCH (20%): Technical and soft skills compatibility
-4. POTENTIAL INDICATORS (10%): Growth trajectory and adaptability
+SCORING:
+90-100: Exceptional fit
+75-89: Strong candidate
+60-74: Good potential
+45-59: Moderate fit
+1-44: Poor match
 
-EVALUATION CRITERIA:
-- Score 90-100: Exceptional fit, exceeds most requirements
-- Score 75-89: Strong candidate, meets key requirements with minor gaps
-- Score 60-74: Good potential, some important requirements missing
-- Score 45-59: Moderate fit, significant skill/experience gaps
-- Score 1-44: Poor match, major misalignment with role requirements
-
-OUTPUT REQUIREMENTS:
-- Provide numerical score (1-100) with clear justification
-- Write 2-3 sentence executive summary highlighting key findings
-- List 3-5 specific strengths with concrete evidence from resume
-- Identify 2-4 improvement areas or missing qualifications
-- Maintain professional, constructive tone throughout
-- Base all assessments on factual resume content
-
-RESPONSE FORMAT (Valid JSON only):
+JSON FORMAT:
 {
-  "score": <integer between 1-100>,
-  "summary": "<concise professional assessment>",
-  "pros": ["<specific strength with evidence>", "<another strength>", ...],
-  "cons": ["<improvement area or gap>", "<another consideration>", ...]
+  "score": <1-100>,
+  "summary": "<2-3 sentences>",
+  "pros": ["<strength>", "<strength>"],
+  "cons": ["<gap>", "<gap>"]
 }
 
-JOB DESCRIPTION:
-{jobDescription}
+JOB: {jobDescription}
+RESUME: {resume}
 
-RESUME TO ANALYZE:
-{resume}
-
-Provide your professional analysis in the exact JSON format specified:`,
+Analyze:`,
 } as const;
 
 export async function POST(req: NextRequest): Promise<NextResponse<ParseResponse>> {
@@ -180,8 +163,8 @@ export async function POST(req: NextRequest): Promise<NextResponse<ParseResponse
       completion = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3,
-        max_tokens: 1000,
+        temperature: 0.2,
+        max_tokens: 500,
       });
     } catch (error) {
       throw new OpenAIError(`OpenAI API request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
