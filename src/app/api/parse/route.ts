@@ -23,25 +23,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<ParseResp
 
     const text = await extractTextFromFile(file);
 
-    const prompt = `Parse the following resume text and extract structured information. Return a JSON object with the following structure:
-{
-  "name": "Full name",
-  "email": "Email address",
-  "phone": "Phone number",
-  "skills": ["skill1", "skill2"],
-  "experience": [{"title": "Job title", "company": "Company name", "duration": "Duration", "description": "Brief description"}],
-  "education": [{"degree": "Degree", "institution": "Institution", "year": "Year"}],
-  "summary": "Brief professional summary"
-}
+    const prompt = `Extract JSON from resume:
+{"name":"","email":"","phone":"","skills":[],"experience":[{"title":"","company":"","duration":"","description":""}],"education":[{"degree":"","institution":"","year":""}],"summary":""}
 
-Resume text:
-${text}`;
+${text.slice(0, 2000)}`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.2,
-      max_tokens: 1000,
+      temperature: 0.1,
+      max_tokens: 500,
     });
 
     const content = completion.choices[0]?.message?.content;
