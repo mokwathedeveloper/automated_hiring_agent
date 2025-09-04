@@ -8,6 +8,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@auth/supabase-adapter": "^1.10.0",
     "@supabase/supabase-js": "^2.57.0",
     "@tanstack/react-query": "^5.86.0",
     "@types/node": "^20.0.0",

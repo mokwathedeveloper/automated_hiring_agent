@@ -1,11 +1,8 @@
 import type { Metadata } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/nextauth';
 
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import ClientSessionProvider from '@/components/ClientSessionProvider';
 import QueryProvider from '@/components/QueryProvider';
 
 export const metadata: Metadata = {
@@ -13,13 +10,11 @@ export const metadata: Metadata = {
   description: 'AI-powered hiring platform',
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
-  
   return (
     <html lang="en">
       <head>
@@ -27,11 +22,9 @@ export default async function RootLayout({
       </head>
       <body className="font-sans">
         <QueryProvider>
-          <ClientSessionProvider session={session}>
-            <Navbar />
-            {children}
-            <Footer />
-          </ClientSessionProvider>
+          <Navbar />
+          {children}
+          <Footer />
         </QueryProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { supabase } from '@/lib/supabase';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -11,31 +11,47 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setSuccess('');
 
-    if (mode === 'login') {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
+    try {
+      if (mode === 'login') {
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
 
-      if (result?.error) {
-        setError('Invalid credentials');
+        if (error) {
+          setError(error.message);
+        } else {
+          setSuccess('Check your email for the login link!');
+        }
       } else {
-        onClose();
+        const { error } = await supabase.auth.signUp({
+          email,
+          password: 'temp-password',
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
+
+        if (error) {
+          setError(error.message);
+        } else {
+          setSuccess('Check your email to confirm your account!');
+        }
       }
-    } else {
-      // Signup logic - in production, create user in database
-      setError('Signup not implemented yet');
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
     }
 
     setIsLoading(false);
@@ -59,21 +75,6 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === 'signup' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-          )}
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -82,42 +83,33 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              placeholder="Enter your email address"
               required
             />
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm">{error}</div>
+            <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">{error}</div>
+          )}
+
+          {success && (
+            <div className="text-green-600 text-sm bg-green-50 p-3 rounded-md">{success}</div>
           )}
 
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            disabled={isLoading || success}
+            className="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 transition-colors"
           >
-            {isLoading ? 'Loading...' : mode === 'login' ? 'Login' : 'Sign Up'}
+            {isLoading ? 'Sending...' : mode === 'login' ? 'Send Login Link' : 'Send Signup Link'}
           </button>
         </form>
 
-        {mode === 'login' && (
-          <p className="mt-4 text-sm text-gray-600 text-center">
-            Demo: email: demo@example.com, password: password
-          </p>
-        )}
+        <div className="mt-4 text-sm text-gray-600 text-center">
+          <p>We'll send you a magic link to {mode === 'login' ? 'sign in' : 'create your account'}.</p>
+          <p className="mt-2">No password required! 🎉</p>
+        </div>
       </div>
     </div>
   );

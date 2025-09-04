@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/hooks/useAuth';
 import { FaCheckCircle, FaBars, FaHome, FaTachometerAlt, FaDollarSign, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import AuthModal from './AuthModal';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authModal, setAuthModal] = useState<{ isOpen: boolean; mode: 'login' | 'signup' }>({ isOpen: false, mode: 'login' });
-  const { data: session } = useSession();
+  const { user, signOut } = useAuth();
 
   return (
     <nav className="bg-gray-50/95 backdrop-blur-sm shadow-lg border-b border-gray-200 sticky top-0 z-50">
@@ -37,10 +37,10 @@ export default function Navbar() {
           
           <div className="flex items-center space-x-4">
             <div className="hidden md:flex md:items-center md:space-x-4">
-              {session ? (
+              {user ? (
                 <>
                   <span className="text-gray-700 flex items-center">
-                    <FaUser className="mr-1" /> {session.user?.name}
+                    <FaUser className="mr-1" /> {user.email}
                   </span>
                   <button 
                     onClick={() => signOut()}
@@ -91,10 +91,10 @@ export default function Navbar() {
                 <FaDollarSign className="mr-2" /> Pricing
               </Link>
               <div className="pt-4 pb-3 border-t border-gray-200">
-                {session ? (
+                {user ? (
                   <>
                     <span className="block px-3 py-2 text-base font-medium text-gray-700 flex items-center">
-                      <FaUser className="mr-2" /> {session.user?.name}
+                      <FaUser className="mr-2" /> {user.email}
                     </span>
                     <button 
                       onClick={() => signOut()}
