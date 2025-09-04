@@ -1,1 +1,5 @@
-node_modules/\n.next/\n*.log
+node_modules/
+.next/
+*.log
+.env*
+.DS_Store
