@@ -8,4 +8,4 @@ Icons were not integrated from a dedicated library (`react-icons`), and color cl
 Integrated `react-icons` for navigation links and authentication buttons, and applied the new custom color scheme (`primary`, `gray`) for a polished, responsive, and professional Navbar.
 
 ### Commit Ref
-[Commit hash will be added here after commit]
+`8b8b7049`
