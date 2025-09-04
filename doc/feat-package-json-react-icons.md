@@ -8,4 +8,4 @@ The `react-icons` library was installed to provide professional and responsive i
 Committed the updated `package.json` and `package-lock.json` files to reflect the addition of the `react-icons` dependency, ensuring proper project setup and reproducibility.
 
 ### Commit Ref
-[Commit hash will be added here after commit]
+`024597ae`

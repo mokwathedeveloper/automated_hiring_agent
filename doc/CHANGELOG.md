@@ -23,6 +23,8 @@ All notable changes to this project will be documented in this file.
   - Commit: `aa5e1b1b`
 - **Resume Uploader Icon & Styling**: Replaced inline SVG with `react-icons` component and updated color scheme for the Resume Uploader.
   - Commit: `866cce35`
+- **React Icons Dependency**: Added `react-icons` to `package.json` and `package-lock.json` to provide a comprehensive set of professional and responsive icons for the UI.
+  - Commit: `024597ae`
 
 ## [Day 1] - 2024-12-19
 
