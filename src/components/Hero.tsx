@@ -1,5 +1,7 @@
 'use client';
 
+import { motion } from 'framer-motion';
+
 export default function Hero() {
   const scrollToUpload = () => {
     const uploadSection = document.getElementById('upload');
@@ -17,35 +19,61 @@ export default function Hero() {
       </div>
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
           <span className="inline-flex items-center px-4 py-2 rounded-full bg-primary-500/10 text-primary-200 text-sm font-medium border border-primary-500/20">
             🚀 Powered by Advanced AI Technology
           </span>
-        </div>
+        </motion.div>
         
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+        <motion.h1 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
+        >
           AI-Powered Hiring
           <span className="block bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent">
             Made Simple
           </span>
-        </h1>
+        </motion.h1>
         
-        <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed">
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed"
+        >
           Transform your recruitment process with intelligent resume analysis designed specifically for the 
           <span className="text-primary-300 font-semibold">Nigerian job market</span>.
-        </p>
+        </motion.p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
             onClick={scrollToUpload}
-            className="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:from-primary-700 hover:to-primary-800 shadow-xl hover:shadow-2xl transition-all duration-200 transform hover:-translate-y-1"
+            className="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:from-primary-700 hover:to-primary-800 shadow-xl hover:shadow-2xl transition-all duration-200"
           >
             Get Started Free
-          </button>
-          <button className="border-2 border-gray-300 text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-300 hover:text-gray-900 transition-all duration-200">
+          </motion.button>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="border-2 border-gray-300 text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-300 hover:text-gray-900 transition-all duration-200"
+          >
             Watch Demo
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
         
         {/* Stats */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
