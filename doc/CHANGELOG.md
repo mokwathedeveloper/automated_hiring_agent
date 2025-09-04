@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
   - Commit: `dc72f5ef`
 - **Google Fonts Integration**: Imported the 'Inter' font from Google Fonts into `src/app/globals.css` to enhance typography and overall aesthetic.
   - Commit: `387f76c2`
+- **Font Application**: Modified `src/app/layout.tsx` to apply `className="font-sans"` to the `body` tag, ensuring consistent application of the 'Inter' font across the entire application via Tailwind CSS.
+  - Commit: `4fd16a31`
 - **Navbar Icons & Styling**: Integrated `react-icons` for navigation links and authentication buttons, and applied the new color scheme for a polished look.
 - **Hero Section Styling**: Updated color scheme and refined responsive classes for the Hero section.
 - **Footer Styling**: Applied the new color scheme to the Footer.

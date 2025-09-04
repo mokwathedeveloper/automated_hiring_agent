@@ -8,4 +8,4 @@ The `body` tag in `src/app/layout.tsx` was using `className={inter.className}` i
 Modified `src/app/layout.tsx` to apply `className="font-sans"` to the `body` tag, ensuring consistent application of the 'Inter' font across the entire application via Tailwind CSS.
 
 ### Commit Ref
-[Commit hash will be added here after commit]
+`4fd16a31`
