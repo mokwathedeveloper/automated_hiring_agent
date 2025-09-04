@@ -36,22 +36,22 @@ export default function ResumeUploader() {
   };
 
   return (
-    <section id="upload" className="py-16 bg-gray-50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+    <section id="upload" className="py-20 bg-slate-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
             Upload Resume
           </h2>
-          <p className="text-lg text-gray-600">
-            Upload a resume to get started with AI-powered analysis
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Upload a resume to get started with AI-powered analysis tailored for the Nigerian job market
           </p>
         </div>
 
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
             isDragOver
-              ? 'border-indigo-500 bg-indigo-50'
-              : 'border-gray-300 hover:border-gray-400'
+              ? 'border-blue-500 bg-blue-50 shadow-lg'
+              : 'border-slate-300 hover:border-slate-400 hover:shadow-md'
           }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -59,25 +59,25 @@ export default function ResumeUploader() {
         >
           <div className="space-y-4">
             <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              stroke="currentColor"
+              className="mx-auto h-8 w-8 sm:h-10 sm:w-10 text-slate-400"
               fill="none"
-              viewBox="0 0 48 48"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
               <path
-                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
               />
             </svg>
             
             <div>
-              <p className="text-lg font-medium text-gray-900">
+              <p className="text-xl font-semibold text-slate-900 mb-2">
                 {selectedFile ? selectedFile.name : 'Drag & Drop Resume Here'}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
-                or click to browse files
+              <p className="text-sm text-slate-500">
+                or click to browse files • PDF, DOC, DOCX supported
               </p>
             </div>
 
@@ -90,7 +90,7 @@ export default function ResumeUploader() {
             />
             <label
               htmlFor="file-upload"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+              className="inline-flex items-center px-6 py-3 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-400 cursor-pointer transition-colors"
             >
               Choose File
             </label>
@@ -98,12 +98,12 @@ export default function ResumeUploader() {
         </div>
 
         {selectedFile && (
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <button
               onClick={handleUpload}
-              className="bg-indigo-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 transition-colors"
+              className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
             >
-              Upload Resume
+              Analyze Resume
             </button>
           </div>
         )}
