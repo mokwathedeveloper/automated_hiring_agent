@@ -8,4 +8,4 @@ Existing color classes in `Footer.tsx` were not updated to use the new custom pa
 Applied the new custom color scheme (`gray` and `primary` gradients) to the Footer for a consistent and professional look, aligning it with the rest of the UI.
 
 ### Commit Ref
-[Commit hash will be added here after commit]
+`aa5e1b1b`

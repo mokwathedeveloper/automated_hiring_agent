@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - **Hero Section Styling**: Updated color scheme and refined responsive classes for the Hero section.
   - Commit: `a7a6bd26`
 - **Footer Styling**: Applied the new color scheme to the Footer.
+  - Commit: `aa5e1b1b`
 - **Resume Uploader Icon & Styling**: Replaced inline SVG with `react-icons` component and updated color scheme for the Resume Uploader.
 
 ## [Day 1] - 2024-12-19
