@@ -7,6 +7,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ClientSessionProvider from '@/components/ClientSessionProvider';
+import QueryProvider from '@/components/QueryProvider';
 
 
 
@@ -28,11 +29,13 @@ export default async function RootLayout({
         <script src="https://js.paystack.co/v1/inline.js"></script>
       </head>
       <body className="font-sans">
-        <ClientSessionProvider session={session}>
-          <Navbar />
-          {children}
-          <Footer />
-        </ClientSessionProvider>
+        <QueryProvider>
+          <ClientSessionProvider session={session}>
+            <Navbar />
+            {children}
+            <Footer />
+          </ClientSessionProvider>
+        </QueryProvider>
       </body>
     </html>
   );
