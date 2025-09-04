@@ -1,6 +1,7 @@
 'use client';
 
 import { ParsedResume } from '@/types';
+import WhatsAppButton from './WhatsAppButton';
 
 interface ResumeDisplayProps {
   data: ParsedResume;
@@ -60,6 +61,8 @@ export default function ResumeDisplay({ data }: ResumeDisplayProps) {
           ))}
         </div>
       </div>
+      
+      <WhatsAppButton resumeData={data} />
     </div>
   );
 }
