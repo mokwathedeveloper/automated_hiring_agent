@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
 - **Footer Styling**: Applied the new color scheme to the Footer.
   - Commit: `aa5e1b1b`
 - **Resume Uploader Icon & Styling**: Replaced inline SVG with `react-icons` component and updated color scheme for the Resume Uploader.
+  - Commit: `866cce35`
 
 ## [Day 1] - 2024-12-19
 
