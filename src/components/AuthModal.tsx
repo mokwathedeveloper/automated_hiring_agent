@@ -6,10 +6,9 @@ import { supabase } from '@/lib/supabase';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'login' | 'signup';
 }
 
-export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,33 +21,17 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
     setSuccess('');
 
     try {
-      if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-        if (error) {
-          setError(error.message);
-        } else {
-          setSuccess('Check your email for the login link!');
-        }
+      if (error) {
+        setError(error.message);
       } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password: 'temp-password',
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-
-        if (error) {
-          setError(error.message);
-        } else {
-          setSuccess('Check your email to confirm your account!');
-        }
+        setSuccess('Check your email for the login link!');
       }
     } catch (err) {
       setError('Something went wrong. Please try again.');
@@ -63,9 +46,7 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 sm:mx-auto sm:max-w-lg">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">
-            {mode === 'login' ? 'Login' : 'Sign Up'}
-          </h2>
+          <h2 className="text-2xl font-bold">Login</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -102,12 +83,12 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
             disabled={isLoading || !!success}
             className="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 transition-colors"
           >
-            {isLoading ? 'Sending...' : mode === 'login' ? 'Send Login Link' : 'Send Signup Link'}
+            {isLoading ? 'Sending...' : 'Send Login Link'}
           </button>
         </form>
 
         <div className="mt-4 text-sm text-gray-600 text-center">
-          <p>We'll send you a magic link to {mode === 'login' ? 'sign in' : 'create your account'}.</p>
+          <p>We'll send you a magic link to sign in.</p>
           <p className="mt-2">No password required! 🎉</p>
         </div>
       </div>
