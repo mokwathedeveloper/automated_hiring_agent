@@ -1,9 +1,6 @@
-// src/app/page.tsx
-
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
 import FileUploadForm from '@/components/FileUploadForm';
-import CTA from '@/components/CTA';
 
 export default function HomePage() {
   return (
@@ -25,7 +22,6 @@ export default function HomePage() {
       </section>
       
       <Features />
-      <CTA />
     </>
   );
 }
