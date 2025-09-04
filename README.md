@@ -85,30 +85,63 @@ npm install
 ```
 
 ### 3. Environment Setup
-Create `.env.local` file:
+Create `.env.local` file with the following configuration:
+
 ```env
 # OpenAI Configuration
-OPENAI_API_KEY=your-openai-api-key
+OPENAI_API_KEY=sk-your-openai-api-key-here
 
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+# Supabase Configuration  
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-nextauth-secret-key-minimum-32-characters
 
 # Twilio WhatsApp Configuration
-TWILIO_ACCOUNT_SID=your-twilio-account-sid
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=your-twilio-auth-token
 TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
 
-# Paystack Configuration
-PAYSTACK_PUBLIC_KEY=pk_test_your-paystack-public-key
-PAYSTACK_SECRET_KEY=sk_test_your-paystack-secret-key
+# Paystack Configuration (Nigerian Payment Gateway)
+PAYSTACK_PUBLIC_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+PAYSTACK_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
+**Environment Variables Guide:**
+- **OpenAI**: Get API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+- **Supabase**: Create project at [Supabase Dashboard](https://supabase.com/dashboard)
+- **NextAuth**: Generate secret with `openssl rand -base64 32`
+- **Twilio**: Sign up at [Twilio Console](https://console.twilio.com/)
+- **Paystack**: Register at [Paystack Dashboard](https://dashboard.paystack.com/)
+
 ### 4. Database Setup
+
+**Option A: Supabase Dashboard (Recommended)**
+1. Go to your Supabase project dashboard
+2. Navigate to SQL Editor
+3. Copy and execute the contents of `database/schema.sql`
+
+**Option B: Command Line**
 ```bash
-# Run database migrations
-psql -h your-supabase-host -U postgres -d postgres -f database/schema.sql
+# Connect to Supabase database
+psql "postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
+
+# Run schema
+\i database/schema.sql
+```
+
+**Verify Setup:**
+```sql
+-- Check if tables were created
+\dt
+
+-- Verify RLS policies
+SELECT schemaname, tablename, policyname 
+FROM pg_policies 
+WHERE schemaname = 'public';
 ```
 
 ### 5. Development Server
@@ -150,7 +183,9 @@ automated_hiring_agent/
 
 ## 🧪 Testing
 
-### Run Tests
+### Test Suite Overview
+Comprehensive testing covering authentication, resume processing, payments, and WhatsApp integration.
+
 ```bash
 # Run all tests
 npm test
@@ -158,46 +193,97 @@ npm test
 # Run tests in watch mode
 npm run test:watch
 
-# Run specific test file
-npm test ResumeUploader.test.tsx
+# Run specific test suite
+npm test auth.test.tsx
+npm test resume.test.tsx
+npm test payment.test.tsx
+npm test whatsapp.test.tsx
+
+# Generate coverage report
+npm test -- --coverage
 ```
 
-### Test Coverage
-- **Unit Tests**: Component and utility function testing
-- **Integration Tests**: API endpoint validation
-- **Nigerian Resume Testing**: Local format compatibility
+### Test Coverage Areas
+- ✅ **Authentication**: Login/signup flows, session management
+- ✅ **Resume Processing**: Nigerian format validation, file parsing
+- ✅ **Payment Integration**: Paystack checkout, webhook verification
+- ✅ **WhatsApp Integration**: Message sending, phone validation
+- ✅ **API Endpoints**: Rate limiting, error handling
+- ✅ **UI Components**: Loading states, form validation
+
+### Manual Testing Checklist
+```bash
+# Test Nigerian resume formats
+# Upload sample PDFs from Nigerian universities
+# Verify phone number formats (+234 xxx xxx xxxx)
+# Test Paystack payment flow with test cards
+# Confirm WhatsApp message delivery
+```
 
 ## 🚀 Deployment
 
-### Vercel Deployment (Recommended)
+### Production Deployment (Vercel)
 
-1. **Connect Repository**
-   ```bash
-   # Install Vercel CLI
-   npm i -g vercel
-   
-   # Deploy
-   vercel --prod
-   ```
+**Prerequisites:**
+- GitHub repository connected
+- All environment variables configured
+- Database migrations completed
 
-2. **Environment Variables**
-   Add all `.env.local` variables to Vercel dashboard
+```bash
+# Install Vercel CLI
+npm i -g vercel
 
-3. **Database Configuration**
-   - Ensure Supabase project is production-ready
-   - Configure connection pooling for high traffic
+# Login to Vercel
+vercel login
 
-### Manual Deployment
+# Deploy to production
+vercel --prod
+```
 
-1. **Build Application**
-   ```bash
-   npm run build
-   ```
+**Vercel Dashboard Configuration:**
+1. **Environment Variables**: Add all `.env.local` variables
+2. **Build Settings**: 
+   - Framework: Next.js
+   - Build Command: `npm run build`
+   - Output Directory: `.next`
+3. **Domain**: Configure custom domain if needed
 
-2. **Start Production Server**
-   ```bash
-   npm start
-   ```
+### Environment-Specific Setup
+
+**Production Environment Variables:**
+```env
+# Use production API keys
+OPENAI_API_KEY=sk-prod-...
+PAYSTACK_PUBLIC_KEY=pk_live_...
+PAYSTACK_SECRET_KEY=sk_live_...
+TWILIO_ACCOUNT_SID=AC...
+NEXTAUTH_URL=https://your-domain.com
+```
+
+**Database Production Setup:**
+- Enable connection pooling in Supabase
+- Configure Row Level Security policies
+- Set up database backups
+- Monitor query performance
+
+### Performance Optimization
+- ✅ Rate limiting: 100 requests/15 minutes
+- ✅ Client-side caching with React Query
+- ✅ Optimized OpenAI prompts (reduced token usage)
+- ✅ Image optimization and lazy loading
+- ✅ Bundle size optimization
+
+### Monitoring & Analytics
+```bash
+# Check deployment status
+vercel ls
+
+# View logs
+vercel logs [deployment-url]
+
+# Monitor performance
+# Use Vercel Analytics dashboard
+```
 
 ## 📊 API Documentation
 
@@ -270,10 +356,25 @@ Content-Type: application/json
 5. Submit pull request with detailed description
 
 ### Code Standards
-- **TypeScript**: Strict mode enabled
-- **ESLint**: Airbnb configuration
-- **Prettier**: Consistent formatting
+- **TypeScript**: Strict mode enabled with comprehensive type coverage
+- **ESLint**: Airbnb configuration with Next.js rules
+- **Prettier**: Consistent formatting across all files
 - **Commit Messages**: Conventional commits format
+  ```
+  feat(auth): add magic link authentication
+  fix(payment): resolve Paystack webhook validation
+  test(resume): add Nigerian format validation tests
+  docs(readme): update deployment instructions
+  perf(api): optimize OpenAI token usage
+  style(ui): add Framer Motion animations
+  ```
+
+### Development Workflow
+1. **Branch Naming**: `feature/description`, `fix/issue`, `test/component`
+2. **Pull Requests**: Detailed descriptions with testing notes
+3. **Code Review**: All changes reviewed before merging
+4. **Testing**: All tests must pass before deployment
+5. **Documentation**: Update relevant docs with changes
 
 ## 📄 License
 

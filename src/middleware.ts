@@ -13,7 +13,8 @@ export function middleware(request: NextRequest) {
     const now = Date.now();
     
     // Clean up expired entries
-    for (const [key, value] of rateLimit.entries()) {
+    const entries = Array.from(rateLimit.entries());
+    for (const [key, value] of entries) {
       if (now > value.resetTime) {
         rateLimit.delete(key);
       }
