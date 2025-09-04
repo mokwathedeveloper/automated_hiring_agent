@@ -17,6 +17,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
 
+    if (!client) {
+      return NextResponse.json({ success: false, error: 'WhatsApp service not configured' }, { status: 500 });
+    }
+
     const resume: ParsedResume = resumeData;
     
     const message = `🎯 Resume Analysis Results

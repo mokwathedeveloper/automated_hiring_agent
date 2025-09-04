@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     if (paymentData.status && paymentData.data.status === 'success') {
       // In production, update user's premium status in database
-      console.log(`Payment verified for user ${session.user.email}: ${reference}`);
+      console.log(`Payment verified for user ${session.user?.email}: ${reference}`);
       
       return NextResponse.json({ 
         success: true, 
