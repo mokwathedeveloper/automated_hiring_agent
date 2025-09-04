@@ -99,7 +99,7 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
 
           <button
             type="submit"
-            disabled={isLoading || success}
+            disabled={isLoading || !!success}
             className="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 transition-colors"
           >
             {isLoading ? 'Sending...' : mode === 'login' ? 'Send Login Link' : 'Send Signup Link'}

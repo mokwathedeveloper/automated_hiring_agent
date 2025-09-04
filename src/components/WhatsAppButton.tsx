@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/useAuth';
 import { FaWhatsapp } from 'react-icons/fa';
 import { ParsedResume } from '@/types';
 
@@ -14,7 +14,7 @@ export default function WhatsAppButton({ resumeData }: WhatsAppButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [showInput, setShowInput] = useState(false);
-  const { data: session } = useSession();
+  const { user } = useAuth();
 
   const handleSend = async () => {
     if (!phoneNumber.trim()) {
@@ -53,7 +53,7 @@ export default function WhatsAppButton({ resumeData }: WhatsAppButtonProps) {
     }
   };
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="mt-6 p-4 bg-gray-50 rounded-lg text-center">
         <p className="text-gray-600">Login to send resume via WhatsApp</p>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/useAuth';
 import { FaCheck, FaCreditCard } from 'react-icons/fa';
 import { PricingSkeleton } from './LoadingSkeleton';
 
@@ -14,10 +14,10 @@ declare global {
 
 export default function Pricing() {
   const [isLoading, setIsLoading] = useState(false);
-  const { data: session } = useSession();
+  const { user } = useAuth();
 
   const handlePayment = () => {
-    if (!session) {
+    if (!user) {
       alert('Please login to upgrade');
       return;
     }
@@ -26,7 +26,7 @@ export default function Pricing() {
 
     const handler = window.PaystackPop.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-      email: session.user?.email,
+      email: user.email,
       amount: 5000 * 100, // Amount in kobo (₦5,000)
       currency: 'NGN',
       ref: `ref_${Date.now()}`,
