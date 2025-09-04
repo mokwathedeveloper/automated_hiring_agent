@@ -108,9 +108,10 @@ export default function ResumeUploader() {
         />
         
         {isLoading ? (
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"></div>
-            <p className="text-gray-600">Processing file...</p>
+          <div className="flex flex-col items-center animate-pulse">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent mb-2"></div>
+            <p className="text-gray-600 font-medium">Processing file...</p>
+            <p className="text-sm text-gray-500 mt-1">Extracting text and analyzing content</p>
           </div>
         ) : (
           <div>
