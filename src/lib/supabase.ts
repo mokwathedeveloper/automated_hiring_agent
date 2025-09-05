@@ -1,4 +1,3 @@
-import { ResumeData } from './types';
 // src/lib/supabase.ts
 
 import { createClient } from '@supabase/supabase-js';
