@@ -23,6 +23,8 @@ All notable changes to the Automated Hiring Agent project will be documented in 
   - Added placeholder for `extractTextFromFile` in `src/lib/utils.ts` and corrected its usage in `src/app/api/parse/route.ts`.
 
 ### Changed
+- **refactor(ui): replace buttons and icons in Features.tsx** (248fefc2)
+  - Replaced plain HTML `<a>` tags with Shadcn/ui `Button` components and SVG icons with `lucide-react` icons in `Features.tsx`.
 - **style(ui): apply custom theme and branding** (f94e596f)
   - Aligned Shadcn/ui primary color variables with existing project branding in `globals.css`.
 - **refactor(ui): replace Tailwind buttons with shadcn Button** (9d34b5ff)
