@@ -1,16 +1,36 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import pdf from 'pdf-parse';
+import mammoth from 'mammoth';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// TODO: Restore the full implementation of extractTextFromFile,
-// which uses 'pdf-parse' and 'mammoth' libraries.
-// This is a placeholder to resolve build errors.
 export async function extractTextFromFile(buffer: Buffer, mimeType: string): Promise<string> {
-  console.warn(`Placeholder: extractTextFromFile called with mimeType: ${mimeType}. Full implementation needs to be restored.`);
-  // For now, just return an empty string or throw an error.
-  // Returning an empty string to allow the build to pass without immediate runtime errors.
-  return "";
+  try {
+    if (mimeType === 'application/pdf') {
+      const data = await pdf(buffer);
+      return data.text;
+    } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const result = await mammoth.extractRawText({ buffer });
+      return result.value;
+    } else {
+      throw new Error(`Unsupported file type: ${mimeType}`);
+    }
+  } catch (error) {
+    console.error('Text extraction error:', error);
+    throw new Error('Failed to extract text from file');
+  }
+}
+
+export function createResumeHash(content: string): string {
+  // Simple hash function for caching
+  let hash = 0;
+  for (let i = 0; i < content.length; i++) {
+    const char = content.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(36);
 }
