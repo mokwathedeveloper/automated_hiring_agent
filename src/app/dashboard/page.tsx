@@ -33,17 +33,19 @@ export default function Dashboard() {
   }, [user]);
 
   const fetchAnalyses = async () => {
+    if (!user?.id) return;
+
     const { data } = await supabase
       .from('resume_analyses')
       .select('*')
-      .eq('user_id', user?.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(10);
 
     if (data) {
-      setAnalyses(data);
+      setAnalyses(data as any);
       const total = data.length;
-      const avgScore = total > 0 ? data.reduce((sum, a) => sum + a.score, 0) / total : 0;
+      const avgScore = total > 0 ? data.reduce((sum, a: any) => sum + a.score, 0) / total : 0;
       setStats({ total, avgScore });
     }
   };
@@ -156,7 +158,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-medium text-gray-900">
                         {analysis.job_title || 'Resume Analysis'}
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      <p className.="text-sm text-gray-500">
                         {analysis.candidate_name || 'Candidate'} • {new Date(analysis.created_at).toLocaleDateString()}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">{analysis.summary}</p>
