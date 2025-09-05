@@ -15,6 +15,7 @@ import {
   Home,
   User
 } from 'lucide-react';
+import SignOutDialog from './SignOutDialog';
 
 interface SidebarProps {
   onSignOut: () => void;
@@ -76,14 +77,7 @@ function SidebarContent({ onSignOut, className = '' }: SidebarProps & { classNam
         </nav>
         
         <div className="pt-4 border-t">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-            onClick={onSignOut}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
+          <SignOutDialog onConfirm={onSignOut} />
         </div>
       </CardContent>
     </Card>
