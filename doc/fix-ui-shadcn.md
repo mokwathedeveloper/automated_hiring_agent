@@ -15,3 +15,4 @@ Shadcn/ui has been integrated into the project. This involved:
 `41cd3e7a`
 `27ca74e2`
 `9d34b5ff`
+`f94e596f`

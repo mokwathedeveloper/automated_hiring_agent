@@ -17,6 +17,8 @@ All notable changes to the Automated Hiring Agent project will be documented in 
   - Removed the 'magiclink' authentication mode from `AuthModal.tsx`.
 
 ### Changed
+- **style(ui): apply custom theme and branding** (f94e596f)
+  - Aligned Shadcn/ui primary color variables with existing project branding in `globals.css`.
 - **refactor(ui): replace Tailwind buttons with shadcn Button** (9d34b5ff)
   - Replaced plain HTML button elements and styled Link components with Shadcn/ui Button components in `Hero.tsx` and `Navbar.tsx`.
 - **refactor(supabase): improve client initialization** (add7b2db)
