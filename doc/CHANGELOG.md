@@ -5,7 +5,7 @@ All notable changes to the Automated Hiring Agent project will be documented in 
 ## [Unreleased] - 2025-09-05
 
 ### Chore
-- **chore(ui): install and configure shadcn-ui** (<commit_hash_here>)
+- **chore(ui): install and configure shadcn-ui** (41cd3e7a)
   - Installed and configured Shadcn/ui, and added base components (Button, Input, Dialog, Form, Label).
 
 ### Added

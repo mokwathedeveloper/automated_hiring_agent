@@ -12,4 +12,4 @@ Shadcn/ui has been integrated into the project. This involved:
 2.  Adding core Shadcn/ui components: `Button`, `Input`, `Dialog`, `Form`, and `Label` using `npx shadcn@latest add`. These components provide pre-built, accessible, and customizable UI elements that will replace existing plain Tailwind implementations.
 
 ## Commit Reference
-(To be added after commit)
+`41cd3e7a`
