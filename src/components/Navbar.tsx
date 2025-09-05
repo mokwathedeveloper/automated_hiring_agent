@@ -8,7 +8,7 @@ import AuthModal from './AuthModal';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [authModal, setAuthModal] = useState<{ isOpen: boolean; mode: 'login' | 'signup' }>({ isOpen: false, mode: 'login' });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { user, signOut } = useAuth();
 
   return (
@@ -52,13 +52,13 @@ export default function Navbar() {
               ) : (
                 <>
                   <button 
-                    onClick={() => setAuthModal({ isOpen: true, mode: 'login' })}
+                    onClick={() => setIsAuthModalOpen(true)}
                     className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
                   >
                     <FaSignInAlt className="mr-1" /> Login
                   </button>
                   <button 
-                    onClick={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+                    onClick={() => setIsAuthModalOpen(true)}
                     className="bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 px-6 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center"
                   >
                     <FaUserPlus className="mr-1" /> Sign Up
@@ -106,13 +106,13 @@ export default function Navbar() {
                 ) : (
                   <>
                     <button 
-                      onClick={() => setAuthModal({ isOpen: true, mode: 'login' })}
+                      onClick={() => setIsAuthModalOpen(true)}
                       className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 flex items-center"
                     >
                       <FaSignInAlt className="mr-2" /> Login
                     </button>
                     <button 
-                      onClick={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+                      onClick={() => setIsAuthModalOpen(true)}
                       className="block w-full text-left px-3 py-2 text-base font-medium bg-primary-600 text-white rounded-md mt-2 flex items-center"
                     >
                       <FaUserPlus className="mr-2" /> Sign Up
@@ -126,9 +126,8 @@ export default function Navbar() {
       </div>
       
       <AuthModal 
-        isOpen={authModal.isOpen}
-        onClose={() => setAuthModal({ ...authModal, isOpen: false })}
-        mode={authModal.mode}
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
     </nav>
   );

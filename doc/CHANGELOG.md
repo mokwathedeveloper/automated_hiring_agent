@@ -2,6 +2,18 @@
 
 All notable changes to the Automated Hiring Agent project will be documented in this file.
 
+## [Unreleased] - 2025-09-05
+
+### Added
+- **feat(auth): implement email/password and magic link flows** (a37d23b9)
+  - Implemented distinct flows for user signup (email/password), login (email/password), and magic link (OTP) in the authentication modal.
+- **feat(auth): remove magic link option from AuthModal** (<commit_hash_here>)
+  - Removed the 'magiclink' authentication mode from `AuthModal.tsx`.
+
+### Changed
+- **refactor(supabase): improve client initialization** (add7b2db)
+  - Replaced `console.warn` with `throw new Error` for missing Supabase environment variables to ensure the application fails fast if not configured correctly.
+
 ## [Day 4] - 2025-01-27
 
 ### Added
@@ -28,7 +40,7 @@ All notable changes to the Automated Hiring Agent project will be documented in 
 - Enhanced mobile responsiveness across all components
 
 ### Technical Improvements
-- Added comprehensive test coverage for core functionality
+- Added comprehensive test coverage for core. functionality
 - Implemented client-side caching to reduce API calls
 - Added rate limiting to prevent API abuse
 - Optimized bundle size with lazy loading

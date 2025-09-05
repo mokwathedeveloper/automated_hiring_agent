@@ -1,28 +1,34 @@
 // src/lib/supabase.ts
 
 import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/database';
 
 // Supabase configuration
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Validate required environment variables
+// Validate required environment variables for client-side
 if (!supabaseUrl) {
-  console.warn('NEXT_PUBLIC_SUPABASE_URL is not set');
+  throw new Error('Missing environment variable: NEXT_PUBLIC_SUPABASE_URL');
 }
 
 if (!supabaseAnonKey) {
-  console.warn('NEXT_PUBLIC_SUPABASE_ANON_KEY is not set');
+  throw new Error('Missing environment variable: NEXT_PUBLIC_SUPABASE_ANON_KEY');
 }
 
 // Client-side Supabase client (for authentication and user operations)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Server-side Supabase client (for admin operations)
-export const supabaseAdmin = supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null;
+let supabaseAdmin: ReturnType<typeof createClient<Database>> | null = null;
+if (supabaseServiceKey) {
+  supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey);
+} else {
+  console.warn('SUPABASE_SERVICE_ROLE_KEY is not set. Admin operations will be disabled.');
+}
+
+export { supabaseAdmin };
 
 // Database table names
 export const TABLES = {
@@ -69,16 +75,17 @@ export const db = {
   // Insert resume analysis
   insertResume: async (userId: string, resumeData: any) => {
     if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not configured');
+      throw new Error('Supabase admin client not configured. Cannot insert resume.');
     }
     
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await (supabaseAdmin as any)
       .from(TABLES.RESUMES)
       .insert({
         user_id: userId,
         content: resumeData.content,
         analysis: resumeData.analysis,
         created_at: new Date().toISOString(),
+        filename: resumeData.filename, // This was missing
       })
       .select()
       .single();

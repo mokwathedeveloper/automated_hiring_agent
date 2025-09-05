@@ -33,17 +33,19 @@ export default function Dashboard() {
   }, [user]);
 
   const fetchAnalyses = async () => {
+    if (!user?.id) return;
+
     const { data } = await supabase
       .from('resume_analyses')
       .select('*')
-      .eq('user_id', user?.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(10);
 
     if (data) {
-      setAnalyses(data);
+      setAnalyses(data as any);
       const total = data.length;
-      const avgScore = total > 0 ? data.reduce((sum, a) => sum + a.score, 0) / total : 0;
+      const avgScore = total > 0 ? data.reduce((sum, a: any) => sum + a.score, 0) / total : 0;
       setStats({ total, avgScore });
     }
   };
