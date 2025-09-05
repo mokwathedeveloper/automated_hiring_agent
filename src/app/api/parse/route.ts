@@ -21,7 +21,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<ParseResp
       return NextResponse.json({ success: false, error: 'File size must be less than 5MB' }, { status: 400 });
     }
 
-    const text = await extractTextFromFile(file);
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const text = await extractTextFromFile(buffer, file.type);
 
     const prompt = `Extract JSON from resume:
 {"name":"","email":"","phone":"","skills":[],"experience":[{"title":"","company":"","duration":"","description":""}],"education":[{"degree":"","institution":"","year":""}],"summary":""}
