@@ -9,6 +9,8 @@ All notable changes to the Automated Hiring Agent project will be documented in 
   - Installed and configured Shadcn/ui, and added base components (Button, Input, Dialog, Form, Label).
 
 ### Added
+- **feat(ui): add base shadcn components (Button, Input, Dialog, Form, Label)** (27ca74e2)
+  - Replaced plain HTML elements with Shadcn/ui Button, Input, and Dialog components in `AuthModal.tsx` and `CTA.tsx`.
 - **feat(auth): implement email/password and magic link flows** (a37d23b9)
   - Implemented distinct flows for user signup (email/password), login (email/password), and magic link (OTP) in the authentication modal.
 - **feat(auth): remove magic link option from AuthModal** (<commit_hash_here>)
