@@ -94,19 +94,19 @@ export default function Dashboard() {
         return;
       }
 
-      const userResumes = resumesData || [];
+      const userResumes: Resume[] = (resumesData as Resume[]) || [];
       setResumes(userResumes);
 
       // Calculate stats
       const now = new Date();
       const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       
-      const completedResumes = userResumes.filter(r => r.status === 'completed');
-      const pendingResumes = userResumes.filter(r => r.status === 'pending' || r.status === 'processing');
-      const thisMonthResumes = userResumes.filter(r => new Date(r.created_at) >= thisMonth);
-      const highScoreResumes = completedResumes.filter(r => (r.score || 0) >= 80);
+      const completedResumes = userResumes.filter((r: Resume) => r.status === 'completed');
+      const pendingResumes = userResumes.filter((r: Resume) => r.status === 'pending' || r.status === 'processing');
+      const thisMonthResumes = userResumes.filter((r: Resume) => new Date(r.created_at) >= thisMonth);
+      const highScoreResumes = completedResumes.filter((r: Resume) => (r.score || 0) >= 80);
       
-      const totalScore = completedResumes.reduce((sum, r) => sum + (r.score || 0), 0);
+      const totalScore = completedResumes.reduce((sum: number, r: Resume) => sum + (r.score || 0), 0);
       const averageScore = completedResumes.length > 0 ? Math.round(totalScore / completedResumes.length) : 0;
 
       setStats({
