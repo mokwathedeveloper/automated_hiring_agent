@@ -2,94 +2,98 @@
 
 All notable changes to the Automated Hiring Agent project will be documented in this file.
 
-## [Unreleased] - 2025-09-05
-
-### Chore
-- **chore(ui): install and configure shadcn-ui** (41cd3e7a)
-  - Installed and configured Shadcn/ui, and added base components (Button, Input, Dialog, Form, Label).
+## [2025-01-06] - Dashboard UI Enhancements
 
 ### Added
-- **feat(ui): replace logo icon with lucide-react CheckCircle** (a7947926)
-  - Replaced the `FaCheckCircle` icon in the Navbar logo with `CheckCircle` from `lucide-react` for a more professional look.
-- **feat(ui): add base shadcn components (Button, Input, Dialog, Form, Label)** (27ca74e2)
-  - Replaced plain HTML elements with Shadcn/ui Button, Input, and Dialog components in `AuthModal.tsx` and `CTA.tsx`.
-- **feat(auth): implement email/password and magic link flows** (a37d23b9)
-  - Implemented distinct flows for user signup (email/password), login (email/password), and magic link (OTP) in the authentication modal.
-- **feat(auth): remove magic link option from AuthModal** (<commit_hash_here>)
-  - Removed the 'magiclink' authentication mode from `AuthModal.tsx`.
 
-### Fixed
-- **fix(auth): AuthModal `mode` prop handling**
-  - Resolved an issue where the `AuthModal` component was not correctly updating its internal `mode` state when the `mode` prop changed, leading to incorrect rendering. Ensured proper initialization and updates via `useEffect`.
-- **fix(tests): WhatsApp Test Failures (Partial)**
-  - Addressed timing issues in `whatsapp.test.tsx` by introducing `await waitFor` to ensure elements are present before querying. Further investigation is needed for full resolution.
-- **fix(build): resolve build errors and update documentation** (8a3cd436)
-  - Added placeholder for `extractTextFromFile` in `src/lib/utils.ts` and corrected its usage in `src/app/api/parse/route.ts`.
+#### feat(ui/dashboard): add responsive sidebar with Shadcn/ui
+**Commit**: `da3e0126`  
+**Date**: 2025-01-06  
+**Description**: Implements mobile collapsible drawer and desktop fixed sidebar with navigation links (Dashboard, Upload, Profile, Settings, Logout), integrates cleanly with existing grid layout using Card and Button components.
 
-### Changed
-- **refactor(ui): replace buttons and icons in Pricing components** (dc73008f)
-  - Replaced plain HTML `Link` and `button` elements with Shadcn/ui `Button` components and SVG icons with `lucide-react` icons in `src/app/pricing/page.tsx` and `src/components/Pricing.tsx`.
-- **refactor(ui): replace buttons and icons in Dashboard components** (bc45cc51)
-  - Replaced plain HTML buttons and SVG icons with Shadcn/ui `Button` components and `lucide-react` icons in `src/app/dashboard/page.tsx` and `src/components/Dashboard.tsx`.
-- **refactor(ui): replace buttons and icons in Features.tsx** (248fefc2)
-  - Replaced plain HTML `<a>` tags with Shadcn/ui `Button` components and SVG icons with `lucide-react` icons in `Features.tsx`.
-- **style(ui): apply custom theme and branding** (f94e596f)
-  - Aligned Shadcn/ui primary color variables with existing project branding in `globals.css`.
-- **refactor(ui): replace Tailwind buttons with shadcn Button** (9d34b5ff)
-  - Replaced plain HTML button elements and styled Link components with Shadcn/ui Button components in `Hero.tsx` and `Navbar.tsx`.
-- **refactor(supabase): improve client initialization** (add7b2db)
-  - Replaced `console.warn` with `throw new Error` for missing Supabase environment variables to ensure the application fails fast if not configured correctly.
+**Features**:
+- Mobile: Collapsible drawer using Sheet component
+- Desktop: Fixed left sidebar with navigation
+- Navigation links: Dashboard, Upload Resumes, Profile, Settings
+- Sign Out functionality integrated
+- Responsive behavior across all breakpoints
 
-## [Day 4] - 2025-01-27
+#### feat(ui/dashboard): implement sign-out confirmation dialog
+**Commit**: `f1bfa7ca`  
+**Date**: 2025-01-06  
+**Description**: Replaces plain Sign Out button with Shadcn/ui Dialog asking "Are you sure you want to sign out?" with Cancel/Confirm options, includes loading state and proper accessibility.
 
-### Added
-- **Testing Suite** (ef5e08da, 925504f9, 1935284a, 34189d71)
-  - Comprehensive authentication unit tests
-  - Nigerian resume format validation tests
-  - Paystack integration and verification tests
-  - WhatsApp integration tests with accessibility improvements
+**Features**:
+- Confirmation dialog with warning icon
+- Cancel/Confirm action buttons
+- Loading state during sign-out process
+- Proper accessibility with ARIA labels
+- Keyboard navigation support
 
-- **Performance Optimizations** (91163332, 81f9412f, 7295a880)
-  - Rate limiting middleware for API protection (100 requests/15 minutes)
-  - React Query implementation for client-side caching
-  - OpenAI prompt optimization for faster processing and lower costs
+#### refactor(ui/dashboard): migrate inputs to Shadcn/ui Form
+**Commit**: `8f96a626`  
+**Date**: 2025-01-06  
+**Description**: Replaces direct state management with ProfileForm component using Form, FormField, FormItem, Input with proper validation, accessibility (aria-labels, keyboard navigation, error messages), and responsive design.
 
-- **UI Polish & Animations** (bb053fd1, 9ca23ab7, 023951aa, b8d5c452)
-  - Loading skeleton components for better UX
-  - Framer Motion animations for engaging user experience
-  - Enhanced error message component with animations
-  - Loading states and animations for uploader and pricing components
-
-### Changed
-- Optimized OpenAI API calls to use fewer tokens and reduce costs
-- Improved accessibility with proper label associations
-- Enhanced mobile responsiveness across all components
+**Features**:
+- Profile update form with validation
+- Fields: First Name, Last Name, Email, Company, Job Title
+- Real-time validation with Zod schema
+- Toast notifications for success/error states
+- Responsive grid layout (mobile: stacked, desktop: two-column)
+- Proper accessibility compliance
 
 ### Technical Improvements
-- Added comprehensive test coverage for core. functionality
-- Implemented client-side caching to reduce API calls
-- Added rate limiting to prevent API abuse
-- Optimized bundle size with lazy loading
 
-### Security
-- Enhanced API protection with rate limiting
-- Improved input validation and sanitization
-- Added proper error handling and user feedback
+- **Components Added**:
+  - `DashboardSidebar.tsx` - Responsive navigation sidebar
+  - `SignOutDialog.tsx` - Confirmation dialog component
+  - `ProfileForm.tsx` - Profile update form with validation
+  - `Sheet.tsx` - Mobile drawer component from Shadcn/ui
 
-## Previous Days
+- **Dependencies Added**:
+  - `@hookform/resolvers` - Form validation integration
 
-### [Day 3] - Authentication & Payments
-- NextAuth.js integration with magic link authentication
-- Paystack payment gateway integration
-- User dashboard and subscription management
+- **Responsive Design**:
+  - Mobile: Stacked layout with collapsible sidebar
+  - Tablet: Two-column layout with sidebar
+  - Desktop: Grid layout with fixed sidebar
 
-### [Day 2] - Core Features
-- Resume parsing with OpenAI integration
-- WhatsApp integration via Twilio
-- File upload and validation system
+- **Accessibility**:
+  - ARIA labels and descriptions
+  - Keyboard navigation support
+  - Screen reader compatibility
+  - Focus management in dialogs
 
-### [Day 1] - Foundation
-- Next.js 14 project setup
-- Tailwind CSS styling
-- Basic component structure
-- Database schema design
+### Layout Changes
+
+- **Mobile (< 1024px)**:
+  - Header with hamburger menu
+  - Collapsible sidebar drawer
+  - Stacked content layout
+
+- **Desktop (≥ 1024px)**:
+  - Fixed left sidebar (256px width)
+  - Main content area with grid layout
+  - Profile form integrated below dashboard content
+
+### Breaking Changes
+
+None. All changes are additive and maintain backward compatibility.
+
+### Migration Notes
+
+- The Dashboard component now includes sidebar navigation
+- Sign-out functionality requires user confirmation
+- Profile updates are handled through a dedicated form component
+- All form inputs use Shadcn/ui components with validation
+
+---
+
+## Previous Releases
+
+### [2025-01-05] - Core Implementation
+- Initial Dashboard and ResumeUploader implementation
+- Shadcn/ui integration
+- Responsive design foundation
+- TypeScript error fixes
