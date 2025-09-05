@@ -18,21 +18,21 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-white" />
+            <Link href="/" className="group flex items-center space-x-2 hover:scale-105 transition-all duration-200">
+              <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center group-hover:shadow-lg group-hover:scale-110 transition-all duration-200">
+                <CheckCircle className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-200" />
               </div>
-              <span className="text-xl font-bold text-gray-900">HiringAgent</span>
+              <span className="text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors duration-200">HiringAgent</span>
             </Link>
             <div className="hidden md:ml-8 md:flex md:space-x-8">
-              <Link href="/" className="text-gray-900 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors flex items-center">
-                <FaHome className="mr-1" /> Home
+              <Link href="/" className="group text-gray-900 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center hover:bg-primary-50 rounded-md hover:shadow-sm">
+                <FaHome className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Home
               </Link>
-              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors flex items-center">
-                <FaTachometerAlt className="mr-1" /> Dashboard
+              <Link href="/dashboard" className="group text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center hover:bg-gray-100 rounded-md hover:shadow-sm">
+                <FaTachometerAlt className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Dashboard
               </Link>
-              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors flex items-center">
-                <FaDollarSign className="mr-1" /> Pricing
+              <Link href="/pricing" className="group text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center hover:bg-gray-100 rounded-md hover:shadow-sm">
+                <FaDollarSign className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Pricing
               </Link>
             </div>
           </div>
@@ -57,15 +57,15 @@ export default function Navbar() {
                   <Button
                     variant="ghost"
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors flex items-center"
+                    className="group text-gray-600 hover:text-gray-900 text-sm font-medium transition-all duration-200 flex items-center hover:bg-gray-100 hover:shadow-sm hover:scale-105"
                   >
-                    <FaSignInAlt className="mr-1" /> Login
+                    <FaSignInAlt className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Login
                   </Button>
                   <Button
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center"
+                    className="group bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center hover:scale-105"
                   >
-                    <FaUserPlus className="mr-1" /> Sign Up
+                    <FaUserPlus className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Sign Up
                   </Button>
                 </>
               )}

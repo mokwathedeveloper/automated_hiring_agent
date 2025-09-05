@@ -8,11 +8,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
-                <FaCheckCircle className="w-5 h-5 text-white" />
+            <div className="group flex items-center space-x-2 mb-4 hover:scale-105 transition-all duration-200 cursor-pointer">
+              <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center group-hover:shadow-lg group-hover:scale-110 transition-all duration-200">
+                <FaCheckCircle className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-200" />
               </div>
-              <span className="text-xl font-bold text-white">HiringAgent</span>
+              <span className="text-xl font-bold text-white group-hover:text-primary-300 transition-colors duration-200">HiringAgent</span>
             </div>
             <p className="text-gray-400 max-w-md">
               AI-powered recruitment solutions designed specifically for the Nigerian job market. 
@@ -24,9 +24,9 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link href="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
-              <li><Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">Dashboard</Link></li>
-              <li><Link href="/pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</Link></li>
+              <li><Link href="/" className="group text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1 flex items-center">Home</Link></li>
+              <li><Link href="/dashboard" className="group text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1 flex items-center">Dashboard</Link></li>
+              <li><Link href="/pricing" className="group text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1 flex items-center">Pricing</Link></li>
             </ul>
           </div>
           
@@ -34,9 +34,9 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Legal</h3>
             <ul className="space-y-2">
-              <li><Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link></li>
-              <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
+              <li><Link href="/privacy" className="group text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1 flex items-center">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="group text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1 flex items-center">Terms of Service</Link></li>
+              <li><Link href="/contact" className="group text-gray-400 hover:text-white transition-all duration-200 hover:translate-x-1 flex items-center">Contact</Link></li>
             </ul>
           </div>
         </div>
@@ -46,14 +46,14 @@ export default function Footer() {
             © 2024 HiringAgent. Built with ❤️ for the Nigerian tech ecosystem.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">
-              <FaFacebook className="w-5 h-5" />
+            <a href="#" className="group text-gray-400 hover:text-white transition-all duration-200 hover:scale-125 hover:-translate-y-1">
+              <FaFacebook className="w-5 h-5 group-hover:text-blue-500 transition-colors duration-200" />
             </a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">
-              <FaTwitter className="w-5 h-5" />
+            <a href="#" className="group text-gray-400 hover:text-white transition-all duration-200 hover:scale-125 hover:-translate-y-1">
+              <FaTwitter className="w-5 h-5 group-hover:text-blue-400 transition-colors duration-200" />
             </a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">
-              <FaLinkedin className="w-5 h-5" />
+            <a href="#" className="group text-gray-400 hover:text-white transition-all duration-200 hover:scale-125 hover:-translate-y-1">
+              <FaLinkedin className="w-5 h-5 group-hover:text-blue-600 transition-colors duration-200" />
             </a>
           </div>
         </div>

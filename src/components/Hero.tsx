@@ -85,18 +85,27 @@ export default function Hero() {
         
         {/* Stats */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-white mb-2">10,000+</div>
-            <div className="text-gray-400 font-medium">Resumes Analyzed</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-white mb-2">95%</div>
-            <div className="text-gray-400 font-medium">Accuracy Rate</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-white mb-2">500+</div>
-            <div className="text-gray-400 font-medium">Nigerian Companies</div>
-          </div>
+          <motion.div 
+            className="group text-center p-6 rounded-lg hover:bg-white/5 transition-all duration-300 cursor-pointer hover:scale-105"
+            whileHover={{ y: -5 }}
+          >
+            <div className="text-3xl font-bold text-white mb-2 group-hover:text-primary-300 transition-colors duration-300">10,000+</div>
+            <div className="text-gray-400 font-medium group-hover:text-gray-300 transition-colors duration-300">Resumes Analyzed</div>
+          </motion.div>
+          <motion.div 
+            className="group text-center p-6 rounded-lg hover:bg-white/5 transition-all duration-300 cursor-pointer hover:scale-105"
+            whileHover={{ y: -5 }}
+          >
+            <div className="text-3xl font-bold text-white mb-2 group-hover:text-primary-300 transition-colors duration-300">95%</div>
+            <div className="text-gray-400 font-medium group-hover:text-gray-300 transition-colors duration-300">Accuracy Rate</div>
+          </motion.div>
+          <motion.div 
+            className="group text-center p-6 rounded-lg hover:bg-white/5 transition-all duration-300 cursor-pointer hover:scale-105"
+            whileHover={{ y: -5 }}
+          >
+            <div className="text-3xl font-bold text-white mb-2 group-hover:text-primary-300 transition-colors duration-300">500+</div>
+            <div className="text-gray-400 font-medium group-hover:text-gray-300 transition-colors duration-300">Nigerian Companies</div>
+          </motion.div>
         </div>
       </div>
     </section>
