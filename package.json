@@ -11,6 +11,8 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@auth/supabase-adapter": "^1.10.0",
+    "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-slot": "^1.0.2",
@@ -21,9 +23,11 @@
     "clsx": "^2.0.0",
     "framer-motion": "^10.16.5",
     "lucide-react": "^0.294.0",
+    "mammoth": "^1.10.0",
     "next": "14.0.3",
     "next-auth": "^4.24.5",
     "openai": "^4.20.1",
+    "pdf-parse": "^1.1.1",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
@@ -31,10 +35,12 @@
     "react-icons": "^4.12.0",
     "tailwind-merge": "^2.0.0",
     "tailwindcss-animate": "^1.0.7",
+    "twilio": "^5.9.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",

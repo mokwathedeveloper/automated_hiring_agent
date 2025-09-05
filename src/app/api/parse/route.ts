@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import openai from '@/lib/openai';
-import { extractTextFromFile } from '@/lib/utils';
 import { ParsedResume, ParseResponse } from '@/types';
 import { ParsedResumeSchema } from '@/lib/validation';
-import { calculateEnhancedAnalysis, ResumeAnalysisError } from '@/lib/analysis';
-import { JobCriteria } from '@/types/enhanced-analysis';
+import pdf from 'pdf-parse';
+import mammoth from 'mammoth';
+
+async function extractTextFromFile(buffer: Buffer, mimeType: string): Promise<string> {
+  try {
+    if (mimeType === 'application/pdf') {
+      const data = await pdf(buffer);
+      return data.text;
+    } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const result = await mammoth.extractRawText({ buffer });
+      return result.value;
+    } else {
+      throw new Error(`Unsupported file type: ${mimeType}`);
+    }
+  } catch (error) {
+    console.error('Text extraction error:', error);
+    throw new Error('Failed to extract text from file');
+  }
+}
 
 export async function POST(request: NextRequest): Promise<NextResponse<ParseResponse>> {
   try {
@@ -53,44 +69,13 @@ ${text.slice(0, 2000)}`;
       return NextResponse.json({ success: false, error: 'Invalid resume data format' }, { status: 500 });
     }
 
-    // Enhanced analysis if job description provided
-    let enhancedAnalysis = null;
-    if (jobDescription) {
-      const defaultCriteria: JobCriteria = {
-        requiredSkills: validationResult.data.skills.slice(0, 5),
-        experienceLevel: 'mid',
-        educationLevel: 'bachelor',
-        industry: 'technology',
-        weights: {
-          technicalSkills: 0.4,
-          experience: 0.3,
-          education: 0.2,
-          cultural: 0.1,
-        },
-      };
-      
-      try {
-        enhancedAnalysis = calculateEnhancedAnalysis(validationResult.data, defaultCriteria);
-      } catch (error) {
-        console.warn('Enhanced analysis failed:', error);
-      }
-    }
-
     return NextResponse.json({ 
       success: true, 
-      data: validationResult.data,
-      enhancedAnalysis 
+      data: validationResult.data
     });
   } catch (error) {
     console.error('Parse error:', error);
-    if (error instanceof ResumeAnalysisError) {
-      return NextResponse.json({ 
-        success: false, 
-        error: error.message,
-        code: error.code,
-        retryable: error.retryable 
-      }, { status: 400 });
-    }
+
     return NextResponse.json({ success: false, error: 'Failed to parse resume' }, { status: 500 });
   }
 }

@@ -64,7 +64,7 @@ export function getUserTier(user: any): PricingTier {
 
 export function canAccessFeature(userTier: PricingTier, feature: string): boolean {
   const tier = PRICING_TIERS[userTier];
-  return tier.features.includes(feature);
+  return (tier.features as readonly string[]).includes(feature);
 }
 
 export function getRemainingResumes(userTier: PricingTier, usedThisMonth: number): number {
