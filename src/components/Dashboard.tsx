@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { User, FileText, TrendingUp, Calendar, BarChart3, Users, Award, Clock } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
+import ProfileForm from './ProfileForm';
 
 interface Resume {
   id: string;
@@ -133,6 +134,34 @@ export default function Dashboard() {
       window.location.href = '/auth';
     } catch (err) {
       console.error('Sign out error:', err);
+    }
+  };
+
+  const handleProfileUpdate = async (profileData: any) => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          first_name: profileData.firstName,
+          last_name: profileData.lastName,
+          full_name: `${profileData.firstName} ${profileData.lastName}`,
+          company: profileData.company,
+          job_title: profileData.jobTitle,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Update local profile state
+      setProfile(data);
+    } catch (error) {
+      console.error('Profile update error:', error);
+      throw error;
     }
   };
 
@@ -399,6 +428,20 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
+
+          {/* Profile Settings */}
+          <div className="mt-8">
+            <ProfileForm
+              initialData={{
+                firstName: profile?.first_name || '',
+                lastName: profile?.last_name || '',
+                email: user.email || '',
+                company: profile?.company || '',
+                jobTitle: profile?.job_title || '',
+              }}
+              onSubmit={handleProfileUpdate}
+            />
+          </div>
         </div>
       </div>
 
@@ -533,6 +576,20 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* Profile Settings - Mobile */}
+        <div className="mt-8">
+          <ProfileForm
+            initialData={{
+              firstName: profile?.first_name || '',
+              lastName: profile?.last_name || '',
+              email: user.email || '',
+              company: profile?.company || '',
+              jobTitle: profile?.job_title || '',
+            }}
+            onSubmit={handleProfileUpdate}
+          />
+        </div>
       </main>
     </div>
   );
