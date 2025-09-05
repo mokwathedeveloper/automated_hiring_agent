@@ -1,6 +1,7 @@
 // src/lib/supabase.ts
 
 import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/database';
 
 // Supabase configuration
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,12 +18,12 @@ if (!supabaseAnonKey) {
 }
 
 // Client-side Supabase client (for authentication and user operations)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Server-side Supabase client (for admin operations)
-let supabaseAdmin: ReturnType<typeof createClient> | null = null;
+let supabaseAdmin: ReturnType<typeof createClient<Database>> | null = null;
 if (supabaseServiceKey) {
-  supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+  supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey);
 } else {
   console.warn('SUPABASE_SERVICE_ROLE_KEY is not set. Admin operations will be disabled.');
 }
@@ -84,6 +85,7 @@ export const db = {
         content: resumeData.content,
         analysis: resumeData.analysis,
         created_at: new Date().toISOString(),
+        filename: resumeData.filename, // This was missing
       })
       .select()
       .single();
