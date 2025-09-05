@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { auth } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 interface Resume {
   id: string;
@@ -67,9 +68,11 @@ export default function Dashboard() {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
           <p className="text-gray-600 mb-6">Please sign in to access your dashboard.</p>
-          <a href="/auth" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg">
-            Sign In
-          </a>
+          <Button asChild>
+            <a href="/auth" className="text-white px-6 py-2 rounded-lg" style={{ backgroundColor: '#4f46e5', color: 'white' }}>
+              Sign In
+            </a>
+          </Button>
         </div>
       </div>
     );
@@ -85,12 +88,13 @@ export default function Dashboard() {
               <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
               <p className="text-gray-600">Welcome back, {user.email}</p>
             </div>
-            <button
+            <Button
+              variant="secondary"
               onClick={handleSignOut}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
+              className="text-gray-700"
             >
               Sign Out
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -182,7 +186,7 @@ export default function Dashboard() {
             <ul className="divide-y divide-gray-200">
               {resumes.length === 0 ? (
                 <li className="px-4 py-4 text-center text-gray-500">
-                  No resumes analyzed yet. <a href="/" className="text-indigo-600 hover:text-indigo-500">Start analyzing</a>
+                  No resumes analyzed yet. <Button variant="link" asChild><a href="/" className="text-indigo-600">Start analyzing</a></Button>
                 </li>
               ) : (
                 resumes.map((resume) => (

@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 export default function Hero() {
   const scrollToUpload = () => {
@@ -58,21 +59,25 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={scrollToUpload}
-            className="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:from-primary-700 hover:to-primary-800 shadow-xl hover:shadow-2xl transition-all duration-200"
-          >
-            Get Started Free
-          </motion.button>
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="border-2 border-gray-300 text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-300 hover:text-gray-900 transition-all duration-200"
-          >
-            Watch Demo
-          </motion.button>
+          <Button asChild>
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={scrollToUpload}
+              className="bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:from-primary-700 hover:to-primary-800 shadow-xl hover:shadow-2xl transition-all duration-200"
+            >
+              Get Started Free
+            </motion.button>
+          </Button>
+          <Button asChild variant="outline">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="border-2 border-gray-300 text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-300 hover:text-gray-900 transition-all duration-200"
+            >
+              Watch Demo
+            </motion.button>
+          </Button>
         </motion.div>
         
         {/* Stats */}

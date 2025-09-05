@@ -4,13 +4,35 @@ All notable changes to the Automated Hiring Agent project will be documented in 
 
 ## [Unreleased] - 2025-09-05
 
+### Chore
+- **chore(ui): install and configure shadcn-ui** (41cd3e7a)
+  - Installed and configured Shadcn/ui, and added base components (Button, Input, Dialog, Form, Label).
+
 ### Added
+- **feat(ui): replace logo icon with lucide-react CheckCircle** (a7947926)
+  - Replaced the `FaCheckCircle` icon in the Navbar logo with `CheckCircle` from `lucide-react` for a more professional look.
+- **feat(ui): add base shadcn components (Button, Input, Dialog, Form, Label)** (27ca74e2)
+  - Replaced plain HTML elements with Shadcn/ui Button, Input, and Dialog components in `AuthModal.tsx` and `CTA.tsx`.
 - **feat(auth): implement email/password and magic link flows** (a37d23b9)
   - Implemented distinct flows for user signup (email/password), login (email/password), and magic link (OTP) in the authentication modal.
 - **feat(auth): remove magic link option from AuthModal** (<commit_hash_here>)
   - Removed the 'magiclink' authentication mode from `AuthModal.tsx`.
 
+### Fixed
+- **fix(build): resolve build errors and update documentation** (8a3cd436)
+  - Added placeholder for `extractTextFromFile` in `src/lib/utils.ts` and corrected its usage in `src/app/api/parse/route.ts`.
+
 ### Changed
+- **refactor(ui): replace buttons and icons in Pricing components** (dc73008f)
+  - Replaced plain HTML `Link` and `button` elements with Shadcn/ui `Button` components and SVG icons with `lucide-react` icons in `src/app/pricing/page.tsx` and `src/components/Pricing.tsx`.
+- **refactor(ui): replace buttons and icons in Dashboard components** (bc45cc51)
+  - Replaced plain HTML buttons and SVG icons with Shadcn/ui `Button` components and `lucide-react` icons in `src/app/dashboard/page.tsx` and `src/components/Dashboard.tsx`.
+- **refactor(ui): replace buttons and icons in Features.tsx** (248fefc2)
+  - Replaced plain HTML `<a>` tags with Shadcn/ui `Button` components and SVG icons with `lucide-react` icons in `Features.tsx`.
+- **style(ui): apply custom theme and branding** (f94e596f)
+  - Aligned Shadcn/ui primary color variables with existing project branding in `globals.css`.
+- **refactor(ui): replace Tailwind buttons with shadcn Button** (9d34b5ff)
+  - Replaced plain HTML button elements and styled Link components with Shadcn/ui Button components in `Hero.tsx` and `Navbar.tsx`.
 - **refactor(supabase): improve client initialization** (add7b2db)
   - Replaced `console.warn` with `throw new Error` for missing Supabase environment variables to ensure the application fails fast if not configured correctly.
 

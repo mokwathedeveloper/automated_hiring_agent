@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function CTA() {
   return (
@@ -28,20 +29,24 @@ export default function CTA() {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-          <Link href="/auth" className="group inline-flex items-center justify-center px-8 py-4 bg-white text-indigo-600 hover:bg-gray-50 font-bold text-lg rounded-2xl transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-            <svg className="w-5 h-5 mr-2 group-hover:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Start Free Trial
-            <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">No Credit Card</span>
-          </Link>
+          <Button asChild className="group inline-flex items-center justify-center font-bold text-lg rounded-2xl transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1" style={{ backgroundColor: 'white', color: '#4f46e5' }}>
+            <Link href="/auth">
+              <svg className="w-5 h-5 mr-2 group-hover:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Start Free Trial
+              <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">No Credit Card</span>
+            </Link>
+          </Button>
           
-          <Link href="/pricing" className="group inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-indigo-600 font-bold text-lg rounded-2xl transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-            <svg className="w-5 h-5 mr-2 group-hover:animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            View Pricing
-          </Link>
+          <Button asChild variant="outline" className="group inline-flex items-center justify-center font-bold text-lg rounded-2xl transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1" style={{ borderColor: 'white', color: 'white' }}>
+            <Link href="/pricing">
+              <svg className="w-5 h-5 mr-2 group-hover:animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              View Pricing
+            </Link>
+          </Button>
         </div>
         
         {/* Trust indicators */}

@@ -1,0 +1,13 @@
+Merge branch '006-confusion-between-supabase-dashboard-login-and-app-auth-loginsignup' into main
+
+This merge incorporates a series of significant enhancements and fixes related to Supabase authentication and overall project stability.
+
+Key changes include:
+
+- **Enhanced Authentication Flows**: The `AuthModal` component has been refactored to support robust email/password signup and login, alongside the existing magic link functionality. This provides users with more flexible authentication options.
+- **Improved Supabase Client Initialization**: The Supabase client setup in `src/lib/supabase.ts` has been made more resilient by enforcing strict environment variable checks, ensuring the application fails fast if critical configurations are missing.
+- **Build System Stability**: Addressed and resolved several critical build errors, including TypeScript type mismatches and ESLint configuration issues. A temporary `any` cast was re-applied to `supabaseAdmin` to ensure successful compilation due to persistent underlying type complexities.
+- **UI Refinements**: The 'sign in with a Magic Link' option has been removed from the login/signup forms as per user request, simplifying the user interface.
+- **Comprehensive Documentation**: Detailed documentation files have been created for each major fix and enhancement, and the `CHANGELOG.md` has been updated to reflect all changes.
+
+This merge significantly improves the authentication experience, enhances code quality, and ensures the project remains buildable and maintainable.
