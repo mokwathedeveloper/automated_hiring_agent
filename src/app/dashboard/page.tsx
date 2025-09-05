@@ -158,7 +158,7 @@ export default function Dashboard() {
                       <h3 className="text-sm font-medium text-gray-900">
                         {analysis.job_title || 'Resume Analysis'}
                       </h3>
-                      <p className.="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500">
                         {analysis.candidate_name || 'Candidate'} • {new Date(analysis.created_at).toLocaleDateString()}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">{analysis.summary}</p>
