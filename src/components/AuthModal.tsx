@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase';
+import { signIn } from 'next-auth/react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -267,6 +268,24 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         {success && <div className="text-green-600 text-sm bg-green-50 p-3 rounded-md mb-4">{success}</div>}
 
         {renderForm()}
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => signIn('google')}
+          disabled={isLoading || !!success}
+        >
+          Sign in with Google
+        </Button>
 
         <div className="mt-6 text-sm text-center">
           {mode !== 'signup' && (
