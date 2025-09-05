@@ -8,7 +8,7 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
-type AuthMode = 'login' | 'signup' | 'magiclink';
+type AuthMode = 'login' | 'signup';
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [mode, setMode] = useState<AuthMode>('login');
@@ -69,27 +69,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
-  const handleMagicLink = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-      handleResponse(error?.message ?? null, 'Check your email for the magic link!');
-    } catch (err: any) {
-      handleResponse(err.message || 'An unexpected error occurred.', '');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const resetForm = () => {
     setEmail('');
     setPassword('');
@@ -106,13 +85,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             {renderEmailInput()}
             {renderPasswordInput()}
             {renderSubmitButton('Sign Up')}
-          </form>
-        );
-      case 'magiclink':
-        return (
-          <form onSubmit={handleMagicLink} className="space-y-4">
-            {renderEmailInput()}
-            {renderSubmitButton('Send Magic Link')}
           </form>
         );
       case 'login':
@@ -200,22 +172,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               Already have an account?{' '}
               <button onClick={() => switchMode('login')} className="text-primary-600 hover:underline">
                 Login
-              </button>
-            </p>
-          )}
-          {mode !== 'magiclink' && (
-            <p className="mt-2">
-              Or,{' '}
-              <button onClick={() => switchMode('magiclink')} className="text-primary-600 hover:underline">
-                sign in with a Magic Link
-              </button>
-            </p>
-          )}
-           {mode === 'magiclink' && (
-            <p className="mt-2">
-              Or,{' '}
-              <button onClick={() => switchMode('login')} className="text-primary-600 hover:underline">
-                sign in with a password
               </button>
             </p>
           )}
