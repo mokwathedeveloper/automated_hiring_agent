@@ -17,6 +17,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -56,12 +59,23 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setError('');
     setSuccess('');
 
+    if (password !== confirmPassword) {
+      handleResponse('Passwords do not match.', '');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            full_name: `${firstName} ${lastName}`,
+          },
         },
       });
       handleResponse(error?.message ?? null, 'Signup successful! Please check your email to verify your account.');
@@ -75,6 +89,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const resetForm = () => {
     setEmail('');
     setPassword('');
+    setConfirmPassword('');
+    setFirstName('');
+    setLastName('');
     setError('');
     setSuccess('');
     setIsLoading(false);
@@ -85,8 +102,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       case 'signup':
         return (
           <form onSubmit={handleSignUp} className="space-y-4">
+            {renderFirstNameInput()}
+            {renderLastNameInput()}
             {renderEmailInput()}
             {renderPasswordInput()}
+            {renderConfirmPasswordInput()}
             {renderSubmitButton('Sign Up')}
           </form>
         );
@@ -125,6 +145,46 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         placeholder="Enter your password"
         required
         minLength={6}
+      />
+    </div>
+  );
+
+  const renderConfirmPasswordInput = () => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+      <Input
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        placeholder="Confirm your password"
+        required
+        minLength={6}
+      />
+    </div>
+  );
+
+  const renderFirstNameInput = () => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+      <Input
+        type="text"
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+        placeholder="Enter your first name"
+        required
+      />
+    </div>
+  );
+
+  const renderLastNameInput = () => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+      <Input
+        type="text"
+        value={lastName}
+        onChange={(e) => setLastName(e.target.value)}
+        placeholder="Enter your last name"
+        required
       />
     </div>
   );
