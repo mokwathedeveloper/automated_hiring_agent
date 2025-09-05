@@ -23,6 +23,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   const handleResponse = (errorMsg: string | null, successMsg: string) => {
     if (errorMsg) {
@@ -46,6 +47,27 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (!error) {
         setTimeout(() => (window.location.href = '/dashboard'), 1000);
       }
+    } catch (err: any) {
+      handleResponse(err.message || 'An unexpected error occurred.', '');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
+      });
+      handleResponse(
+        error?.message ?? null,
+        'Password reset email sent! Please check your inbox.'
+      );
     } catch (err: any) {
       handleResponse(err.message || 'An unexpected error occurred.', '');
     } finally {
@@ -109,9 +131,22 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setError('');
     setSuccess('');
     setIsLoading(false);
+    setIsResettingPassword(false);
   };
 
   const renderForm = () => {
+    if (isResettingPassword) {
+      return (
+        <form onSubmit={handleForgotPassword} className="space-y-4">
+          {renderEmailInput()}
+          {renderSubmitButton('Send Reset Email')}
+          <Button variant="link" onClick={() => setIsResettingPassword(false)} className="w-full">
+            Back to Login
+          </Button>
+        </form>
+      );
+    }
+
     switch (mode) {
       case 'signup':
         return (
@@ -130,6 +165,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <form onSubmit={handleLogin} className="space-y-4">
             {renderEmailInput()}
             {renderPasswordInput()}
+            <Button variant="link" onClick={() => setIsResettingPassword(true)} className="text-sm text-primary-600 p-0 h-auto justify-start">
+              Forgot Password?
+            </Button>
             {renderSubmitButton('Login')}
           </form>
         );
