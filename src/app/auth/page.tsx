@@ -12,6 +12,7 @@ export default function AuthPage() {
         <AuthModal 
           isOpen={true}
           onClose={() => window.history.back()}
+          mode="login"
         />
         
       </div>

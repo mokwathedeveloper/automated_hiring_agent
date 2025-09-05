@@ -16,8 +16,8 @@ export default function UpdatePasswordForm() {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    const accessToken = searchParams.get('access_token');
-    const type = searchParams.get('type');
+    const accessToken = searchParams?.get('access_token');
+    const type = searchParams?.get('type');
 
     if (accessToken && type === 'recovery') {
       // Supabase automatically handles setting the session from the access_token
