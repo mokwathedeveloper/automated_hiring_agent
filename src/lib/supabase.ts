@@ -1,9 +1,7 @@
-import { ResumeData } from './types';
 // src/lib/supabase.ts
 
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
-import { ResumeData } from '@/types';
 
 // Supabase configuration
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -75,7 +73,7 @@ export const auth = {
 // Database helper functions
 export const db = {
   // Insert resume analysis
-  insertResume: async (userId: string, resumeData: ResumeData) => {
+  insertResume: async (userId: string, resumeData: any) => {
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not configured. Cannot insert resume.');
     }
@@ -87,7 +85,7 @@ export const db = {
         content: resumeData.content,
         analysis: resumeData.analysis,
         created_at: new Date().toISOString(),
-        filename: resumeData.filename,
+        filename: resumeData.filename, // This was missing
       })
       .select()
       .single();
