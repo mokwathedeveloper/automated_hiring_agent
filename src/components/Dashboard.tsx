@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { User, FileText, TrendingUp, Calendar, BarChart3, Users, Award, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
 import DashboardSidebar from './DashboardSidebar';
 import ProfileForm from './ProfileForm';
 
@@ -301,57 +302,137 @@ export default function Dashboard() {
 
           {/* Stats Grid - Desktop */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Resumes</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalResumes}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats.thisMonthResumes} this month
-                </p>
-              </CardContent>
-            </Card>
+            <motion.div
+              whileHover={{ 
+                scale: 1.05, 
+                y: -8,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Card className="relative overflow-hidden group cursor-pointer border-0 bg-gradient-to-br from-blue-50 to-indigo-100 hover:from-blue-100 hover:to-indigo-200 transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                  <CardTitle className="text-sm font-medium text-gray-700 group-hover:text-blue-700 transition-colors duration-300">Total Resumes</CardTitle>
+                  <motion.div
+                    whileHover={{ rotate: 360, scale: 1.2 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <FileText className="h-4 w-4 text-blue-500 group-hover:text-blue-600" />
+                  </motion.div>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <motion.div 
+                    className="text-2xl font-bold text-gray-900 group-hover:text-blue-900 transition-colors duration-300"
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    {stats.totalResumes}
+                  </motion.div>
+                  <p className="text-xs text-gray-600 group-hover:text-blue-600 transition-colors duration-300">
+                    {stats.thisMonthResumes} this month
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Average Score</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.averageScore}/100</div>
-                <p className="text-xs text-muted-foreground">
-                  {stats.completedAnalyses} completed
-                </p>
-              </CardContent>
-            </Card>
+            <motion.div
+              whileHover={{ 
+                scale: 1.05, 
+                y: -8,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Card className="relative overflow-hidden group cursor-pointer border-0 bg-gradient-to-br from-emerald-50 to-green-100 hover:from-emerald-100 hover:to-green-200 transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 to-green-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                  <CardTitle className="text-sm font-medium text-gray-700 group-hover:text-emerald-700 transition-colors duration-300">Average Score</CardTitle>
+                  <motion.div
+                    whileHover={{ rotate: 360, scale: 1.2 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <TrendingUp className="h-4 w-4 text-emerald-500 group-hover:text-emerald-600" />
+                  </motion.div>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <motion.div 
+                    className="text-2xl font-bold text-gray-900 group-hover:text-emerald-900 transition-colors duration-300"
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    {stats.averageScore}/100
+                  </motion.div>
+                  <p className="text-xs text-gray-600 group-hover:text-emerald-600 transition-colors duration-300">
+                    {stats.completedAnalyses} completed
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">High Scores</CardTitle>
-                <Award className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.highScoreResumes}</div>
-                <p className="text-xs text-muted-foreground">
-                  80+ score resumes
-                </p>
-              </CardContent>
-            </Card>
+            <motion.div
+              whileHover={{ 
+                scale: 1.05, 
+                y: -8,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Card className="relative overflow-hidden group cursor-pointer border-0 bg-gradient-to-br from-amber-50 to-yellow-100 hover:from-amber-100 hover:to-yellow-200 transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-600/10 to-yellow-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                  <CardTitle className="text-sm font-medium text-gray-700 group-hover:text-amber-700 transition-colors duration-300">High Scores</CardTitle>
+                  <motion.div
+                    whileHover={{ rotate: 360, scale: 1.2 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Award className="h-4 w-4 text-amber-500 group-hover:text-amber-600" />
+                  </motion.div>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <motion.div 
+                    className="text-2xl font-bold text-gray-900 group-hover:text-amber-900 transition-colors duration-300"
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    {stats.highScoreResumes}
+                  </motion.div>
+                  <p className="text-xs text-gray-600 group-hover:text-amber-600 transition-colors duration-300">
+                    80+ score resumes
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.pendingAnalyses}</div>
-                <p className="text-xs text-muted-foreground">
-                  In processing
-                </p>
-              </CardContent>
-            </Card>
+            <motion.div
+              whileHover={{ 
+                scale: 1.05, 
+                y: -8,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Card className="relative overflow-hidden group cursor-pointer border-0 bg-gradient-to-br from-purple-50 to-violet-100 hover:from-purple-100 hover:to-violet-200 transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-violet-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                  <CardTitle className="text-sm font-medium text-gray-700 group-hover:text-purple-700 transition-colors duration-300">Pending</CardTitle>
+                  <motion.div
+                    whileHover={{ rotate: 360, scale: 1.2 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Clock className="h-4 w-4 text-purple-500 group-hover:text-purple-600" />
+                  </motion.div>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <motion.div 
+                    className="text-2xl font-bold text-gray-900 group-hover:text-purple-900 transition-colors duration-300"
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    {stats.pendingAnalyses}
+                  </motion.div>
+                  <p className="text-xs text-gray-600 group-hover:text-purple-600 transition-colors duration-300">
+                    In processing
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
 
           {/* Resume History - Desktop */}
@@ -379,7 +460,7 @@ export default function Dashboard() {
                   {resumes.map((resume) => (
                     <div
                       key={resume.id}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                      className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 hover:shadow-md hover:border-gray-300 transition-all duration-300 cursor-pointer"
                     >
                       <div className="flex items-center space-x-4 mb-2 sm:mb-0">
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${
@@ -449,53 +530,53 @@ export default function Dashboard() {
       <main className="lg:hidden max-w-7xl mx-auto py-6 px-4 sm:px-6">
         {/* Stats Grid - Mobile */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-          <Card>
+          <Card className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-blue-200 hover:bg-blue-50/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Resumes</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium group-hover:text-blue-700 transition-colors">Total Resumes</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 group-hover:scale-110 transition-all duration-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalResumes}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold group-hover:text-blue-900 transition-colors">{stats.totalResumes}</div>
+              <p className="text-xs text-muted-foreground group-hover:text-blue-600 transition-colors">
                 {stats.thisMonthResumes} this month
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-emerald-200 hover:bg-emerald-50/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Average Score</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium group-hover:text-emerald-700 transition-colors">Average Score</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground group-hover:text-emerald-500 group-hover:scale-110 transition-all duration-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.averageScore}/100</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold group-hover:text-emerald-900 transition-colors">{stats.averageScore}/100</div>
+              <p className="text-xs text-muted-foreground group-hover:text-emerald-600 transition-colors">
                 {stats.completedAnalyses} completed
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-amber-200 hover:bg-amber-50/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">High Scores</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium group-hover:text-amber-700 transition-colors">High Scores</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 group-hover:scale-110 transition-all duration-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.highScoreResumes}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold group-hover:text-amber-900 transition-colors">{stats.highScoreResumes}</div>
+              <p className="text-xs text-muted-foreground group-hover:text-amber-600 transition-colors">
                 80+ score resumes
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-purple-200 hover:bg-purple-50/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium group-hover:text-purple-700 transition-colors">Pending</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground group-hover:text-purple-500 group-hover:scale-110 transition-all duration-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingAnalyses}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold group-hover:text-purple-900 transition-colors">{stats.pendingAnalyses}</div>
+              <p className="text-xs text-muted-foreground group-hover:text-purple-600 transition-colors">
                 In processing
               </p>
             </CardContent>
@@ -527,7 +608,7 @@ export default function Dashboard() {
                 {resumes.map((resume) => (
                   <div
                     key={resume.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                    className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 hover:shadow-md hover:border-gray-300 transition-all duration-300 cursor-pointer"
                   >
                     <div className="flex items-center space-x-4 mb-2 sm:mb-0">
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${

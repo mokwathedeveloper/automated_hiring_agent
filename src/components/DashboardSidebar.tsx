@@ -64,11 +64,11 @@ function SidebarContent({ onSignOut, className = '' }: SidebarProps & { classNam
               <Button
                 key={item.name}
                 variant={isActive ? 'default' : 'ghost'}
-                className="w-full justify-start"
+                className="w-full justify-start group hover:bg-gray-100 hover:shadow-sm transition-all duration-200 hover:scale-[1.02]"
                 asChild
               >
                 <Link href={item.href}>
-                  <Icon className="mr-2 h-4 w-4" />
+                  <Icon className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                   {item.name}
                 </Link>
               </Button>

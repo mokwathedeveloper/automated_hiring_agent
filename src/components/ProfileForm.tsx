@@ -70,13 +70,13 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
   };
 
   return (
-    <Card>
+    <Card className="group hover:shadow-lg transition-all duration-300 hover:border-indigo-200">
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <User className="h-5 w-5" />
+        <CardTitle className="flex items-center space-x-2 group-hover:text-indigo-700 transition-colors">
+          <User className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
           <span>Profile Information</span>
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="group-hover:text-indigo-600 transition-colors">
           Update your personal information and preferences
         </CardDescription>
       </CardHeader>
@@ -95,6 +95,7 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
                         placeholder="Enter your first name"
                         {...field}
                         disabled={isLoading}
+                        className="hover:border-indigo-300 focus:border-indigo-500 transition-colors duration-200"
                       />
                     </FormControl>
                     <FormMessage />
@@ -113,6 +114,7 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
                         placeholder="Enter your last name"
                         {...field}
                         disabled={isLoading}
+                        className="hover:border-indigo-300 focus:border-indigo-500 transition-colors duration-200"
                       />
                     </FormControl>
                     <FormMessage />
@@ -133,6 +135,7 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
                       placeholder="Enter your email address"
                       {...field}
                       disabled={isLoading}
+                      className="hover:border-indigo-300 focus:border-indigo-500 transition-colors duration-200"
                     />
                   </FormControl>
                   <FormDescription>
@@ -182,7 +185,7 @@ export default function ProfileForm({ initialData, onSubmit }: ProfileFormProps)
             </div>
 
             <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading} className="min-w-32">
+              <Button type="submit" disabled={isLoading} className="min-w-32 hover:shadow-lg hover:scale-105 transition-all duration-200">
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
