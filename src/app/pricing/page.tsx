@@ -96,7 +96,7 @@ export default function PricingPage() {
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                   }`}
                 >
-                  <Link href="/subscription">
+                  <Link href="/auth">
                     {plan.cta}
                   </Link>
                 </Button>
