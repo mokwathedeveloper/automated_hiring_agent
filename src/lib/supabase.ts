@@ -79,15 +79,17 @@ export const db = {
       throw new Error('Supabase admin client not configured. Cannot insert resume.');
     }
     
+    const newResume: Database['public']['Tables']['resumes']['Insert'] = {
+      user_id: userId,
+      content: resumeData.content,
+      analysis: resumeData.analysis,
+      created_at: new Date().toISOString(),
+      filename: resumeData.filename,
+    };
+
     const { data, error } = await supabaseAdmin
       .from(TABLES.RESUMES)
-      .insert({
-        user_id: userId,
-        content: resumeData.content,
-        analysis: resumeData.analysis,
-        created_at: new Date().toISOString(),
-        filename: resumeData.filename,
-      })
+      .insert(newResume)
       .select()
       .single();
     
