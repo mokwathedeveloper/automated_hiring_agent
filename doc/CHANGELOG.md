@@ -16,6 +16,10 @@ All notable changes to the Automated Hiring Agent project will be documented in 
 - **feat(auth): remove magic link option from AuthModal** (<commit_hash_here>)
   - Removed the 'magiclink' authentication mode from `AuthModal.tsx`.
 
+### Fixed
+- **fix(build): resolve build errors and update documentation** (8a3cd436)
+  - Added placeholder for `extractTextFromFile` in `src/lib/utils.ts` and corrected its usage in `src/app/api/parse/route.ts`.
+
 ### Changed
 - **style(ui): apply custom theme and branding** (f94e596f)
   - Aligned Shadcn/ui primary color variables with existing project branding in `globals.css`.
