@@ -8,13 +8,68 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
+type AuthMode = 'login' | 'signup' | 'magiclink';
+
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleResponse = (errorMsg: string | null, successMsg: string) => {
+    if (errorMsg) {
+      setError(errorMsg);
+      setSuccess('');
+    } else {
+      setError('');
+      setSuccess(successMsg);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      handleResponse(error?.message ?? null, 'Login successful! Redirecting...');
+      if (!error) {
+        setTimeout(() => (window.location.href = '/dashboard'), 1000);
+      }
+    } catch (err: any) {
+      handleResponse(err.message || 'An unexpected error occurred.', '');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      handleResponse(error?.message ?? null, 'Signup successful! Please check your email to verify your account.');
+    } catch (err: any) {
+      handleResponse(err.message || 'An unexpected error occurred.', '');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -27,17 +82,93 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-
-      if (error) {
-        setError(error.message);
-      } else {
-        setSuccess('Check your email for the login link!');
-      }
-    } catch (err) {
-      setError('Something went wrong. Please try again.');
+      handleResponse(error?.message ?? null, 'Check your email for the magic link!');
+    } catch (err: any) {
+      handleResponse(err.message || 'An unexpected error occurred.', '');
+    } finally {
+      setIsLoading(false);
     }
+  };
 
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setError('');
+    setSuccess('');
     setIsLoading(false);
+  };
+
+  const renderForm = () => {
+    switch (mode) {
+      case 'signup':
+        return (
+          <form onSubmit={handleSignUp} className="space-y-4">
+            {renderEmailInput()}
+            {renderPasswordInput()}
+            {renderSubmitButton('Sign Up')}
+          </form>
+        );
+      case 'magiclink':
+        return (
+          <form onSubmit={handleMagicLink} className="space-y-4">
+            {renderEmailInput()}
+            {renderSubmitButton('Send Magic Link')}
+          </form>
+        );
+      case 'login':
+      default:
+        return (
+          <form onSubmit={handleLogin} className="space-y-4">
+            {renderEmailInput()}
+            {renderPasswordInput()}
+            {renderSubmitButton('Login')}
+          </form>
+        );
+    }
+  };
+
+  const renderEmailInput = () => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+        placeholder="Enter your email"
+        required
+      />
+    </div>
+  );
+
+  const renderPasswordInput = () => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+        placeholder="Enter your password"
+        required
+        minLength={6}
+      />
+    </div>
+  );
+
+  const renderSubmitButton = (text: string) => (
+    <button
+      type="submit"
+      disabled={isLoading || !!success}
+      className="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 transition-colors"
+    >
+      {isLoading ? 'Processing...' : text}
+    </button>
+  );
+
+  const switchMode = (newMode: AuthMode) => {
+    setMode(newMode);
+    resetForm();
   };
 
   if (!isOpen) return null;
@@ -46,50 +177,48 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 sm:mx-auto sm:max-w-lg">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Login</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
+          <h2 className="text-2xl font-bold">{mode === 'signup' ? 'Create Account' : 'Login'}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Enter your email address"
-              required
-            />
-          </div>
+        {error && <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md mb-4">{error}</div>}
+        {success && <div className="text-green-600 text-sm bg-green-50 p-3 rounded-md mb-4">{success}</div>}
 
-          {error && (
-            <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">{error}</div>
+        {renderForm()}
+
+        <div className="mt-6 text-sm text-center">
+          {mode !== 'signup' && (
+            <p>
+              Don't have an account?{' '}
+              <button onClick={() => switchMode('signup')} className="text-primary-600 hover:underline">
+                Sign Up
+              </button>
+            </p>
           )}
-
-          {success && (
-            <div className="text-green-600 text-sm bg-green-50 p-3 rounded-md">{success}</div>
+          {mode === 'signup' && (
+            <p>
+              Already have an account?{' '}
+              <button onClick={() => switchMode('login')} className="text-primary-600 hover:underline">
+                Login
+              </button>
+            </p>
           )}
-
-          <button
-            type="submit"
-            disabled={isLoading || !!success}
-            className="w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 disabled:opacity-50 transition-colors"
-          >
-            {isLoading ? 'Sending...' : 'Send Login Link'}
-          </button>
-        </form>
-
-        <div className="mt-4 text-sm text-gray-600 text-center">
-          <p>We'll send you a magic link to sign in.</p>
-          <p className="mt-2">No password required! 🎉</p>
+          {mode !== 'magiclink' && (
+            <p className="mt-2">
+              Or,{' '}
+              <button onClick={() => switchMode('magiclink')} className="text-primary-600 hover:underline">
+                sign in with a Magic Link
+              </button>
+            </p>
+          )}
+           {mode === 'magiclink' && (
+            <p className="mt-2">
+              Or,{' '}
+              <button onClick={() => switchMode('login')} className="text-primary-600 hover:underline">
+                sign in with a password
+              </button>
+            </p>
+          )}
         </div>
       </div>
     </div>
