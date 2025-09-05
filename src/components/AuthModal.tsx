@@ -59,6 +59,20 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setError('');
     setSuccess('');
 
+    if (password.length < 8 ||
+        !/[A-Z]/.test(password) ||
+        !/[a-z]/.test(password) ||
+        !/[0-9]/.test(password) ||
+        !/[^A-Za-z0-9]/.test(password)
+    ) {
+      handleResponse(
+        'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+        ''
+      );
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       handleResponse('Passwords do not match.', '');
       setIsLoading(false);
@@ -144,7 +158,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Enter your password"
         required
-        minLength={6}
+        minLength={8}
       />
     </div>
   );
@@ -158,7 +172,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onChange={(e) => setConfirmPassword(e.target.value)}
         placeholder="Confirm your password"
         required
-        minLength={6}
+        minLength={8}
       />
     </div>
   );
