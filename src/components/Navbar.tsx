@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { FaCheckCircle, FaBars, FaHome, FaTachometerAlt, FaDollarSign, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import { FaBars, FaHome, FaTachometerAlt, FaDollarSign, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import { CheckCircle } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { Button } from '@/components/ui/button';
 
@@ -19,7 +20,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
-                <FaCheckCircle className="w-5 h-5 text-white" />
+                <CheckCircle className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">HiringAgent</span>
             </Link>
