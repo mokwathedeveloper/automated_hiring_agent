@@ -9,6 +9,8 @@ All notable changes to the Automated Hiring Agent project will be documented in 
   - Installed and configured Shadcn/ui, and added base components (Button, Input, Dialog, Form, Label).
 
 ### Added
+- **feat(ui): replace logo icon with lucide-react CheckCircle** (a7947926)
+  - Replaced the `FaCheckCircle` icon in the Navbar logo with `CheckCircle` from `lucide-react` for a more professional look.
 - **feat(ui): add base shadcn components (Button, Input, Dialog, Form, Label)** (27ca74e2)
   - Replaced plain HTML elements with Shadcn/ui Button, Input, and Dialog components in `AuthModal.tsx` and `CTA.tsx`.
 - **feat(auth): implement email/password and magic link flows** (a37d23b9)
