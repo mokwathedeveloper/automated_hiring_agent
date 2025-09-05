@@ -1,10 +1,11 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { useSession } from 'next-auth/react';
+import { act } from 'react-dom/test-utils';
+import { useAuth } from '@/hooks/useAuth';
 import Pricing from '@/components/Pricing';
 
-// Mock next-auth
-jest.mock('next-auth/react');
-const mockUseSession = useSession as jest.MockedFunction<typeof useSession>;
+// Mock useAuth hook
+jest.mock('@/hooks/useAuth');
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 // Mock Paystack
 declare global {
@@ -21,19 +22,26 @@ describe('Payment Integration', () => {
     
     // Mock Paystack
     window.PaystackPop = {
-      setup: jest.fn(() => ({
-        openIframe: jest.fn()
+      setup: jest.fn((options) => ({
+        openIframe: jest.fn(() => {
+          // Simulate immediate callback for testing
+          if (options.callback) {
+            options.callback({ reference: 'mock_ref' });
+          }
+        })
       }))
     };
   });
 
   test('renders pricing plans', () => {
-    mockUseSession.mockReturnValue({
-      data: null,
-      status: 'unauthenticated'
+    mockUseAuth.mockReturnValue({
+      user: null,
+      loading: false,
     });
 
-    render(<Pricing />);
+    act(() => {
+      render(<Pricing />);
+    });
     
     expect(screen.getByText('Free Plan')).toBeInTheDocument();
     expect(screen.getByText('Pro Plan')).toBeInTheDocument();
@@ -42,37 +50,40 @@ describe('Payment Integration', () => {
   });
 
   test('requires login for payment', () => {
-    mockUseSession.mockReturnValue({
-      data: null,
-      status: 'unauthenticated'
+    mockUseAuth.mockReturnValue({
+      user: null,
+      loading: false,
     });
 
     // Mock alert
     window.alert = jest.fn();
 
-    render(<Pricing />);
+    act(() => {
+      render(<Pricing />);
+    });
     
     const upgradeButton = screen.getByText('Upgrade to Pro');
-    fireEvent.click(upgradeButton);
+    act(() => {
+      fireEvent.click(upgradeButton);
+    });
     
     expect(window.alert).toHaveBeenCalledWith('Please login to upgrade');
   });
 
-  test('initiates Paystack checkout for authenticated user', () => {
-    mockUseSession.mockReturnValue({
-      data: {
-        user: {
-          email: 'test@example.com',
-          name: 'Test User'
-        }
-      },
-      status: 'authenticated'
+  test('initiates Paystack checkout for authenticated user', async () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: '123', email: 'test@example.com' } as any,
+      loading: false,
     });
 
-    render(<Pricing />);
+    act(() => {
+      render(<Pricing />);
+    });
     
     const upgradeButton = screen.getByText('Upgrade to Pro');
-    fireEvent.click(upgradeButton);
+    await act(async () => {
+      fireEvent.click(upgradeButton);
+    });
     
     expect(window.PaystackPop.setup).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -84,14 +95,9 @@ describe('Payment Integration', () => {
   });
 
   test('handles payment verification', async () => {
-    mockUseSession.mockReturnValue({
-      data: {
-        user: {
-          email: 'test@example.com',
-          name: 'Test User'
-        }
-      },
-      status: 'authenticated'
+    mockUseAuth.mockReturnValue({
+      user: { id: '123', email: 'test@example.com' } as any,
+      loading: false,
     });
 
     // Mock fetch for payment verification
@@ -103,14 +109,20 @@ describe('Payment Integration', () => {
     // Mock alert
     window.alert = jest.fn();
 
-    render(<Pricing />);
+    act(() => {
+      render(<Pricing />);
+    });
     
     const upgradeButton = screen.getByText('Upgrade to Pro');
-    fireEvent.click(upgradeButton);
+    await act(async () => {
+      fireEvent.click(upgradeButton);
+    });
     
     // Simulate Paystack callback
     const setupCall = (window.PaystackPop.setup as jest.Mock).mock.calls[0][0];
-    await setupCall.callback({ reference: 'test_ref_123' });
+    await act(async () => {
+      await setupCall.callback({ reference: 'test_ref_123' });
+    });
     
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/payment', {
@@ -123,14 +135,9 @@ describe('Payment Integration', () => {
   });
 
   test('handles payment verification failure', async () => {
-    mockUseSession.mockReturnValue({
-      data: {
-        user: {
-          email: 'test@example.com',
-          name: 'Test User'
-        }
-      },
-      status: 'authenticated'
+    mockUseAuth.mockReturnValue({
+      user: { id: '123', email: 'test@example.com' } as any,
+      loading: false,
     });
 
     // Mock fetch for failed verification
@@ -142,14 +149,20 @@ describe('Payment Integration', () => {
     // Mock alert
     window.alert = jest.fn();
 
-    render(<Pricing />);
+    act(() => {
+      render(<Pricing />);
+    });
     
     const upgradeButton = screen.getByText('Upgrade to Pro');
-    fireEvent.click(upgradeButton);
+    await act(async () => {
+      fireEvent.click(upgradeButton);
+    });
     
     // Simulate Paystack callback
     const setupCall = (window.PaystackPop.setup as jest.Mock).mock.calls[0][0];
-    await setupCall.callback({ reference: 'failed_ref_123' });
+    await act(async () => {
+      await setupCall.callback({ reference: 'failed_ref_123' });
+    });
     
     await waitFor(() => {
       expect(window.alert).toHaveBeenCalledWith('❌ Payment verification failed');

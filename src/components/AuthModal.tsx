@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -10,12 +10,13 @@ import { signIn } from 'next-auth/react';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  mode: AuthMode;
 }
 
 type AuthMode = 'login' | 'signup';
 
-export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const [mode, setMode] = useState<AuthMode>('login');
+export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthModalProps) {
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,6 +26,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   const handleResponse = (errorMsg: string | null, successMsg: string) => {
     if (errorMsg) {
@@ -177,20 +182,21 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const renderEmailInput = () => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
       <Input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Enter your email"
         required
+        id="email"
       />
     </div>
   );
 
   const renderPasswordInput = () => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+      <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
       <Input
         type="password"
         value={password}
@@ -198,13 +204,14 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         placeholder="Enter your password"
         required
         minLength={8}
+        id="password"
       />
     </div>
   );
 
   const renderConfirmPasswordInput = () => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+      <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
       <Input
         type="password"
         value={confirmPassword}
@@ -212,32 +219,35 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         placeholder="Confirm your password"
         required
         minLength={8}
+        id="confirm-password"
       />
     </div>
   );
 
   const renderFirstNameInput = () => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+      <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
       <Input
         type="text"
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
         placeholder="Enter your first name"
         required
+        id="first-name"
       />
     </div>
   );
 
   const renderLastNameInput = () => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+      <label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
       <Input
         type="text"
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
         placeholder="Enter your last name"
         required
+        id="last-name"
       />
     </div>
   );
@@ -262,6 +272,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{mode === 'signup' ? 'Create Account' : 'Login'}</DialogTitle>
+          <DialogDescription>
+            {mode === 'signup' ? 'Enter your details to create an account.' : 'Enter your email and password to log in.'}
+          </DialogDescription>
         </DialogHeader>
 
         {error && <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md mb-4">{error}</div>}

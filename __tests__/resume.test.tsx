@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 import ResumeUploader from '@/components/ResumeUploader';
 
 // Mock fetch
@@ -11,7 +12,9 @@ describe('Resume Processing', () => {
   });
 
   test('renders resume uploader', () => {
-    render(<ResumeUploader />);
+    act(() => {
+      render(<ResumeUploader />);
+    });
     
     expect(screen.getByText(/drag.*drop.*resume/i)).toBeInTheDocument();
     expect(screen.getByText(/choose file/i)).toBeInTheDocument();
@@ -45,34 +48,50 @@ describe('Resume Processing', () => {
       json: async () => mockResponse,
     } as Response);
 
-    render(<ResumeUploader />);
+    act(() => {
+      render(<ResumeUploader />);
+    });
     
     const file = new File(['resume content'], 'resume.pdf', { type: 'application/pdf' });
     const input = screen.getByLabelText(/choose file/i);
     
-    fireEvent.change(input, { target: { files: [file] } });
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [file] } });
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /analyze resume/i }));
+    });
     
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/parse', expect.objectContaining({
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        body: expect.any(FormData),
       }));
     });
   });
 
-  test('validates file type', () => {
-    render(<ResumeUploader />);
+  test('validates file type', async () => {
+    act(() => {
+      render(<ResumeUploader />);
+    });
     
     const invalidFile = new File(['content'], 'resume.txt', { type: 'text/plain' });
     const input = screen.getByLabelText(/choose file/i);
     
-    fireEvent.change(input, { target: { files: [invalidFile] } });
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [invalidFile] } });
+    });
     
-    expect(screen.getByText(/please upload a pdf or docx file/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/please upload a pdf or docx file/i)).toBeInTheDocument();
+    });
   });
 
-  test('validates file size', () => {
-    render(<ResumeUploader />);
+  test('validates file size', async () => {
+    act(() => {
+      render(<ResumeUploader />);
+    });
     
     // Create a file larger than 5MB
     const largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'large.pdf', { 
@@ -80,9 +99,13 @@ describe('Resume Processing', () => {
     });
     const input = screen.getByLabelText(/choose file/i);
     
-    fireEvent.change(input, { target: { files: [largeFile] } });
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [largeFile] } });
+    });
     
-    expect(screen.getByText(/file size must be less than 5mb/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/file size must be less than 5mb/i)).toBeInTheDocument();
+    });
   });
 
   test('handles Nigerian resume format', async () => {
@@ -113,14 +136,22 @@ describe('Resume Processing', () => {
       json: async () => nigerianResume,
     } as Response);
 
-    render(<ResumeUploader />);
+    act(() => {
+      render(<ResumeUploader />);
+    });
     
     const file = new File(['Nigerian resume'], 'adebayo_cv.pdf', { 
       type: 'application/pdf' 
     });
     const input = screen.getByLabelText(/choose file/i);
     
-    fireEvent.change(input, { target: { files: [file] } });
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [file] } });
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /analyze resume/i }));
+    });
     
     await waitFor(() => {
       expect(screen.getByText('Adebayo Ogundimu')).toBeInTheDocument();

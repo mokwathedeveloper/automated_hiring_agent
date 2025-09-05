@@ -19,6 +19,10 @@ All notable changes to the Automated Hiring Agent project will be documented in 
   - Removed the 'magiclink' authentication mode from `AuthModal.tsx`.
 
 ### Fixed
+- **fix(auth): AuthModal `mode` prop handling**
+  - Resolved an issue where the `AuthModal` component was not correctly updating its internal `mode` state when the `mode` prop changed, leading to incorrect rendering. Ensured proper initialization and updates via `useEffect`.
+- **fix(tests): WhatsApp Test Failures (Partial)**
+  - Addressed timing issues in `whatsapp.test.tsx` by introducing `await waitFor` to ensure elements are present before querying. Further investigation is needed for full resolution.
 - **fix(build): resolve build errors and update documentation** (8a3cd436)
   - Added placeholder for `extractTextFromFile` in `src/lib/utils.ts` and corrected its usage in `src/app/api/parse/route.ts`.
 

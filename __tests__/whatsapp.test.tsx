@@ -1,11 +1,11 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { useSession } from 'next-auth/react';
+import { act } from 'react-dom/test-utils';
+import { useAuth } from '@/hooks/useAuth';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { ParsedResume } from '@/types';
 
-// Mock next-auth
-jest.mock('next-auth/react');
-const mockUseSession = useSession as jest.MockedFunction<typeof useSession>;
+jest.mock('@/hooks/useAuth');
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 const mockResumeData: ParsedResume = {
   name: 'Kemi Adebayo',
@@ -32,59 +32,72 @@ describe('WhatsApp Integration', () => {
     global.fetch = jest.fn();
   });
 
-  test('shows login prompt for unauthenticated users', () => {
-    mockUseSession.mockReturnValue({
-      data: null,
-      status: 'unauthenticated'
+  test('shows login prompt for unauthenticated users', async () => {
+    mockUseAuth.mockReturnValue({
+      user: null,
+      loading: false,
     });
 
-    render(<WhatsAppButton resumeData={mockResumeData} />);
+    await act(async () => {
+      render(<WhatsAppButton resumeData={mockResumeData} />);
+    });
     
     expect(screen.getByText('Login to send resume via WhatsApp')).toBeInTheDocument();
   });
 
-  test('shows WhatsApp button for authenticated users', () => {
-    mockUseSession.mockReturnValue({
-      data: {
-        user: { email: 'test@example.com', name: 'Test User' }
-      },
-      status: 'authenticated'
+  test('shows WhatsApp button for authenticated users', async () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: '123', email: 'test@example.com' } as any,
+      loading: false,
     });
 
-    render(<WhatsAppButton resumeData={mockResumeData} />);
+    await act(async () => {
+      render(<WhatsAppButton resumeData={mockResumeData} />);
+    });
     
     expect(screen.getByText('Send to WhatsApp')).toBeInTheDocument();
     expect(screen.getByText('Send Resume')).toBeInTheDocument();
   });
 
-  test('opens phone input when send button clicked', () => {
-    mockUseSession.mockReturnValue({
-      data: {
-        user: { email: 'test@example.com', name: 'Test User' }
-      },
-      status: 'authenticated'
+  test('opens phone input when send button clicked', async () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: '123', email: 'test@example.com' } as any,
+      loading: false,
     });
 
-    render(<WhatsAppButton resumeData={mockResumeData} />);
+    await act(async () => {
+      render(<WhatsAppButton resumeData={mockResumeData} />);
+    });
     
-    fireEvent.click(screen.getByText('Send Resume'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Send Resume'));
+    });
     
     expect(screen.getByLabelText(/phone number/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText('+234 123 456 7890')).toBeInTheDocument();
   });
 
   test('validates phone number input', async () => {
-    mockUseSession.mockReturnValue({
-      data: {
-        user: { email: 'test@example.com', name: 'Test User' }
-      },
-      status: 'authenticated'
+    mockUseAuth.mockReturnValue({
+      user: { id: '123', email: 'test@example.com' } as any,
+      loading: false,
     });
 
-    render(<WhatsAppButton resumeData={mockResumeData} />);
+    await act(async () => {
+      render(<WhatsAppButton resumeData={mockResumeData} />);
+    });
     
-    fireEvent.click(screen.getByText('Send Resume'));
-    fireEvent.click(screen.getByText('Send'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Send Resume'));
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText('Send')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Send'));
+    });
     
     await waitFor(() => {
       expect(screen.getByText('Please enter a phone number')).toBeInTheDocument();
@@ -92,11 +105,9 @@ describe('WhatsApp Integration', () => {
   });
 
   test('sends WhatsApp message successfully', async () => {
-    mockUseSession.mockReturnValue({
-      data: {
-        user: { email: 'test@example.com', name: 'Test User' }
-      },
-      status: 'authenticated'
+    mockUseAuth.mockReturnValue({
+      user: { id: '123', email: 'test@example.com' } as any,
+      loading: false,
     });
 
     (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -104,14 +115,18 @@ describe('WhatsApp Integration', () => {
       json: async () => ({ success: true, message: 'Message sent' })
     });
 
-    render(<WhatsAppButton resumeData={mockResumeData} />);
+    await act(async () => {
+      render(<WhatsAppButton resumeData={mockResumeData} />);
+    });
     
-    fireEvent.click(screen.getByText('Send Resume'));
-    
-    const phoneInput = screen.getByLabelText(/phone number/i);
-    fireEvent.change(phoneInput, { target: { value: '+234 803 123 4567' } });
-    
-    fireEvent.click(screen.getByText('Send'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Send Resume'));
+      
+      const phoneInput = screen.getByLabelText(/phone number/i);
+      fireEvent.change(phoneInput, { target: { value: '+234 803 123 4567' } });
+      
+      fireEvent.click(screen.getByText('Send'));
+    });
     
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/whatsapp', {
@@ -127,11 +142,9 @@ describe('WhatsApp Integration', () => {
   });
 
   test('handles WhatsApp send failure', async () => {
-    mockUseSession.mockReturnValue({
-      data: {
-        user: { email: 'test@example.com', name: 'Test User' }
-      },
-      status: 'authenticated'
+    mockUseAuth.mockReturnValue({
+      user: { id: '123', email: 'test@example.com' } as any,
+      loading: false,
     });
 
     (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -139,14 +152,18 @@ describe('WhatsApp Integration', () => {
       json: async () => ({ success: false, error: 'Failed to send' })
     });
 
-    render(<WhatsAppButton resumeData={mockResumeData} />);
+    await act(async () => {
+      render(<WhatsAppButton resumeData={mockResumeData} />);
+    });
     
-    fireEvent.click(screen.getByText('Send Resume'));
-    
-    const phoneInput = screen.getByLabelText(/phone number/i);
-    fireEvent.change(phoneInput, { target: { value: '+234 803 123 4567' } });
-    
-    fireEvent.click(screen.getByText('Send'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Send Resume'));
+      
+      const phoneInput = screen.getByLabelText(/phone number/i);
+      fireEvent.change(phoneInput, { target: { value: '+234 803 123 4567' } });
+      
+      fireEvent.click(screen.getByText('Send'));
+    });
     
     await waitFor(() => {
       expect(screen.getByText('❌ Failed to send')).toBeInTheDocument();
@@ -154,11 +171,9 @@ describe('WhatsApp Integration', () => {
   });
 
   test('formats Nigerian phone numbers correctly', async () => {
-    mockUseSession.mockReturnValue({
-      data: {
-        user: { email: 'test@example.com', name: 'Test User' }
-      },
-      status: 'authenticated'
+    mockUseAuth.mockReturnValue({
+      user: { id: '123', email: 'test@example.com' } as any,
+      loading: false,
     });
 
     (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -166,14 +181,18 @@ describe('WhatsApp Integration', () => {
       json: async () => ({ success: true })
     });
 
-    render(<WhatsAppButton resumeData={mockResumeData} />);
+    await act(async () => {
+      render(<WhatsAppButton resumeData={mockResumeData} />);
+    });
     
-    fireEvent.click(screen.getByText('Send Resume'));
-    
-    const phoneInput = screen.getByLabelText(/phone number/i);
-    fireEvent.change(phoneInput, { target: { value: '08031234567' } });
-    
-    fireEvent.click(screen.getByText('Send'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Send Resume'));
+      
+      const phoneInput = screen.getByLabelText(/phone number/i);
+      fireEvent.change(phoneInput, { target: { value: '08031234567' } });
+      
+      fireEvent.click(screen.getByText('Send'));
+    });
     
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/whatsapp', 
