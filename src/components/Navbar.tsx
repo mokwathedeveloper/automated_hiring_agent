@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { FaCheckCircle, FaBars, FaHome, FaTachometerAlt, FaDollarSign, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import AuthModal from './AuthModal';
+import { Button } from '@/components/ui/button';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,38 +43,42 @@ export default function Navbar() {
                   <span className="text-gray-700 flex items-center">
                     <FaUser className="mr-1" /> {user.email}
                   </span>
-                  <button 
+                  <Button
+                    variant="ghost"
                     onClick={() => signOut()}
-                    className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
+                    className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors flex items-center"
                   >
                     <FaSignOutAlt className="mr-1" /> Logout
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <>
-                  <button 
+                  <Button
+                    variant="ghost"
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
+                    className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors flex items-center"
                   >
                     <FaSignInAlt className="mr-1" /> Login
-                  </button>
-                  <button 
+                  </Button>
+                  <Button
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 px-6 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center"
+                    className="bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center"
                   >
                     <FaUserPlus className="mr-1" /> Sign Up
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
             
             <div className="md:hidden">
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-gray-500 hover:text-gray-700 p-2"
+                className="text-gray-500 hover:text-gray-700"
               >
                 <FaBars className="w-6 h-6" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -96,27 +101,29 @@ export default function Navbar() {
                     <span className="block px-3 py-2 text-base font-medium text-gray-700 flex items-center">
                       <FaUser className="mr-2" /> {user.email}
                     </span>
-                    <button 
+                    <Button
+                      variant="ghost"
                       onClick={() => signOut()}
-                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 flex items-center"
+                      className="block w-full text-left text-base font-medium text-gray-500 flex items-center"
                     >
                       <FaSignOutAlt className="mr-2" /> Logout
-                    </button>
+                    </Button>
                   </>
                 ) : (
                   <>
-                    <button 
+                    <Button
+                      variant="ghost"
                       onClick={() => setIsAuthModalOpen(true)}
-                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 flex items-center"
+                      className="block w-full text-left text-base font-medium text-gray-500 flex items-center"
                     >
                       <FaSignInAlt className="mr-2" /> Login
-                    </button>
-                    <button 
+                    </Button>
+                    <Button
                       onClick={() => setIsAuthModalOpen(true)}
-                      className="block w-full text-left px-3 py-2 text-base font-medium bg-primary-600 text-white rounded-md mt-2 flex items-center"
+                      className="block w-full text-left text-base font-medium bg-primary-600 text-white rounded-md mt-2 flex items-center"
                     >
                       <FaUserPlus className="mr-2" /> Sign Up
-                    </button>
+                    </Button>
                   </>
                 )}
               </div>
