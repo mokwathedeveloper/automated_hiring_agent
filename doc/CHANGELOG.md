@@ -2,6 +2,12 @@
 
 All notable changes to the Automated Hiring Agent project will be documented in this file.
 
+## [Unreleased] - 2025-09-05
+
+### Added
+- **feat(auth): implement email/password and magic link flows** (a37d23b9)
+  - Implemented distinct flows for user signup (email/password), login (email/password), and magic link (OTP) in the authentication modal.
+
 ## [Day 4] - 2025-01-27
 
 ### Added
