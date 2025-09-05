@@ -26,3 +26,9 @@ export interface ParseResponse {
   data?: ParsedResume;
   error?: string;
 }
+
+export interface ResumeData {
+  content: string;
+  analysis: any;
+  filename: string;
+}
