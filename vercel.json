@@ -8,17 +8,6 @@
       "maxDuration": 30
     }
   },
-  "env": {
-    "OPENAI_API_KEY": "@openai-api-key",
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
-    "TWILIO_ACCOUNT_SID": "@twilio-account-sid",
-    "TWILIO_AUTH_TOKEN": "@twilio-auth-token",
-    "TWILIO_WHATSAPP_NUMBER": "@twilio-whatsapp-number",
-    "PAYSTACK_PUBLIC_KEY": "@paystack-public-key",
-    "PAYSTACK_SECRET_KEY": "@paystack-secret-key"
-  },
   "headers": [
     {
       "source": "/api/(.*)",
