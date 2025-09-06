@@ -1,9 +1,3 @@
--- Database Schema for Automated Hiring Agent
--- Run this in your Supabase SQL Editor
-
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- Create a table for public profiles
 create table profiles (
   id uuid references auth.users not null primary key,
@@ -40,7 +34,7 @@ create trigger on_auth_user_created
 -- Resumes table
 CREATE TABLE IF NOT EXISTS public.resumes (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     filename TEXT NOT NULL,
     file_size INTEGER,
     file_type TEXT,
@@ -56,7 +50,7 @@ CREATE TABLE IF NOT EXISTS public.resumes (
 CREATE TABLE IF NOT EXISTS public.analyses (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     resume_id UUID REFERENCES public.resumes(id) ON DELETE CASCADE NOT NULL,
-    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     analysis_type TEXT NOT NULL CHECK (analysis_type IN ('skills', 'experience', 'education', 'overall')),
     analysis_data JSONB NOT NULL,
     recommendations TEXT[],
@@ -68,7 +62,7 @@ CREATE TABLE IF NOT EXISTS public.analyses (
 -- Subscriptions table
 CREATE TABLE IF NOT EXISTS public.subscriptions (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     plan_id TEXT NOT NULL,
     plan_name TEXT NOT NULL,
     amount INTEGER NOT NULL, -- in kobo for NGN
@@ -85,7 +79,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
 -- WhatsApp sessions table
 CREATE TABLE IF NOT EXISTS public.whatsapp_sessions (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     phone_number TEXT NOT NULL,
     session_data JSONB,
     status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'expired')),
@@ -102,18 +96,10 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON public.subscriptions(use
 CREATE INDEX IF NOT EXISTS idx_whatsapp_sessions_phone ON public.whatsapp_sessions(phone_number);
 
 -- Row Level Security (RLS) policies
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.analyses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.whatsapp_sessions ENABLE ROW LEVEL SECURITY;
-
--- Users can only see their own data
-CREATE POLICY "Users can view own profile" ON public.users
-    FOR SELECT USING (auth.uid() = id);
-
-CREATE POLICY "Users can update own profile" ON public.users
-    FOR UPDATE USING (auth.uid() = id);
 
 -- Resumes policies
 CREATE POLICY "Users can view own resumes" ON public.resumes
@@ -156,9 +142,6 @@ END;
 $$ language 'plpgsql';
 
 -- Add updated_at triggers
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON public.users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_resumes_updated_at BEFORE UPDATE ON public.resumes
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
