@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Hero from '@/components/Hero';
 import ResumeUploader from '@/components/ResumeUploader';
+import Reviews from '@/components/Reviews';
 import Pricing from '@/components/Pricing';
 import ResultsDisplay from '@/components/ResultsDisplay';
 
@@ -54,6 +55,7 @@ export default function HomePage() {
         </div>
       </section>
       
+      <Reviews />
       <Pricing />
     </main>
   );
