@@ -7,6 +7,7 @@ import { FaBars, FaHome, FaTachometerAlt, FaDollarSign, FaSignInAlt, FaUserPlus,
 import { CheckCircle } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { Button } from '@/components/ui/button';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,7 +15,7 @@ export default function Navbar() {
   const { user, signOut } = useAuth();
 
   return (
-    <nav className="bg-gray-50/95 backdrop-blur-sm shadow-lg border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -22,16 +23,16 @@ export default function Navbar() {
               <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg flex items-center justify-center group-hover:shadow-lg group-hover:scale-110 transition-all duration-200">
                 <CheckCircle className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-200" />
               </div>
-              <span className="text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors duration-200">HiringAgent</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors duration-200">HiringAgent</span>
             </Link>
             <div className="hidden md:ml-8 md:flex md:space-x-8">
-              <Link href="/" className="group text-gray-900 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center hover:bg-primary-50 rounded-md hover:shadow-sm">
+              <Link href="/" className="group text-gray-900 dark:text-gray-100 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md hover:shadow-sm">
                 <FaHome className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Home
               </Link>
-              <Link href="/dashboard" className="group text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center hover:bg-gray-100 rounded-md hover:shadow-sm">
+              <Link href="/dashboard" className="group text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md hover:shadow-sm">
                 <FaTachometerAlt className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Dashboard
               </Link>
-              <Link href="/pricing" className="group text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center hover:bg-gray-100 rounded-md hover:shadow-sm">
+              <Link href="/pricing" className="group text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md hover:shadow-sm">
                 <FaDollarSign className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Pricing
               </Link>
             </div>
@@ -39,15 +40,16 @@ export default function Navbar() {
           
           <div className="flex items-center space-x-4">
             <div className="hidden md:flex md:items-center md:space-x-4">
+              <ThemeToggle />
               {user ? (
                 <>
-                  <span className="text-gray-700 flex items-center">
+                  <span className="text-gray-700 dark:text-gray-300 flex items-center">
                     <FaUser className="mr-1" /> {user.email}
                   </span>
                   <Button
                     variant="ghost"
                     onClick={() => signOut()}
-                    className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors flex items-center"
+                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 text-sm font-medium transition-colors flex items-center"
                   >
                     <FaSignOutAlt className="mr-1" /> Logout
                   </Button>
