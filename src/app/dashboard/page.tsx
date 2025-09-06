@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { LogOut, FileText, BarChart2, User, Inbox, Plus } from 'lucide-react';
@@ -22,6 +22,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ total: 0, avgScore: 0 });
   const router = useRouter();
 
+  const supabase = createClient();
+
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth');
@@ -38,7 +40,7 @@ export default function Dashboard() {
     if (!user?.id) return;
 
     const { data } = await supabase
-      .from('resume_analyses')
+      .from('analyses')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })

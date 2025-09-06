@@ -1,9 +1,9 @@
-// src/app/api/resumes/route.ts
+import { createClient } from '@/lib/supabase/server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, db } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
+  const supabase = await createClient();
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
@@ -14,7 +14,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const { data: resumes, error } = await db.getUserResumes(user.id);
+    const { data: resumes, error }  = await supabase.from("resumes")
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
     
     if (error) {
       return NextResponse.json(
