@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { signIn } from 'next-auth/react';
 
 interface AuthModalProps {
@@ -13,9 +13,11 @@ interface AuthModalProps {
   mode: AuthMode;
 }
 
-type AuthMode = 'login' | 'signup';
+export type AuthMode = 'login' | 'signup';
 
 export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthModalProps) {
+  const supabase = createClient();
+  
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

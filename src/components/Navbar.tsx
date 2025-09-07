@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { FaBars, FaHome, FaTachometerAlt, FaDollarSign, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import { CheckCircle } from 'lucide-react';
-import AuthModal from './AuthModal';
+import AuthModal, { AuthMode } from './AuthModal';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from './ThemeToggle';
 
@@ -13,6 +13,8 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { user, signOut } = useAuth();
+
+  const [mode, setMode] = useState<AuthMode>("login");
 
   return (
     <nav className="bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 transition-colors">
@@ -58,13 +60,19 @@ export default function Navbar() {
                 <>
                   <Button
                     variant="ghost"
-                    onClick={() => setIsAuthModalOpen(true)}
+                    onClick={() => {
+                      setMode("login");
+                      setIsAuthModalOpen(true)}
+                    }
                     className="group text-gray-600 hover:text-gray-900 text-sm font-medium transition-all duration-200 flex items-center hover:bg-gray-100 hover:shadow-sm hover:scale-105"
                   >
                     <FaSignInAlt className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Login
                   </Button>
                   <Button
-                    onClick={() => setIsAuthModalOpen(true)}
+                    onClick={() => {
+                      setMode("signup");
+                      setIsAuthModalOpen(true)}
+                    }
                     className="group bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center hover:scale-105"
                   >
                     <FaUserPlus className="mr-1 group-hover:scale-110 transition-transform duration-200" /> Sign Up
@@ -138,7 +146,7 @@ export default function Navbar() {
       <AuthModal 
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        mode="login"
+        mode={mode}
       />
     </nav>
   );

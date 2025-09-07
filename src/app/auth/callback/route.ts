@@ -1,11 +1,11 @@
-// src/app/auth/callback/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get('code');
+
+  const supabase = await createClient();
 
   if (code) {
     try {
