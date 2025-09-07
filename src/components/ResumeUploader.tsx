@@ -93,8 +93,8 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
     }
     
     // Limit number of files
-    if (validFiles.length > 5) {
-      setError('Maximum 5 files allowed');
+    if (validFiles.length > 100) {
+      setError('Maximum 100 files allowed');
       return;
     }
     
@@ -107,7 +107,7 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
       'application/pdf': ['.pdf'],
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
     },
-    maxFiles: 5,
+    maxFiles: 100,
     maxSize: 5 * 1024 * 1024
   });
 
@@ -243,7 +243,7 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
               {isDragActive ? 'Drop files here' : 'Drag & Drop Resume Here'}
             </p>
             <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">
-              or click to browse files • PDF, DOCX supported • Max 5MB each
+              or click to browse files • PDF, DOCX supported • Max 5MB each • Up to 100 files
             </p>
           </div>
 
@@ -251,7 +251,7 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
           {files.length > 0 && (
             <div className="mt-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 transition-colors duration-500">
-                Selected Files ({files.length}/5)
+                Selected Files ({files.length}/100)
               </h3>
               <div className="space-y-2">
                 {files.map((file, index) => (
