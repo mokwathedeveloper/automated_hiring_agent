@@ -117,13 +117,16 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
       return;
     }
 
-    // Validate job description if provided
-    if (jobDescription) {
-      const sanitized = sanitizeInput(jobDescription);
-      if (sanitized.length < 10 || sanitized.length > 10000) {
-        setError('Job description must be between 10 and 10,000 characters');
-        return;
-      }
+    // Validate job description (now mandatory)
+    if (!jobDescription || jobDescription.trim().length === 0) {
+      setError('Job description is required');
+      return;
+    }
+    
+    const sanitized = sanitizeInput(jobDescription);
+    if (sanitized.length < 10 || sanitized.length > 10000) {
+      setError('Job description must be between 10 and 10,000 characters');
+      return;
     }
 
     setIsUploading(true);
@@ -135,9 +138,8 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
         const formData = new FormData();
         formData.append('file', file);
         
-        if (jobDescription) {
-          formData.append('jobDescription', sanitizeInput(jobDescription));
-        }
+        // Job description is now mandatory
+        formData.append('jobDescription', sanitizeInput(jobDescription));
 
         const response = await fetch('/api/parse', {
           method: 'POST',
@@ -210,18 +212,19 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
           {/* Job Description Input */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-500">
-              Job Description (Optional)
+              Job Description <span className="text-red-500">*</span>
             </label>
             <textarea
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Enter job description to get more targeted analysis..."
+              placeholder="Enter job description for targeted resume analysis (required)..."
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-500"
               rows={4}
               maxLength={10000}
+              required
             />
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-500">
-              {jobDescription.length}/10,000 characters
+              {jobDescription.length}/10,000 characters (minimum 10 characters required)
             </p>
           </div>
 
@@ -291,7 +294,7 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleUpload}
-              disabled={files.length === 0 || isUploading}
+              disabled={files.length === 0 || isUploading || !jobDescription.trim() || jobDescription.trim().length < 10}
               className="flex-1 bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               {isUploading ? (
