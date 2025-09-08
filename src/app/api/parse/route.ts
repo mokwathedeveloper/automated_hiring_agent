@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import openai from '@/lib/openai';
 import { ParsedResume, ParseResponse } from '@/types';
 import { ParsedResumeSchema } from '@/lib/validation';
@@ -25,7 +25,7 @@ const parseRequestSchema = Joi.object({
 
 // Handle CORS pre-flight requests
 export async function OPTIONS(request: NextRequest) {
-  return withCORS(new Response(null, { status: 204 }), request);
+  return withCORS(new NextResponse(null, { status: 204 }), request);
 }
 
 async function extractTextFromFile(buffer: Buffer, mimeType: string): Promise<string> {
