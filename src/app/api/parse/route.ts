@@ -16,6 +16,7 @@ import {
   withCORS
 } from '@/lib/security';
 import Joi from 'joi';
+import { OpenAI } from 'openai';
 
 // Request validation schema
 const parseRequestSchema = Joi.object({
@@ -29,7 +30,6 @@ export async function OPTIONS(request: NextRequest) {
 
 async function extractTextFromFile(buffer: Buffer, mimeType: string): Promise<string> {
   try {
-    // Additional security check
     if (buffer.length > 5 * 1024 * 1024) {
       throw new Error('File too large');
     }
@@ -61,13 +61,11 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    // Rate limiting
     const clientIP = getClientIP(request);
     if (!checkRateLimit(clientIP, 50, 15 * 60 * 1000)) {
       return withCORS(createErrorResponse('Rate limit exceeded. Please try again later.', 429), request);
     }
 
-    // Request size check
     const contentLength = request.headers.get('content-length');
     if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) {
       return withCORS(createErrorResponse('Request too large', 413), request);
@@ -83,7 +81,6 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
     const jobDescription = formData.get('jobDescription') as string;
 
-    // File validation
     if (!file) {
       return withCORS(createErrorResponse('No file provided', 400), request);
     }
@@ -93,7 +90,6 @@ export async function POST(request: NextRequest) {
       return withCORS(createErrorResponse(fileValidation.error!, 400), request);
     }
 
-    // Job description validation
     if (jobDescription) {
       const validation = validateRequest({ jobDescription }, parseRequestSchema);
       if (!validation.valid) {
@@ -101,7 +97,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Extract and validate text
     let arrayBuffer: ArrayBuffer;
     try {
       arrayBuffer = await file.arrayBuffer();
@@ -118,24 +113,21 @@ export async function POST(request: NextRequest) {
       return withCORS(createErrorResponse('Failed to extract text from file', 400), request);
     }
 
-    // Sanitize extracted text
     const sanitizedText = sanitizeInput(text);
     if (sanitizedText.length < 50) {
       return withCORS(createErrorResponse('Insufficient text content in file', 400), request);
     }
 
-    // Create secure prompt
     const prompt = `Extract JSON from resume (respond only with valid JSON):
 {"name":"","email":"","phone":"","skills":[],"experience":[{"title":"","company":"","duration":"","description":""}],"education":[{"degree":"","institution":"","year":""}],"summary":""}
 
 Resume text:
 ${sanitizedText.slice(0, 2000)}`;
 
-    // OpenAI API call with timeout
     let completion;
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
       
       completion = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
@@ -146,8 +138,29 @@ ${sanitizedText.slice(0, 2000)}`;
       
       clearTimeout(timeoutId);
     } catch (error) {
-      console.error('OpenAI API error:', error);
-      return withCORS(createErrorResponse('AI processing failed', 500), request);
+      // FIX: Add more specific error handling for the OpenAI API call.
+      // This will provide more insight into why the API call is failing.
+      console.error('OpenAI API Error:', error); 
+
+      let errorMessage = 'AI processing failed. Please try again later.';
+      if (error instanceof OpenAI.APIError) {
+        switch (error.status) {
+          case 401:
+            errorMessage = 'OpenAI API key is invalid or has expired.';
+            break;
+          case 429:
+            errorMessage = 'You have exceeded your OpenAI API quota. Please check your plan and billing details.';
+            break;
+          case 500:
+            errorMessage = 'The OpenAI API is currently experiencing issues. Please try again later.';
+            break;
+          default:
+            errorMessage = `An unexpected error occurred with the OpenAI API (Status: ${error.status}).`;
+            break;
+        }
+      }
+      
+      return withCORS(createErrorResponse(errorMessage, 500), request);
     }
 
     const content = completion.choices[0]?.message?.content;
@@ -155,7 +168,6 @@ ${sanitizedText.slice(0, 2000)}`;
       return withCORS(createErrorResponse('No response from AI', 500), request);
     }
 
-    // Parse and validate JSON response
     let rawData;
     try {
       rawData = JSON.parse(content);
@@ -164,7 +176,6 @@ ${sanitizedText.slice(0, 2000)}`;
       return withCORS(createErrorResponse('Invalid AI response format', 500), request);
     }
 
-    // Sanitize all string fields in the response
     if (rawData && typeof rawData === 'object') {
       Object.keys(rawData).forEach(key => {
         if (typeof rawData[key] === 'string') {
@@ -193,7 +204,6 @@ ${sanitizedText.slice(0, 2000)}`;
       return withCORS(createErrorResponse('Invalid resume data format', 400), request);
     }
 
-    // Log processing time for monitoring
     const processingTime = Date.now() - startTime;
     console.log(`Resume processed in ${processingTime}ms for IP: ${clientIP}`);
 
