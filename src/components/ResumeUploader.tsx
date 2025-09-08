@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useDropzone, FileRejection } from 'react-dropzone';
 import { motion } from 'framer-motion';
 import { FaUpload, FaFileAlt, FaSpinner, FaCheck, FaTimes } from 'react-icons/fa';
 import { sanitizeInput } from '@/lib/security';
 
+// Interfaces for type safety
 interface ParsedResume {
   name: string;
   email: string;
@@ -25,16 +26,18 @@ interface ParsedResume {
   summary: string;
 }
 
+interface AnalysisResult {
+  fileName: string;
+  score: number;
+  analysis: {
+    summary: string;
+    pros: string[];
+    cons: string[];
+  };
+}
+
 interface ResumeUploaderProps {
-  onUploadSuccess?: (results: Array<{
-    fileName: string;
-    score: number;
-    analysis: {
-      summary: string;
-      pros: string[];
-      cons: string[];
-    };
-  }>) => void;
+  onUploadSuccess?: (results: AnalysisResult[]) => void;
 }
 
 export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps) {
@@ -44,7 +47,7 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
   const [error, setError] = useState<string>('');
   const [jobDescription, setJobDescription] = useState('');
 
-  // Secure file validation
+  // Secure file validation logic remains the same
   const validateFile = (file: File): { valid: boolean; error?: string } => {
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -61,7 +64,6 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
       return { valid: false, error: 'Filename too long' };
     }
     
-    // Check for suspicious file names
     const suspiciousPatterns = [
       /\.(exe|bat|cmd|scr|pif|com)$/i,
       /[<>:"|?*]/,
@@ -78,10 +80,15 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
     return { valid: true };
   };
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
     setError('');
     
-    // Validate each file
+    if (fileRejections.length > 0) {
+      const firstError = fileRejections[0].errors[0];
+      setError(`File error: ${firstError.message}`);
+      return;
+    }
+
     const validFiles: File[] = [];
     for (const file of acceptedFiles) {
       const validation = validateFile(file);
@@ -92,14 +99,13 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
       validFiles.push(file);
     }
     
-    // Limit number of files
-    if (validFiles.length > 100) {
-      setError('Maximum 100 files allowed');
+    if (files.length + validFiles.length > 100) {
+      setError('You can upload a maximum of 100 files.');
       return;
     }
     
-    setFiles(validFiles);
-  }, []);
+    setFiles(prevFiles => [...prevFiles, ...validFiles]);
+  }, [files]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -113,19 +119,13 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
 
   const handleUpload = async () => {
     if (files.length === 0) {
-      setError('Please select at least one file');
+      setError('Please select at least one file.');
       return;
     }
 
-    // Validate job description (now mandatory)
-    if (!jobDescription || jobDescription.trim().length === 0) {
-      setError('Job description is required');
-      return;
-    }
-    
-    const sanitized = sanitizeInput(jobDescription);
-    if (sanitized.length < 10 || sanitized.length > 10000) {
-      setError('Job description must be between 10 and 10,000 characters');
+    const sanitizedJD = sanitizeInput(jobDescription);
+    if (sanitizedJD.length < 10 || sanitizedJD.length > 10000) {
+      setError('Job description must be between 10 and 10,000 characters.');
       return;
     }
 
@@ -137,24 +137,22 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
       for (const file of files) {
         const formData = new FormData();
         formData.append('file', file);
-        
-        // Job description is now mandatory
-        formData.append('jobDescription', sanitizeInput(jobDescription));
+        formData.append('jobDescription', sanitizedJD);
 
         const response = await fetch('/api/parse', {
           method: 'POST',
           body: formData,
         });
 
+        const result = await response.json();
+
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || `HTTP ${response.status}`);
+          // If response is not OK, throw an error with the message from the backend
+          throw new Error(result.error || `An unknown error occurred (HTTP ${response.status})`);
         }
 
-        const result = await response.json();
-        
         if (!result.success) {
-          throw new Error(result.error || 'Upload failed');
+          throw new Error(result.error || 'The upload failed for an unknown reason.');
         }
 
         uploadResults.push(result.data);
@@ -162,13 +160,14 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
 
       setResults(uploadResults);
       
-      // Call success callback if provided
-      if (onUploadSuccess) {
-        const analysisResults = uploadResults.map((resume, index) => ({
+      // FIX: Ensure onUploadSuccess is a function before calling it.
+      // This prevents the "Attribute callback must be a valid function" error if a non-function prop is passed.
+      if (typeof onUploadSuccess === 'function') {
+        const analysisResults: AnalysisResult[] = uploadResults.map((resume, index) => ({
           fileName: files[index].name,
           score: Math.floor(Math.random() * 30) + 70, // Mock score
           analysis: {
-            summary: resume.summary || 'Resume analysis completed',
+            summary: resume.summary || 'Resume analysis completed.',
             pros: resume.skills.slice(0, 3) || ['Professional experience'],
             cons: ['Could improve formatting'] // Mock cons
           }
@@ -178,7 +177,9 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
 
     } catch (error: any) {
       console.error('Upload error:', error);
-      setError(error.message || 'Upload failed. Please try again.');
+      // FIX: Provide a more user-friendly error message instead of the raw error.
+      // This improves the user experience when the backend fails.
+      setError(`Upload failed: ${error.message}. Please check the file and try again.`);
     } finally {
       setIsUploading(false);
     }
@@ -186,7 +187,6 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
 
   const removeFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
-    setError('');
   };
 
   const clearAll = () => {
@@ -201,34 +201,33 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-500">
-            Upload Resume
+            Upload Resumes for Analysis
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 transition-colors duration-500">
-            Upload candidate resumes for AI-powered analysis
+            Get instant, AI-powered feedback on candidate resumes against your job description.
           </p>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 transition-colors duration-500">
-          {/* Job Description Input */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-500">
+            <label htmlFor="job-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Job Description <span className="text-red-500">*</span>
             </label>
             <textarea
+              id="job-description"
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Enter job description for targeted resume analysis (required)..."
+              placeholder="Paste the job description here to get a tailored analysis..."
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-500"
-              rows={4}
+              rows={5}
               maxLength={10000}
               required
             />
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-500">
-              {jobDescription.length}/10,000 characters (minimum 10 characters required)
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {jobDescription.length}/10000 characters
             </p>
           </div>
 
-          {/* File Upload Area */}
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300 ${
@@ -238,64 +237,64 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
             }`}
           >
             <input {...getInputProps()} />
-            <FaUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4 transition-colors duration-500" />
-            <p className="text-lg font-medium text-gray-900 dark:text-white mb-2 transition-colors duration-500">
-              {isDragActive ? 'Drop files here' : 'Drag & Drop Resume Here'}
+            <FaUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+            <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              {isDragActive ? 'Drop files here' : 'Drag & drop resumes, or click to select'}
             </p>
-            <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">
-              or click to browse files • PDF, DOCX supported • Max 5MB each • Up to 100 files
+            <p className="text-gray-600 dark:text-gray-400">
+              PDF or DOCX, up to 5MB each. Maximum 100 files.
             </p>
           </div>
 
-          {/* Selected Files */}
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-red-700 dark:text-red-400 font-medium">{error}</p>
+            </div>
+          )}
+
           {files.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 transition-colors duration-500">
-                Selected Files ({files.length}/100)
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Selected Files ({files.length})
               </h3>
-              <div className="space-y-2">
+              <ul className="space-y-2">
                 {files.map((file, index) => (
-                  <div
+                  <motion.li
                     key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg transition-colors duration-500"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
                   >
-                    <div className="flex items-center">
-                      <FaFileAlt className="text-primary-600 mr-3" />
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white transition-colors duration-500">
+                    <div className="flex items-center min-w-0">
+                      <FaFileAlt className="text-primary-600 mr-3 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 dark:text-white truncate">
                           {file.name}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => removeFile(index)}
-                      className="text-red-500 hover:text-red-700 transition-colors"
+                      className="text-red-500 hover:text-red-700 transition-colors disabled:opacity-50 ml-4"
                       disabled={isUploading}
+                      aria-label={`Remove ${file.name}`}
                     >
                       <FaTimes />
                     </button>
-                  </div>
+                  </motion.li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
 
-          {/* Error Message */}
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg transition-colors duration-500">
-              <p className="text-red-700 dark:text-red-400 transition-colors duration-500">{error}</p>
-            </div>
-          )}
-
-          {/* Action Buttons */}
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleUpload}
-              disabled={files.length === 0 || isUploading || !jobDescription.trim() || jobDescription.trim().length < 10}
-              className="flex-1 bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              disabled={files.length === 0 || isUploading || jobDescription.trim().length < 10}
+              className="flex-1 bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
             >
               {isUploading ? (
                 <>
@@ -305,7 +304,7 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
               ) : (
                 <>
                   <FaCheck className="mr-2" />
-                  Analyze Resume{files.length > 1 ? 's' : ''}
+                  Analyze {files.length > 1 ? `${files.length} Resumes` : 'Resume'}
                 </>
               )}
             </button>

@@ -1,8 +1,14 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Joi from 'joi';
 
 // Rate limiting store
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+// Allowed origins for CORS
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://your-production-domain.com' 
+];
 
 // Input validation schemas
 export const schemas = {
@@ -132,9 +138,23 @@ export const securityHeaders = {
   'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' js.paystack.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com paystack.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.openai.com https://api.paystack.co; frame-src 'self' checkout.paystack.com;"
 };
 
+// CORS wrapper for API responses
+export function withCORS(response: NextResponse, request: NextRequest): NextResponse {
+  const origin = request.headers.get('origin');
+  if (origin && allowedOrigins.includes(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+  }
+  
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+  
+  return response;
+}
+
 // Error response helper
-export function createErrorResponse(message: string, status: number = 400) {
-  return new Response(
+export function createErrorResponse(message: string, status: number = 400): NextResponse {
+  const response = new NextResponse(
     JSON.stringify({ 
       success: false, 
       error: sanitizeInput(message),
@@ -148,11 +168,12 @@ export function createErrorResponse(message: string, status: number = 400) {
       }
     }
   );
+  return response;
 }
 
 // Success response helper
-export function createSuccessResponse(data: any, status: number = 200) {
-  return new Response(
+export function createSuccessResponse(data: any, status: number = 200): NextResponse {
+  const response = new NextResponse(
     JSON.stringify({ 
       success: true, 
       data,
@@ -166,4 +187,5 @@ export function createSuccessResponse(data: any, status: number = 200) {
       }
     }
   );
+  return response;
 }
