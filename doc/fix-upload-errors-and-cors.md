@@ -62,6 +62,39 @@ export async function POST(request: NextRequest) {
 }
 ```
 
+#### OpenAI API Error Handling
+
+To provide better insight into why the AI processing might be failing, specific error handling for the OpenAI API call was added. This will return a more informative error message to the frontend.
+
+**`src/app/api/parse/route.ts`**
+```typescript
+// ... inside POST function
+} catch (error) {
+  // FIX: Add more specific error handling for the OpenAI API call.
+  console.error('OpenAI API Error:', error); 
+
+  let errorMessage = 'AI processing failed. Please try again later.';
+  if (error instanceof OpenAI.APIError) {
+    switch (error.status) {
+      case 401:
+        errorMessage = 'OpenAI API key is invalid or has expired.';
+        break;
+      case 429:
+        errorMessage = 'You have exceeded your OpenAI API quota. Please check your plan and billing details.';
+        break;
+      case 500:
+        errorMessage = 'The OpenAI API is currently experiencing issues. Please try again later.';
+        break;
+      default:
+        errorMessage = `An unexpected error occurred with the OpenAI API (Status: ${error.status}).`;
+        break;
+    }
+  }
+  
+  return withCORS(createErrorResponse(errorMessage, 500), request);
+}
+```
+
 ### Frontend Fixes (`ResumeUploader.tsx`)
 
 #### Graceful Error Handling
@@ -94,3 +127,16 @@ if (typeof onUploadSuccess === 'function') {
   onUploadSuccess(analysisResults);
 }
 ```
+
+## 3. Debugging OpenAI API Errors
+
+If you continue to see errors related to "AI processing failed," the root cause is likely an issue with the OpenAI API configuration. Here’s how to troubleshoot:
+
+1.  **Check Your `.env.local` File**: Ensure that your `OPENAI_API_KEY` is correctly set in your `.env.local` file.
+2.  **Verify Your OpenAI Account**: 
+    -   Log in to your OpenAI account and confirm that your API key is active.
+    -   Check your account balance and billing status to ensure you have sufficient credits.
+3.  **Check the Browser Console**: The frontend will now display a more specific error message from the backend. Look for messages like:
+    -   `OpenAI API key is invalid or has expired.`
+    -   `You have exceeded your OpenAI API quota.`
+    -   `The OpenAI API is currently experiencing issues.`
