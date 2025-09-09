@@ -1,43 +1,44 @@
 import OpenAI from 'openai';
 
-const OPENAI_API_KEYS = [
-  process.env.OPENAI_API_KEY_1,
-  process.env.OPENAI_API_KEY_2,
-  process.env.DEEPSEEK_API_KEY_1, // User provided key
-].filter(Boolean) as string[]; // Filter out undefined/null and assert type
+interface ApiKeyConfig {
+  apiKey: string;
+  provider: 'openai' | 'deepseek';
+  model: string;
+  baseURL?: string;
+}
 
-const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1';
+const API_KEY_CONFIGS: ApiKeyConfig[] = [
+  process.env.OPENAI_API_KEY_1 ? { apiKey: process.env.OPENAI_API_KEY_1, provider: 'openai', model: 'gpt-3.5-turbo' } : null,
+  process.env.OPENAI_API_KEY_2 ? { apiKey: process.env.OPENAI_API_KEY_2, provider: 'openai', model: 'gpt-3.5-turbo' } : null,
+  process.env.DEEPSEEK_API_KEY_1 ? { apiKey: process.env.DEEPSEEK_API_KEY_1, provider: 'deepseek', model: 'deepseek-chat', baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1' } : null,
+].filter(Boolean) as ApiKeyConfig[];
 
 let currentApiKeyIndex = 0;
 
-export function getOpenAIClient(): OpenAI {
-  if (OPENAI_API_KEYS.length === 0) {
+export function getOpenAIClient(): { client: OpenAI; model: string } {
+  if (API_KEY_CONFIGS.length === 0) {
     throw new Error('No OpenAI or DeepSeek API keys configured.');
   }
 
-  const apiKey = OPENAI_API_KEYS[currentApiKeyIndex];
-  let baseURL = undefined; // Default for OpenAI
+  const config = API_KEY_CONFIGS[currentApiKeyIndex];
 
-  // Check if the current key is a DeepSeek key (simple check for now)
-  // A more robust solution might involve mapping keys to providers
-  if (apiKey === process.env.DEEPSEEK_API_KEY_1) {
-    baseURL = DEEPSEEK_BASE_URL;
-  }
-
-  return new OpenAI({
-    apiKey: apiKey,
-    baseURL: baseURL,
-  });
+  return {
+    client: new OpenAI({
+      apiKey: config.apiKey,
+      baseURL: config.baseURL,
+    }),
+    model: config.model,
+  };
 }
 
 export function markApiKeyAsInvalid(): void {
-  if (OPENAI_API_KEYS.length === 0) {
+  if (API_KEY_CONFIGS.length === 0) {
     console.warn('No API keys to mark as invalid.');
     return;
   }
 
-  console.warn(`API Key at index ${currentApiKeyIndex} marked as invalid. Switching to next key.`);
-  currentApiKeyIndex = (currentApiKeyIndex + 1) % OPENAI_API_KEYS.length;
+  console.warn(`API Key for ${API_KEY_CONFIGS[currentApiKeyIndex].provider} (model: ${API_KEY_CONFIGS[currentApiKeyIndex].model}) marked as invalid. Switching to next key.`);
+  currentApiKeyIndex = (currentApiKeyIndex + 1) % API_KEY_CONFIGS.length;
 
   if (currentApiKeyIndex === 0) {
     console.error('All configured API keys have been exhausted or are invalid. Please check your API keys.');
@@ -45,5 +46,6 @@ export function markApiKeyAsInvalid(): void {
 }
 
 // Export a default client for initial use, but encourage using getOpenAIClient
-const openai = getOpenAIClient();
+// This default export might not be used directly anymore in route.ts
+const openai = getOpenAIClient().client;
 export default openai;

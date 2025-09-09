@@ -130,12 +130,12 @@ ${sanitizedText.slice(0, 2000)}`;
 
     while (attempts < MAX_ATTEMPTS) {
       try {
-        const openai = getOpenAIClient(); // Get an OpenAI client with the current active key
+        const { client: openai, model } = getOpenAIClient(); // Get an OpenAI client and model with the current active key
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000);
         
         completion = await openai.chat.completions.create({
-          model: 'gpt-3.5-turbo',
+          model: model,
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.1,
           max_tokens: 500,
@@ -177,14 +177,21 @@ ${sanitizedText.slice(0, 2000)}`;
       }
     }
 
-    const content = completion.choices[0]?.message?.content;
+    const content = completion!.choices[0]?.message?.content;
     if (!content) {
       return withCORS(createErrorResponse('No response from AI', 500), request);
     }
 
     let rawData;
+    let cleanedContent = content;
+    // Attempt to extract JSON from markdown code block if present
+    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
+    if (jsonMatch && jsonMatch[1]) {
+      cleanedContent = jsonMatch[1];
+    }
+
     try {
-      rawData = JSON.parse(content);
+      rawData = JSON.parse(cleanedContent);
     } catch (error) {
       console.error('JSON parse error:', error);
       return withCORS(createErrorResponse('Invalid AI response format', 500), request);
