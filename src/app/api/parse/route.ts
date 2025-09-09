@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import openai from '@/lib/openai';
+import { getOpenAIClient, markApiKeyAsInvalid } from '@/lib/openai';
 import { ParsedResume, ParseResponse } from '@/types';
 import { ParsedResumeSchema } from '@/lib/validation';
 import pdf from 'pdf-parse';
@@ -125,42 +125,56 @@ Resume text:
 ${sanitizedText.slice(0, 2000)}`;
 
     let completion;
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-      
-      completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.1,
-        max_tokens: 500,
-      });
-      
-      clearTimeout(timeoutId);
-    } catch (error) {
-      // FIX: Add more specific error handling for the OpenAI API call.
-      // This will provide more insight into why the API call is failing.
-      console.error('OpenAI API Error:', error); 
+    let attempts = 0;
+    const MAX_ATTEMPTS = 3; // Max attempts to try different API keys
 
-      let errorMessage = 'AI processing failed. Please try again later.';
-      if (error instanceof OpenAI.APIError) {
-        switch (error.status) {
-          case 401:
-            errorMessage = 'OpenAI API key is invalid or has expired.';
-            break;
-          case 429:
-            errorMessage = 'You have exceeded your OpenAI API quota. Please check your plan and billing details.';
-            break;
-          case 500:
-            errorMessage = 'The OpenAI API is currently experiencing issues. Please try again later.';
-            break;
-          default:
-            errorMessage = `An unexpected error occurred with the OpenAI API (Status: ${error.status}).`;
-            break;
+    while (attempts < MAX_ATTEMPTS) {
+      try {
+        const openai = getOpenAIClient(); // Get an OpenAI client with the current active key
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        
+        completion = await openai.chat.completions.create({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.1,
+          max_tokens: 500,
+        });
+        
+        clearTimeout(timeoutId);
+        break; // Success, exit loop
+      } catch (error) {
+        console.error('OpenAI API Error:', error); 
+
+        if (error instanceof OpenAI.APIError && error.status === 401) {
+          markApiKeyAsInvalid(); // Mark current key as invalid and switch
+          attempts++;
+          if (attempts < MAX_ATTEMPTS) {
+            console.warn(`Retrying OpenAI API call with a new key (attempt ${attempts}/${MAX_ATTEMPTS}).`);
+            continue; // Retry with next key
+          } else {
+            console.error('All OpenAI API keys exhausted after multiple attempts.');
+            return withCORS(createErrorResponse('AI processing failed: All API keys exhausted.', 500), request);
+          }
+        } else {
+          // Handle other types of OpenAI API errors or network errors
+          let errorMessage = 'AI processing failed. Please try again later.';
+          if (error instanceof OpenAI.APIError) {
+            switch (error.status) {
+              case 429:
+                errorMessage = 'You have exceeded your OpenAI API quota. Please check your plan and billing details.';
+                break;
+              case 500:
+                errorMessage = 'The OpenAI API is currently experiencing issues. Please try again later.';
+                break;
+              default:
+                errorMessage = `An unexpected error occurred with the OpenAI API (Status: ${error.status}).`;
+                break;
+            }
+          }
+          return withCORS(createErrorResponse(errorMessage, 500), request);
         }
       }
-      
-      return withCORS(createErrorResponse(errorMessage, 500), request);
     }
 
     const content = completion.choices[0]?.message?.content;
