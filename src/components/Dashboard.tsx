@@ -5,77 +5,96 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { FaUser, FaFileAlt, FaChartLine, FaAward, FaClock, FaSearch } from 'react-icons/fa';
 import { useState, useMemo } from 'react';
-import { LoadingSkeleton } from './LoadingSkeleton';
-import { ErrorMessage } from './ErrorMessage';
+import LoadingSkeleton from './LoadingSkeleton';
+import ErrorMessage from './ErrorMessage';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // Define types for the data we expect from the API
-interface Resume {
+interface WorkExperience {
+  title: string;
+  company: string;
+  duration: string;
+  description: string;
+}
+
+interface Education {
+  degree: string;
+  institution: string;
+  year: string;
+}
+
+interface Candidate {
   id: string;
-  filename: string;
-  file_size: number;
-  file_type: string;
-  score: number;
-  status: 'completed' | 'pending' | 'failed';
+  name: string;
+  email: string;
+  phone: string;
+  work_experience: WorkExperience[];
+  skills: string[];
+  education: Education[];
   created_at: string;
-  analysis: {
-    summary?: string;
-    name?: string;
-    email?: string;
-    skills?: string[];
-  } | null;
 }
 
 interface Stats {
-  totalResumes: number;
-  averageScore: number;
-  highScoreResumes: number;
-  pendingAnalyses: number;
+  totalCandidates: number;
+  // Add other relevant stats for candidates if needed
 }
 
-// Function to fetch resumes from our new API endpoint
-const fetchResumes = async (): Promise<Resume[]> => {
-  const response = await fetch('/api/resumes');
+// Function to fetch candidates from our new API endpoint
+const fetchCandidates = async (): Promise<Candidate[]> => {
+  const response = await fetch('/api/candidates');
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to fetch resumes');
+    throw new Error(errorData.error || 'Failed to fetch candidates');
   }
   const result = await response.json();
   return result.data;
 };
 
-const Badge = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-block bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 dark:text-gray-200 mr-2 mb-2">
-    {children}
-  </span>
-);
+import { Badge } from '@/components/ui/badge';
 
-const CandidateCard = ({ resume }: { resume: Resume }) => (
+const CandidateCard = ({ candidate }: { candidate: Candidate }) => (
   <Card className="flex flex-col justify-between transition-all hover:shadow-lg">
     <CardHeader>
       <div className="flex justify-between items-start">
         <div>
-          <CardTitle className="truncate">{resume.analysis?.name || resume.filename}</CardTitle>
-          <CardDescription className="truncate">{resume.analysis?.email || 'No email found'}</CardDescription>
-        </div>
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl ${resume.score >= 85 ? 'bg-green-500' : resume.score >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`}>
-          {resume.score || 'N/A'}
+          <CardTitle className="truncate">{candidate.name || 'N/A'}</CardTitle>
+          <CardDescription className="truncate">{candidate.email || 'No email found'}</CardDescription>
+          <CardDescription className="truncate">{candidate.phone || 'No phone found'}</CardDescription>
         </div>
       </div>
     </CardHeader>
     <CardContent>
-      <p className="text-sm text-gray-600 dark:text-gray-300 italic line-clamp-2">"{resume.analysis?.summary || 'No summary available'}"</p>
       <div className="mt-4">
-        <h4 className="text-sm font-semibold mb-2">Top Skills</h4>
+        <h4 className="text-sm font-semibold mb-2">Skills</h4>
         <div className="flex flex-wrap">
-          {resume.analysis?.skills?.slice(0, 3).map(skill => <Badge key={skill}>{skill}</Badge>) ?? <Badge>No skills found</Badge>}
+          {candidate.skills?.map(skill => <Badge key={skill} variant="secondary" className="mr-1 mb-1">{skill}</Badge>) ?? <Badge variant="secondary">No skills found</Badge>}
         </div>
+      </div>
+      <div className="mt-4">
+        <h4 className="text-sm font-semibold mb-2">Work Experience</h4>
+        {candidate.work_experience?.map((exp, index) => (
+          <div key={index} className="mb-2">
+            <p className="font-medium">{exp.title} at {exp.company}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{exp.duration}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{exp.description}</p>
+          </div>
+        )) ?? <p className="text-sm text-gray-600 dark:text-gray-300">No work experience found</p>}
+      </div>
+      <div className="mt-4">
+        <h4 className="text-sm font-semibold mb-2">Education</h4>
+        {candidate.education?.map((edu, index) => (
+          <div key={index} className="mb-2">
+            <p className="font-medium">{edu.degree} from {edu.institution}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{edu.year}</p>
+          </div>
+        )) ?? <p className="text-sm text-gray-600 dark:text-gray-300">No education found</p>}
       </div>
     </CardContent>
     <CardFooter className="flex justify-between items-center">
       <div className="text-xs text-gray-500 dark:text-gray-400">
-        Submitted: {new Date(resume.created_at).toLocaleDateString()}
+        Added: {new Date(candidate.created_at).toLocaleDateString()}
       </div>
       <Button variant="outline" size="sm">View Details</Button>
     </CardFooter>
@@ -86,31 +105,27 @@ export default function Dashboard() {
   const { user, signOut } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: resumes = [], isLoading, error } = useQuery<Resume[]>({ 
-    queryKey: ['resumes', user?.id], 
-    queryFn: fetchResumes, 
+  const { data: candidates = [], isLoading, error } = useQuery<Candidate[]>({ 
+    queryKey: ['candidates', user?.id], 
+    queryFn: fetchCandidates, 
     enabled: !!user, // Only run the query if the user is authenticated
   });
 
-  const filteredResumes = useMemo(() => {
-    if (!searchTerm) return resumes;
-    return resumes.filter(resume => 
-      resume.filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      resume.analysis?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      resume.analysis?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCandidates = useMemo(() => {
+    if (!searchTerm) return candidates;
+    return candidates.filter(candidate => 
+      candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidate.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidate.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  }, [resumes, searchTerm]);
+  }, [candidates, searchTerm]);
 
   const stats: Stats = useMemo(() => {
-    const completedResumes = resumes.filter(r => r.status === 'completed' && r.score);
-    const totalScore = completedResumes.reduce((acc, r) => acc + r.score, 0);
     return {
-      totalResumes: resumes.length,
-      averageScore: completedResumes.length > 0 ? Math.round(totalScore / completedResumes.length) : 0,
-      highScoreResumes: completedResumes.filter(r => r.score >= 85).length,
-      pendingAnalyses: resumes.filter(r => r.status === 'pending').length,
+      totalCandidates: candidates.length,
     };
-  }, [resumes]);
+  }, [candidates]);
 
   if (!user) {
     return (
@@ -156,54 +171,28 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Resumes</CardTitle>
-                        <FaFileAlt className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Total Candidates</CardTitle>
+                        <FaUser className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalResumes}</div>
+                        <div className="text-2xl font-bold">{stats.totalCandidates}</div>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Average Score</CardTitle>
-                        <FaChartLine className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.averageScore}/100</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">High Scores</CardTitle>
-                        <FaAward className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.highScoreResumes}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                        <FaClock className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.pendingAnalyses}</div>
-                    </CardContent>
-                </Card>
+                {/* Removed other stats as they are not directly applicable to candidates without analysis */}
             </div>
 
-            {/* Resume History */}
+            {/* Candidate List */}
             <Card>
               <CardHeader className="flex-row justify-between items-center">
                 <div>
-                  <CardTitle>Resume Analysis History</CardTitle>
-                  <CardDescription>Your recent resume analyses and performance scores</CardDescription>
+                  <CardTitle>Candidate List</CardTitle>
+                  <CardDescription>Manage your candidate profiles</CardDescription>
                 </div>
                 <div className="relative">
                   <FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
                   <input 
                     type="text"
-                    placeholder="Search by name, email, file..."
+                    placeholder="Search by name, email, phone, skills..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-500"
@@ -211,22 +200,72 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                {filteredResumes.length === 0 ? (
+                {filteredCandidates.length === 0 ? (
                   <div className="text-center py-8">
-                    <FaFileAlt className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                    <FaUser className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-500 dark:text-gray-400 mb-4">
-                      {searchTerm ? `No resumes found for "${searchTerm}"` : 'No resumes analyzed yet'}
+                      {searchTerm ? `No candidates found for "${searchTerm}"` : 'No candidates added yet'}
                     </p>
-                    <Button asChild>
-                      <a href="/">Start Analyzing Resumes</a>
-                    </Button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredResumes.map((resume) => (
-                      <CandidateCard key={resume.id} resume={resume} />
-                    ))}
-                  </div>
+                  <>
+                    {/* Mobile and Tablet View (Cards) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden gap-6">
+                      {filteredCandidates.map((candidate) => (
+                        <CandidateCard key={candidate.id} candidate={candidate} />
+                      ))}
+                    </div>
+
+                    {/* Desktop View (Table) */}
+                    <div className="hidden lg:block">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Phone</TableHead>
+                            <TableHead>Skills</TableHead>
+                            <TableHead>Education</TableHead>
+                            <TableHead>Experience</TableHead>
+                            <TableHead>Added On</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredCandidates.map((candidate) => (
+                            <TableRow key={candidate.id}>
+                              <TableCell className="font-medium">{candidate.name}</TableCell>
+                              <TableCell>{candidate.email}</TableCell>
+                              <TableCell>{candidate.phone}</TableCell>
+                              <TableCell>
+                                <div className="flex flex-wrap gap-1">
+                                  {candidate.skills?.map(skill => <Badge key={skill} variant="outline">{skill}</Badge>)}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {candidate.education?.map((edu, index) => (
+                                  <div key={index}>
+                                    {edu.degree} from {edu.institution} ({edu.year})
+                                  </div>
+                                ))}
+                              </TableCell>
+                              <TableCell>
+                                {candidate.work_experience?.map((exp, index) => (
+                                  <div key={index}>
+                                    {exp.title} at {exp.company} ({exp.duration})
+                                  </div>
+                                ))}
+                              </TableCell>
+                              <TableCell>{new Date(candidate.created_at).toLocaleDateString()}</TableCell>
+                              <TableCell>
+                                <Button variant="outline" size="sm">View</Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
