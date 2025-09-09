@@ -1,6 +1,32 @@
+
 # Changelog
 
 All notable changes to the Automated Hiring Agent project will be documented in this file.
+
+## [2025-09-09] - Audit Fixes and Dashboard Enhancements
+
+### Added
+
+#### feat(db): create candidates view
+**Commit**: (will be added after commit)
+**Date**: 2025-09-09
+**Description**: To align with the project blueprint, a `candidates` view was added to the database. This view joins the `users`, `profiles`, and `resumes` tables to provide a unified representation of candidate data without altering the underlying schema.
+
+### Fixed
+
+#### fix(dashboard): connect to live data
+**Commit**: (will be added after commit)
+**Date**: 2025-09-09
+**Description**: The dashboard was refactored to fetch live data from a new `/api/resumes` endpoint, replacing all static mock data. Loading and error states were also added for a better user experience.
+
+### Refactored
+
+#### refactor(dashboard): implement shadcn/ui cards
+**Commit**: (will be added after commit)
+**Date**: 2025-09-09
+**Description**: The dashboard UI was significantly improved by replacing the basic list of resumes with a responsive grid of `shadcn/ui` `Card` components. Each card provides a structured and detailed view of the candidate's analysis results.
+
+---
 
 ## [2025-01-06] - Dashboard UI Enhancements
 

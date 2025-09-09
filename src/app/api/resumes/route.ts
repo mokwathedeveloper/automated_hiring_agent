@@ -1,37 +1,35 @@
-import { createClient } from '@/lib/supabase/server';
 
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { createErrorResponse, createSuccessResponse, withCORS } from '@/lib/security';
 
-export async function GET(req: NextRequest) {
-  const supabase = await createClient();
+export async function GET(request: NextRequest) {
+  const supabase = createRouteHandlerClient({ cookies });
+
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      return withCORS(createErrorResponse('Unauthorized', 401), request);
     }
 
-    const { data: resumes, error }  = await supabase.from("resumes")
+    const { data: resumes, error } = await supabase
+      .from('resumes')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
-    
+
     if (error) {
-      return NextResponse.json(
-        { error: 'Failed to fetch resumes' },
-        { status: 500 }
-      );
+      console.error('Error fetching resumes:', error);
+      throw new Error(error.message);
     }
 
-    return NextResponse.json({ resumes });
-  } catch (error) {
-    console.error('Resumes API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return withCORS(createSuccessResponse(resumes), request);
+  } catch (error: any) {
+    console.error('Error in /api/resumes:', error);
+    return withCORS(createErrorResponse(error.message || 'Internal Server Error', 500), request);
   }
 }
