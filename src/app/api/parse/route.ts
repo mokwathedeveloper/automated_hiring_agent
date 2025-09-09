@@ -17,6 +17,7 @@ import {
 } from '@/lib/security';
 import Joi from 'joi';
 import { OpenAI } from 'openai';
+import { createClient } from '@supabase/supabase-js'; // Import Supabase client
 
 // Request validation schema
 const parseRequestSchema = Joi.object({
@@ -227,6 +228,35 @@ ${sanitizedText.slice(0, 2000)}`;
 
     const processingTime = Date.now() - startTime;
     console.log(`Resume processed in ${processingTime}ms for IP: ${clientIP}`);
+
+    // Initialize Supabase client
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return withCORS(createErrorResponse('Supabase environment variables not configured.', 500), request);
+    }
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    // Save parsed data to Supabase candidates table
+    const { data: candidateData, error: insertError } = await supabase
+      .from('candidates')
+      .insert({
+        name: validationResult.data.name,
+        email: validationResult.data.email,
+        phone: validationResult.data.phone,
+        work_experience: validationResult.data.experience,
+        skills: validationResult.data.skills,
+        education: validationResult.data.education,
+      })
+      .select();
+
+    if (insertError) {
+      console.error('Error saving candidate to Supabase:', insertError);
+      return withCORS(createErrorResponse('Failed to save candidate data.', 500), request);
+    }
+
+    console.log(`Candidate saved to Supabase:`, candidateData);
 
     return withCORS(createSuccessResponse(validationResult.data), request);
     
