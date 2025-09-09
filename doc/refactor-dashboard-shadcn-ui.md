@@ -1,8 +1,7 @@
-
 # **Refactor: Dashboard UI with Shadcn/ui**
 
 - **Date:** 2025-09-09
-- **Commit:** (will be added after commit)
+- **Commit:** `b684a99`
 
 ## Problem
 
