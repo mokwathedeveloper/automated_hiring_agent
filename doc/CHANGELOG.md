@@ -1,7 +1,29 @@
-
 # Changelog
 
 All notable changes to the Automated Hiring Agent project will be documented in this file.
+
+## [2025-09-09] - Audit Fixes and Dashboard Enhancements
+
+### Added
+
+#### feat(db): create candidates table
+**Commit**: [Commit Hash]
+**Date**: 2025-09-09
+**Description**: A new `candidates` table was created in the database to store structured candidate information, including name, email, phone, work experience, skills, and education. This enables better management and querying of candidate profiles.
+
+#### feat(dashboard): bind candidate list to Supabase and add search/filter
+**Commit**: [Commit Hash]
+**Date**: 2025-09-09
+**Description**: The dashboard was refactored to fetch candidate data directly from the new Supabase `candidates` table. Search and filtering functionalities were implemented to allow users to easily find candidates by name, email, phone, and skills.
+
+### Refactored
+
+#### refactor(ui): enhance resume display with Shadcn/ui responsive components
+**Commit**: [Commit Hash]
+**Date**: 2025-09-09
+**Description**: The candidate display in the dashboard was enhanced to be fully responsive. It now uses Shadcn/ui `Card` components for mobile and tablet views (stacked and two-column layouts) and a Shadcn/ui `Table` component for desktop view, providing a professional and accessible user interface.
+
+---
 
 ## [2025-09-09] - Audit Fixes and Dashboard Enhancements
 
