@@ -4,6 +4,8 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { createErrorResponse, createSuccessResponse, withCORS } from '@/lib/security';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const supabase = createRouteHandlerClient({ cookies });
 
