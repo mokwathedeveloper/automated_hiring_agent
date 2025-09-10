@@ -7,7 +7,16 @@ interface DeepSeekConfig {
   baseURL: string;
 }
 
-// Only use DeepSeek API - no OpenAI integration
+/**
+ * DeepSeek API Configuration
+ *
+ * This function validates and returns the DeepSeek API configuration.
+ * Replaces the previous OpenAI integration for cost efficiency and performance.
+ *
+ * Required Environment Variables:
+ * - DEEPSEEK_API_KEY_1: Your DeepSeek API key from https://platform.deepseek.com/api_keys
+ * - DEEPSEEK_BASE_URL: DeepSeek API base URL (https://api.deepseek.com/v1)
+ */
 function getDeepSeekConfig(): DeepSeekConfig {
   const apiKey = process.env.DEEPSEEK_API_KEY_1;
   const baseURL = process.env.DEEPSEEK_BASE_URL;
@@ -23,20 +32,28 @@ function getDeepSeekConfig(): DeepSeekConfig {
   return {
     apiKey,
     provider: 'deepseek',
-    model: 'deepseek-chat',
+    model: 'deepseek-chat', // DeepSeek's chat model optimized for conversations
     baseURL,
   };
 }
 
+/**
+ * Get DeepSeek Client
+ *
+ * Creates and returns a configured DeepSeek client using the OpenAI SDK.
+ * The OpenAI SDK is compatible with DeepSeek's API endpoints.
+ *
+ * @returns {object} Object containing the configured client and model name
+ */
 export function getOpenAIClient(): { client: OpenAI; model: string } {
   const config = getDeepSeekConfig();
 
   return {
     client: new OpenAI({
       apiKey: config.apiKey,
-      baseURL: config.baseURL,
+      baseURL: config.baseURL, // Points to DeepSeek API instead of OpenAI
     }),
-    model: config.model,
+    model: config.model, // 'deepseek-chat'
   };
 }
 

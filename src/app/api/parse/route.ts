@@ -222,6 +222,8 @@ ${sanitizedText.slice(0, 2000)}`;
     const supabase = await createClient();
 
     // Save parsed data to Supabase candidates table
+    // Note: Requires candidates table with education JSONB column
+    // Run migration: migrations/supabase/20250909135157_create_candidates_table.up.sql
     console.log('Data to be inserted into Supabase:', validationResult.data);
     const { data: candidateData, error: insertError } = await supabase
       .from('candidates')
@@ -229,9 +231,9 @@ ${sanitizedText.slice(0, 2000)}`;
         name: validationResult.data.name,
         email: validationResult.data.email,
         phone: validationResult.data.phone,
-        work_experience: validationResult.data.experience,
-        skills: validationResult.data.skills,
-        education: validationResult.data.education,
+        work_experience: validationResult.data.experience, // JSONB field
+        skills: validationResult.data.skills, // TEXT[] array
+        education: validationResult.data.education, // JSONB field
       })
       .select();
 
