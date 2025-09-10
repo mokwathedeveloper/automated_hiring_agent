@@ -1,8 +1,18 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AuthModal from '@/components/AuthModal'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
-jest.mock('@/lib/supabase')
+jest.mock('@/lib/supabase/client')
+
+const mockSignInWithOtp = jest.fn();
+const mockSignUp = jest.fn();
+
+(createClient as jest.Mock).mockReturnValue({
+  auth: {
+    signInWithOtp: mockSignInWithOtp,
+    signUp: mockSignUp,
+  },
+});
 
 describe('AuthModal', () => {
   const mockOnClose = jest.fn()
@@ -13,39 +23,44 @@ describe('AuthModal', () => {
 
   it('renders login modal correctly', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)
-    
-    expect(screen.getByText('Login')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Enter your email address')).toBeInTheDocument()
-    expect(screen.getByText('Send Login Link')).toBeInTheDocument()
+
+    expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Enter your email')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument()
   })
 
   it('renders signup modal correctly', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="signup" />)
-    
-    expect(screen.getByText('Sign Up')).toBeInTheDocument()
-    expect(screen.getByText('Send Signup Link')).toBeInTheDocument()
+
+    expect(screen.getByRole('heading', { name: /sign up/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument()
   })
 
   it('does not render when closed', () => {
     render(<AuthModal isOpen={false} onClose={mockOnClose} mode="login" />)
-    
-    expect(screen.queryByText('Login')).not.toBeInTheDocument()
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('handles successful login submission', async () => {
-    const mockSignInWithOtp = jest.mocked(supabase.auth.signInWithOtp)
-    mockSignInWithOtp.mockResolvedValue({ error: null } as any)
+    const mockSupabaseClient = {
+      auth: {
+        signInWithOtp: jest.fn().mockResolvedValue({ error: null })
+      }
+    }
+
+    jest.mocked(createClient).mockReturnValue(mockSupabaseClient as any)
 
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)
-    
-    const emailInput = screen.getByPlaceholderText('Enter your email address')
-    const submitButton = screen.getByText('Send Login Link')
+
+    const emailInput = screen.getByPlaceholderText('Enter your email')
+    const submitButton = screen.getByRole('button', { name: /login/i })
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(mockSignInWithOtp).toHaveBeenCalledWith({
+      expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
         email: 'test@example.com',
         options: {
           emailRedirectTo: expect.stringContaining('/auth/callback'),
@@ -57,13 +72,18 @@ describe('AuthModal', () => {
   })
 
   it('handles signup submission', async () => {
-    const mockSignUp = jest.mocked(supabase.auth.signUp)
-    mockSignUp.mockResolvedValue({ error: null } as any)
+    const mockSupabaseClient = {
+      auth: {
+        signUp: jest.fn().mockResolvedValue({ error: null })
+      }
+    }
+
+    jest.mocked(createClient).mockReturnValue(mockSupabaseClient as any)
 
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="signup" />)
-    
-    const emailInput = screen.getByPlaceholderText('Enter your email address')
-    const submitButton = screen.getByText('Send Signup Link')
+
+    const emailInput = screen.getByPlaceholderText('Enter your email')
+    const submitButton = screen.getByRole('button', { name: /sign up/i })
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
     fireEvent.click(submitButton)
@@ -82,7 +102,7 @@ describe('AuthModal', () => {
   })
 
   it('handles authentication errors', async () => {
-    const mockSignInWithOtp = jest.mocked(supabase.auth.signInWithOtp)
+    const mockSignInWithOtp = jest.mocked(mockSignInWithOtp)
     mockSignInWithOtp.mockResolvedValue({ error: { message: 'Invalid email' } } as any)
 
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)

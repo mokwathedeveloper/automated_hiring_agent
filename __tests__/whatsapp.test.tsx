@@ -121,10 +121,14 @@ describe('WhatsApp Integration', () => {
     
     await act(async () => {
       fireEvent.click(screen.getByText('Send Resume'));
-      
-      const phoneInput = screen.getByLabelText(/phone number/i);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('+234 123 456 7890')).toBeInTheDocument();
+      });
+
+      const phoneInput = screen.getByPlaceholderText('+234 123 456 7890');
       fireEvent.change(phoneInput, { target: { value: '+234 803 123 4567' } });
-      
+
       fireEvent.click(screen.getByText('Send'));
     });
     
@@ -158,10 +162,14 @@ describe('WhatsApp Integration', () => {
     
     await act(async () => {
       fireEvent.click(screen.getByText('Send Resume'));
-      
-      const phoneInput = screen.getByLabelText(/phone number/i);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('+234 123 456 7890')).toBeInTheDocument();
+      });
+
+      const phoneInput = screen.getByPlaceholderText('+234 123 456 7890');
       fireEvent.change(phoneInput, { target: { value: '+234 803 123 4567' } });
-      
+
       fireEvent.click(screen.getByText('Send'));
     });
     
@@ -187,10 +195,14 @@ describe('WhatsApp Integration', () => {
     
     await act(async () => {
       fireEvent.click(screen.getByText('Send Resume'));
-      
-      const phoneInput = screen.getByLabelText(/phone number/i);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('+234 123 456 7890')).toBeInTheDocument();
+      });
+
+      const phoneInput = screen.getByPlaceholderText('+234 123 456 7890');
       fireEvent.change(phoneInput, { target: { value: '08031234567' } });
-      
+
       fireEvent.click(screen.getByText('Send'));
     });
     

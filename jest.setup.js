@@ -21,7 +21,10 @@ jest.mock('framer-motion', () => ({
     h1: 'h1',
     h2: 'h2',
     p: 'p',
+    li: 'li', // Ensure li is mocked as a string
   },
+  useAnimation: () => ({ start: jest.fn() }),
+  AnimatePresence: ({ children }) => children, // Render children directly
 }))
 
 // Mock modules will be handled in individual test files
@@ -40,6 +43,39 @@ global.Response = jest.fn(() => ({
 }));
 
 global.Request = jest.fn();
+
+// Mock NextRequest for API tests
+global.NextRequest = jest.fn().mockImplementation((url, options = {}) => {
+  const request = {
+    url,
+    method: options.method || 'GET',
+    headers: new Map(Object.entries(options.headers || {})),
+    body: options.body,
+    formData: jest.fn().mockResolvedValue(options.body),
+    json: jest.fn().mockResolvedValue({}),
+    text: jest.fn().mockResolvedValue(''),
+    cookies: {
+      get: jest.fn(),
+      set: jest.fn(),
+      delete: jest.fn(),
+    },
+    nextUrl: {
+      searchParams: new URLSearchParams(),
+    },
+  };
+  return request;
+});
+
+jest.mock('next/headers', () => ({
+  cookies: jest.fn(() => ({
+    get: jest.fn((name) => {
+      if (name === 'next-auth.session-token') {
+        return 'mock-session-token';
+      }
+      return undefined;
+    }),
+  })),
+}));
 
 beforeEach(() => {
   jest.clearAllMocks()

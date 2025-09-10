@@ -37,6 +37,8 @@ describe('Payment Integration', () => {
     mockUseAuth.mockReturnValue({
       user: null,
       loading: false,
+      signOut: jest.fn(),
+      isAuthenticated: false,
     });
 
     act(() => {
@@ -53,6 +55,8 @@ describe('Payment Integration', () => {
     mockUseAuth.mockReturnValue({
       user: null,
       loading: false,
+      signOut: jest.fn(),
+      isAuthenticated: false,
     });
 
     // Mock alert
@@ -74,6 +78,8 @@ describe('Payment Integration', () => {
     mockUseAuth.mockReturnValue({
       user: { id: '123', email: 'test@example.com' } as any,
       loading: false,
+      signOut: jest.fn(),
+      isAuthenticated: true,
     });
 
     act(() => {
@@ -98,6 +104,8 @@ describe('Payment Integration', () => {
     mockUseAuth.mockReturnValue({
       user: { id: '123', email: 'test@example.com' } as any,
       loading: false,
+      signOut: jest.fn(),
+      isAuthenticated: true,
     });
 
     // Mock fetch for payment verification
@@ -138,6 +146,8 @@ describe('Payment Integration', () => {
     mockUseAuth.mockReturnValue({
       user: { id: '123', email: 'test@example.com' } as any,
       loading: false,
+      signOut: jest.fn(),
+      isAuthenticated: true,
     });
 
     // Mock fetch for failed verification

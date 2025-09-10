@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import ResumeUploader from '@/components/ResumeUploader';
 
 // Mock fetch
@@ -16,8 +16,8 @@ describe('Resume Processing', () => {
       render(<ResumeUploader />);
     });
     
-    expect(screen.getByText(/drag.*drop.*resume/i)).toBeInTheDocument();
-    expect(screen.getByText(/choose file/i)).toBeInTheDocument();
+    expect(screen.getByText('Drag & drop resumes, or click to select')).toBeInTheDocument();
+    expect(screen.getByTestId('file-input')).toBeInTheDocument();
   });
 
   test('handles file upload', async () => {
@@ -53,14 +53,14 @@ describe('Resume Processing', () => {
     });
     
     const file = new File(['resume content'], 'resume.pdf', { type: 'application/pdf' });
-    const input = screen.getByLabelText(/choose file/i);
+    const input = screen.getByTestId('file-input');
     
     await act(async () => {
       fireEvent.change(input, { target: { files: [file] } });
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /analyze resume/i }));
+      fireEvent.click(screen.getByText(/Analyze.*Resume/i));
     });
     
     await waitFor(() => {
@@ -77,14 +77,14 @@ describe('Resume Processing', () => {
     });
     
     const invalidFile = new File(['content'], 'resume.txt', { type: 'text/plain' });
-    const input = screen.getByLabelText(/choose file/i);
+    const input = screen.getByTestId('file-input');
     
     await act(async () => {
       fireEvent.change(input, { target: { files: [invalidFile] } });
     });
     
     await waitFor(() => {
-      expect(screen.getByText(/please upload a pdf or docx file/i)).toBeInTheDocument();
+      expect(screen.getByText(/File type must be one of/)).toBeInTheDocument();
     });
   });
 
@@ -97,14 +97,14 @@ describe('Resume Processing', () => {
     const largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'large.pdf', { 
       type: 'application/pdf' 
     });
-    const input = screen.getByLabelText(/choose file/i);
+    const input = screen.getByTestId('file-input');
     
     await act(async () => {
       fireEvent.change(input, { target: { files: [largeFile] } });
     });
     
     await waitFor(() => {
-      expect(screen.getByText(/file size must be less than 5mb/i)).toBeInTheDocument();
+      expect(screen.getByText(/File is larger than/)).toBeInTheDocument();
     });
   });
 
@@ -143,14 +143,14 @@ describe('Resume Processing', () => {
     const file = new File(['Nigerian resume'], 'adebayo_cv.pdf', { 
       type: 'application/pdf' 
     });
-    const input = screen.getByLabelText(/choose file/i);
+    const input = screen.getByTestId('file-input');
     
     await act(async () => {
       fireEvent.change(input, { target: { files: [file] } });
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /analyze resume/i }));
+      fireEvent.click(screen.getByText(/Analyze.*Resume/i));
     });
     
     await waitFor(() => {

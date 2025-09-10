@@ -6,25 +6,8 @@ import { motion } from 'framer-motion';
 import { FaUpload, FaFileAlt, FaSpinner, FaCheck, FaTimes } from 'react-icons/fa';
 import { sanitizeInput } from '@/lib/security';
 
-// Interfaces for type safety
-interface ParsedResume {
-  name: string;
-  email: string;
-  phone: string;
-  skills: string[];
-  experience: Array<{
-    title: string;
-    company: string;
-    duration: string;
-    description: string;
-  }>;
-  education: Array<{
-    degree: string;
-    institution: string;
-    year: string;
-  }>;
-  summary: string;
-}
+// Import shared types instead of duplicating
+import { ParsedResume, WorkExperience, Education } from '@/types';
 
 interface AnalysisResult {
   fileName: string;
@@ -236,7 +219,7 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
                 : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500'
             }`}
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} data-testid="file-input" />
             <FaUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
             <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               {isDragActive ? 'Drop files here' : 'Drag & drop resumes, or click to select'}

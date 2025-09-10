@@ -1,8 +1,20 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAuth } from '@/hooks/useAuth'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
-jest.mock('@/lib/supabase')
+jest.mock('@/lib/supabase/client')
+
+const mockGetSession = jest.fn();
+const mockOnAuthStateChange = jest.fn();
+const mockSignOut = jest.fn();
+
+(createClient as jest.Mock).mockReturnValue({
+  auth: {
+    getSession: mockGetSession,
+    onAuthStateChange: mockOnAuthStateChange,
+    signOut: mockSignOut,
+  },
+});
 
 describe('useAuth', () => {
   const mockUser = {
@@ -13,10 +25,12 @@ describe('useAuth', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockOnAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: jest.fn() } }
+    })
   })
 
   it('initializes with loading state', () => {
-    const mockGetSession = jest.mocked(supabase.auth.getSession)
     mockGetSession.mockReturnValue(new Promise(() => {})) // never resolves
 
     const { result } = renderHook(() => useAuth())
@@ -27,14 +41,11 @@ describe('useAuth', () => {
   })
 
   it('sets user when session exists', async () => {
-    const mockGetSession = jest.mocked(supabase.auth.getSession)
-    const mockOnAuthStateChange = jest.mocked(supabase.auth.onAuthStateChange)
-    
     mockGetSession.mockResolvedValue({
       data: { session: { user: mockUser } },
       error: null
     } as any)
-    
+
     mockOnAuthStateChange.mockReturnValue({
       data: { subscription: { unsubscribe: jest.fn() } }
     } as any)
@@ -50,15 +61,11 @@ describe('useAuth', () => {
   })
 
   it('provides signOut function', async () => {
-    const mockGetSession = jest.mocked(supabase.auth.getSession)
-    const mockOnAuthStateChange = jest.mocked(supabase.auth.onAuthStateChange)
-    const mockSignOut = jest.mocked(supabase.auth.signOut)
-    
     mockGetSession.mockResolvedValue({
       data: { session: { user: mockUser } },
       error: null
     } as any)
-    
+
     mockOnAuthStateChange.mockReturnValue({
       data: { subscription: { unsubscribe: jest.fn() } }
     } as any)

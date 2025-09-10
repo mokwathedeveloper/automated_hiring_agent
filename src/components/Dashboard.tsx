@@ -12,19 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import WhatsAppModal from './WhatsAppModal';
 
-// Define types for the data we expect from the API
-interface WorkExperience {
-  title: string;
-  company: string;
-  duration: string;
-  description: string;
-}
-
-interface Education {
-  degree: string;
-  institution: string;
-  year: string;
-}
+// Import shared types instead of duplicating
+import { WorkExperience, Education } from '@/types';
 
 interface Candidate {
   id: string;

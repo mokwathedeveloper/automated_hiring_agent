@@ -1,5 +1,15 @@
 import { POST } from '@/app/api/parse/route'
-import { NextRequest } from 'next/server'
+
+// Mock NextRequest
+const createMockRequest = (body: any, headers: Record<string, string> = {}) => {
+  return {
+    formData: jest.fn().mockResolvedValue(body),
+    headers: new Map(Object.entries(headers)),
+    cookies: {
+      get: jest.fn(),
+    },
+  } as any;
+};
 import { getOpenAIClient } from '@/lib/openai'
 
 jest.mock('@/lib/openai', () => ({
@@ -47,9 +57,9 @@ describe('/api/parse', () => {
 
     mockChatCompletionsCreate.mockResolvedValue(mockCompletion as any)
 
-    const request = new NextRequest('http://localhost:3000/api/parse', {
-      method: 'POST',
-      body: formData
+    const request = createMockRequest(formData, {
+      'content-type': 'multipart/form-data',
+      'x-forwarded-for': '127.0.0.1',
     })
 
     const response = await POST(request)
@@ -63,9 +73,9 @@ describe('/api/parse', () => {
   it('handles missing file', async () => {
     const formData = new FormData()
 
-    const request = new NextRequest('http://localhost:3000/api/parse', {
-      method: 'POST',
-      body: formData
+    const request = createMockRequest(formData, {
+      'content-type': 'multipart/form-data',
+      'x-forwarded-for': '127.0.0.1',
     })
 
     const response = await POST(request)
@@ -81,9 +91,9 @@ describe('/api/parse', () => {
     const formData = new FormData()
     formData.append('file', mockFile)
 
-    const request = new NextRequest('http://localhost:3000/api/parse', {
-      method: 'POST',
-      body: formData
+    const request = createMockRequest(formData, {
+      'content-type': 'multipart/form-data',
+      'x-forwarded-for': '127.0.0.1',
     })
 
     const response = await POST(request)
@@ -100,9 +110,9 @@ describe('/api/parse', () => {
     const formData = new FormData()
     formData.append('file', mockFile)
 
-    const request = new NextRequest('http://localhost:3000/api/parse', {
-      method: 'POST',
-      body: formData
+    const request = createMockRequest(formData, {
+      'content-type': 'multipart/form-data',
+      'x-forwarded-for': '127.0.0.1',
     })
 
     const response = await POST(request)
@@ -120,9 +130,9 @@ describe('/api/parse', () => {
 
     mockChatCompletionsCreate.mockRejectedValue(new Error('OpenAI API error'))
 
-    const request = new NextRequest('http://localhost:3000/api/parse', {
-      method: 'POST',
-      body: formData
+    const request = createMockRequest(formData, {
+      'content-type': 'multipart/form-data',
+      'x-forwarded-for': '127.0.0.1',
     })
 
     const response = await POST(request)
@@ -148,9 +158,9 @@ describe('/api/parse', () => {
 
     mockChatCompletionsCreate.mockResolvedValue(mockCompletion as any)
 
-    const request = new NextRequest('http://localhost:3000/api/parse', {
-      method: 'POST',
-      body: formData
+    const request = createMockRequest(formData, {
+      'content-type': 'multipart/form-data',
+      'x-forwarded-for': '127.0.0.1',
     })
 
     const response = await POST(request)
