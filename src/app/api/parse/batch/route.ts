@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ParsedResumeSchema } from '@/lib/validation';
-import openai from '@/lib/openai';
+import { getOpenAIClient } from '@/lib/openai';
 import pdf from 'pdf-parse';
 import mammoth from 'mammoth';
 
@@ -170,8 +170,9 @@ async function processResumeFile(file: File, criteria: any): Promise<any> {
 
 ${text.slice(0, 2000)}`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+  const { client, model } = getOpenAIClient();
+  const completion = await client.chat.completions.create({
+    model: model,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.1,
     max_tokens: 500,

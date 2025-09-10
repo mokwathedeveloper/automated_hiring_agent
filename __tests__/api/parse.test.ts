@@ -1,15 +1,28 @@
 import { POST } from '@/app/api/parse/route'
 import { NextRequest } from 'next/server'
-import openai from '@/lib/openai'
+import { getOpenAIClient } from '@/lib/openai'
 
-jest.mock('@/lib/openai')
+jest.mock('@/lib/openai', () => ({
+  getOpenAIClient: jest.fn(),
+}))
 
 describe('/api/parse', () => {
-  const mockOpenAI = jest.mocked(openai)
+  const mockChatCompletionsCreate = jest.fn();
+  const mockOpenAIClient = {
+    chat: {
+      completions: {
+        create: mockChatCompletionsCreate,
+      },
+    },
+  };
 
   beforeEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+    (getOpenAIClient as jest.Mock).mockReturnValue({
+      client: mockOpenAIClient,
+      model: 'gpt-3.5-turbo',
+    });
+  });
 
   it('handles successful resume parsing', async () => {
     const mockFile = new File(['test content'], 'test.pdf', { type: 'application/pdf' })
@@ -32,7 +45,7 @@ describe('/api/parse', () => {
       }]
     }
 
-    mockOpenAI.chat.completions.create.mockResolvedValue(mockCompletion as any)
+    mockChatCompletionsCreate.mockResolvedValue(mockCompletion as any)
 
     const request = new NextRequest('http://localhost:3000/api/parse', {
       method: 'POST',
@@ -105,7 +118,7 @@ describe('/api/parse', () => {
     const formData = new FormData()
     formData.append('file', mockFile)
 
-    mockOpenAI.chat.completions.create.mockRejectedValue(new Error('OpenAI API error'))
+    mockChatCompletionsCreate.mockRejectedValue(new Error('OpenAI API error'))
 
     const request = new NextRequest('http://localhost:3000/api/parse', {
       method: 'POST',
@@ -133,7 +146,7 @@ describe('/api/parse', () => {
       }]
     }
 
-    mockOpenAI.chat.completions.create.mockResolvedValue(mockCompletion as any)
+    mockChatCompletionsCreate.mockResolvedValue(mockCompletion as any)
 
     const request = new NextRequest('http://localhost:3000/api/parse', {
       method: 'POST',

@@ -133,7 +133,7 @@ function analyzeCulturalFit(resume: ParsedResumeType): number {
 }
 
 function extractSalaryExpectation(summary: string): string {
-  const salaryRegex = /(?:salary|compensation|pay).*?(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:naira|ngn|₦|k|million)/i;
+  const salaryRegex = /(?:salary|compensation|pay).*?(\d+(?:,\d+)*(?:\.\d+)?k?)\s*(?:naira|ngn|₦|million)/i;
   const match = summary.match(salaryRegex);
   return match ? match[1] : 'Not specified';
 }

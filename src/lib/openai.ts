@@ -47,5 +47,3 @@ export function markApiKeyAsInvalid(): void {
 
 // Export a default client for initial use, but encourage using getOpenAIClient
 // This default export might not be used directly anymore in route.ts
-const openai = getOpenAIClient().client;
-export default openai;

@@ -135,7 +135,7 @@ export const securityHeaders = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' js.paystack.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com paystack.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.openai.com https://api.paystack.co; frame-src 'self' checkout.paystack.com;"
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' js.paystack.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com paystack.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.openai.com https://api.payseek.com https://api.paystack.co; frame-src 'self' checkout.paystack.com;"
 };
 
 // CORS wrapper for API responses

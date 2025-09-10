@@ -147,29 +147,29 @@ ${sanitizedText.slice(0, 2000)}`;
       } catch (error) {
         console.error('OpenAI API Error:', error); 
 
-        if (error instanceof OpenAI.APIError && error.status === 401) {
+        if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
           markApiKeyAsInvalid(); // Mark current key as invalid and switch
           attempts++;
           if (attempts < MAX_ATTEMPTS) {
-            console.warn(`Retrying OpenAI API call with a new key (attempt ${attempts}/${MAX_ATTEMPTS}).`);
+            console.warn(`Retrying API call with a new key (attempt ${attempts}/${MAX_ATTEMPTS}).`);
             continue; // Retry with next key
           } else {
-            console.error('All OpenAI API keys exhausted after multiple attempts.');
+            console.error('All API keys exhausted after multiple attempts.');
             return withCORS(createErrorResponse('AI processing failed: All API keys exhausted.', 500), request);
           }
         } else {
-          // Handle other types of OpenAI API errors or network errors
+          // Handle other types of API errors or network errors
           let errorMessage = 'AI processing failed. Please try again later.';
-          if (error instanceof OpenAI.APIError) {
+          if (error && typeof error === 'object' && 'status' in error) {
             switch (error.status) {
               case 429:
-                errorMessage = 'You have exceeded your OpenAI API quota. Please check your plan and billing details.';
+                errorMessage = 'You have exceeded your API quota. Please check your plan and billing details.';
                 break;
               case 500:
-                errorMessage = 'The OpenAI API is currently experiencing issues. Please try again later.';
+                errorMessage = 'The AI API is currently experiencing issues. Please try again later.';
                 break;
               default:
-                errorMessage = `An unexpected error occurred with the OpenAI API (Status: ${error.status}).`;
+                errorMessage = `An unexpected error occurred with the AI API (Status: ${error.status}).`;
                 break;
             }
           }

@@ -33,6 +33,14 @@ global.FormData = jest.fn(() => ({
   get: jest.fn(),
 }))
 
+global.Response = jest.fn(() => ({
+  ok: true,
+  json: jest.fn(),
+  text: jest.fn(),
+}));
+
+global.Request = jest.fn();
+
 beforeEach(() => {
   jest.clearAllMocks()
 })
