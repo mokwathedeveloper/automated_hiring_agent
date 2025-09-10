@@ -97,8 +97,10 @@ const CandidateCard = ({ candidate, openWhatsAppModal }: { candidate: Candidate,
       <div className="text-xs text-gray-500 dark:text-gray-400">
         Added: {new Date(candidate.created_at).toLocaleDateString()}
       </div>
-      <Button variant="outline" size="sm">View Details</Button>
-      <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)}><FaWhatsapp /></Button>
+      <div className="flex space-x-2">
+        <Button variant="outline" size="sm">View Details</Button>
+        <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)}><FaWhatsapp className="mr-1" /> WhatsApp</Button>
+      </div>
     </CardFooter>
   </Card>
 );
@@ -267,8 +269,10 @@ export default function Dashboard() {
                               </TableCell>
                               <TableCell>{new Date(candidate.created_at).toLocaleDateString()}</TableCell>
                               <TableCell>
-                                <Button variant="outline" size="sm">View</Button>
-                                <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)}><FaWhatsapp /></Button>
+                                <div className="flex space-x-2">
+                                  <Button variant="outline" size="sm">View</Button>
+                                  <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)}><FaWhatsapp className="mr-1" /> WhatsApp</Button>
+                                </div>
                               </TableCell>
                             </TableRow>
                           ))}
