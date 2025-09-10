@@ -20,7 +20,7 @@ export const schemas = {
   reviewText: Joi.string().min(10).max(1000).required(),
   name: Joi.string().min(2).max(100).pattern(/^[a-zA-Z\s]+$/).required(),
   company: Joi.string().min(2).max(100).required(),
-  phone: Joi.string().pattern(/^\+234[0-9]{10}$/).optional(),
+  phone: Joi.string().pattern(/^\+[1-9]\d{1,14}$/).optional(), // International phone numbers
 };
 
 // Sanitize input to prevent XSS
