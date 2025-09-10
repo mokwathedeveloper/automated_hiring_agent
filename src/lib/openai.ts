@@ -1,26 +1,35 @@
 import OpenAI from 'openai';
 
-interface ApiKeyConfig {
+interface DeepSeekConfig {
   apiKey: string;
-  provider: 'openai' | 'deepseek';
+  provider: 'deepseek';
   model: string;
-  baseURL?: string;
+  baseURL: string;
 }
 
-const API_KEY_CONFIGS: ApiKeyConfig[] = [
-  process.env.OPENAI_API_KEY_1 ? { apiKey: process.env.OPENAI_API_KEY_1, provider: 'openai', model: 'gpt-3.5-turbo' } : null,
-  process.env.OPENAI_API_KEY_2 ? { apiKey: process.env.OPENAI_API_KEY_2, provider: 'openai', model: 'gpt-3.5-turbo' } : null,
-  process.env.DEEPSEEK_API_KEY_1 ? { apiKey: process.env.DEEPSEEK_API_KEY_1, provider: 'deepseek', model: 'deepseek-chat', baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1' } : null,
-].filter(Boolean) as ApiKeyConfig[];
+// Only use DeepSeek API - no OpenAI integration
+function getDeepSeekConfig(): DeepSeekConfig {
+  const apiKey = process.env.DEEPSEEK_API_KEY_1;
+  const baseURL = process.env.DEEPSEEK_BASE_URL;
 
-let currentApiKeyIndex = 0;
-
-export function getOpenAIClient(): { client: OpenAI; model: string } {
-  if (API_KEY_CONFIGS.length === 0) {
-    throw new Error('No OpenAI or DeepSeek API keys configured.');
+  if (!apiKey) {
+    throw new Error('DEEPSEEK_API_KEY_1 is required but not configured in environment variables.');
   }
 
-  const config = API_KEY_CONFIGS[currentApiKeyIndex];
+  if (!baseURL) {
+    throw new Error('DEEPSEEK_BASE_URL is required but not configured in environment variables.');
+  }
+
+  return {
+    apiKey,
+    provider: 'deepseek',
+    model: 'deepseek-chat',
+    baseURL,
+  };
+}
+
+export function getOpenAIClient(): { client: OpenAI; model: string } {
+  const config = getDeepSeekConfig();
 
   return {
     client: new OpenAI({
@@ -32,17 +41,9 @@ export function getOpenAIClient(): { client: OpenAI; model: string } {
 }
 
 export function markApiKeyAsInvalid(): void {
-  if (API_KEY_CONFIGS.length === 0) {
-    console.warn('No API keys to mark as invalid.');
-    return;
-  }
-
-  console.warn(`API Key for ${API_KEY_CONFIGS[currentApiKeyIndex].provider} (model: ${API_KEY_CONFIGS[currentApiKeyIndex].model}) marked as invalid. Switching to next key.`);
-  currentApiKeyIndex = (currentApiKeyIndex + 1) % API_KEY_CONFIGS.length;
-
-  if (currentApiKeyIndex === 0) {
-    console.error('All configured API keys have been exhausted or are invalid. Please check your API keys.');
-  }
+  // Since we only have one DeepSeek API key, log the error and throw
+  console.error('DeepSeek API key is invalid or exhausted. Please check your DEEPSEEK_API_KEY_1 configuration.');
+  throw new Error('DeepSeek API authentication failed. Please verify your API key.');
 }
 
 // Export a default client for initial use, but encourage using getOpenAIClient

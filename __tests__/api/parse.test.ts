@@ -30,7 +30,7 @@ describe('/api/parse', () => {
     jest.clearAllMocks();
     (getOpenAIClient as jest.Mock).mockReturnValue({
       client: mockOpenAIClient,
-      model: 'gpt-3.5-turbo',
+      model: 'deepseek-chat',
     });
   });
 

@@ -164,14 +164,14 @@ async function processResumeFile(file: File, criteria: any): Promise<any> {
     throw new ResumeAnalysisError('Could not extract meaningful text', 'EXTRACTION_FAILED');
   }
 
-  // Parse with OpenAI
+  // Parse with DeepSeek API
   const prompt = `Extract JSON from resume:
 {"name":"","email":"","phone":"","skills":[],"experience":[{"title":"","company":"","duration":"","description":""}],"education":[{"degree":"","institution":"","year":""}],"summary":""}
 
 ${text.slice(0, 2000)}`;
 
-  const { client, model } = getOpenAIClient();
-  const completion = await client.chat.completions.create({
+  const { client: deepseekClient, model } = getOpenAIClient();
+  const completion = await deepseekClient.chat.completions.create({
     model: model,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.1,
