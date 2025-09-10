@@ -56,14 +56,14 @@ export async function POST(request: NextRequest) {
     if (contentType.includes('application/json')) {
       try {
         body = await request.json();
-      } catch (error) {
+      } catch {
         return createErrorResponse('Invalid JSON', 400);
       }
     } else if (contentType.includes('application/x-www-form-urlencoded')) {
       try {
         const formData = await request.formData();
         body = Object.fromEntries(formData.entries());
-      } catch (error) {
+      } catch {
         return createErrorResponse('Invalid form data', 400);
       }
     } else {

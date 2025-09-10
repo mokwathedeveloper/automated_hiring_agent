@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     let formData: FormData;
     try {
       formData = await request.formData();
-    } catch (error) {
+    } catch {
       return withCORS(createErrorResponse('Invalid form data', 400), request);
     }
 
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     let arrayBuffer: ArrayBuffer;
     try {
       arrayBuffer = await file.arrayBuffer();
-    } catch (error) {
+    } catch {
       return withCORS(createErrorResponse('Failed to read file', 400), request);
     }
 
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     
     try {
       text = await extractTextFromFile(buffer, file.type);
-    } catch (error) {
+    } catch {
       return withCORS(createErrorResponse('Failed to extract text from file', 400), request);
     }
 
