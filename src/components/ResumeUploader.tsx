@@ -127,15 +127,30 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
           body: formData,
         });
 
-        const result = await response.json();
+        let result;
+        try {
+          result = await response.json();
+        } catch (jsonError) {
+          console.error('Failed to parse response JSON:', jsonError);
+          throw new Error(`Server returned invalid response for file: ${file.name}`);
+        }
 
         if (!response.ok) {
           // If response is not OK, throw an error with the message from the backend
-          throw new Error(result.error || `An unknown error occurred (HTTP ${response.status})`);
+          const errorMessage = result?.error || `Server error (${response.status}) for file: ${file.name}`;
+          console.error('API Error:', errorMessage, result);
+          throw new Error(errorMessage);
         }
 
         if (!result.success) {
-          throw new Error(result.error || 'The upload failed for an unknown reason.');
+          const errorMessage = result?.error || `Upload failed for file: ${file.name}`;
+          console.error('Upload Error:', errorMessage, result);
+          throw new Error(errorMessage);
+        }
+
+        if (!result.data) {
+          console.error('No data returned for file:', file.name, result);
+          throw new Error(`No data returned for file: ${file.name}`);
         }
 
         uploadResults.push(result.data);
@@ -160,9 +175,27 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
 
     } catch (error: any) {
       console.error('Upload error:', error);
-      // FIX: Provide a more user-friendly error message instead of the raw error.
-      // This improves the user experience when the backend fails.
-      setError(`Upload failed: ${error.message}. Please check the file and try again.`);
+
+      // Provide more specific error messages based on error type
+      let userMessage = 'Upload failed. Please try again.';
+
+      if (error.message) {
+        if (error.message.includes('Network')) {
+          userMessage = 'Network error. Please check your connection and try again.';
+        } else if (error.message.includes('Server error (500)')) {
+          userMessage = 'Server error. Please try again later or contact support.';
+        } else if (error.message.includes('Database')) {
+          userMessage = 'Database error. The file was processed but not saved. Please contact support.';
+        } else if (error.message.includes('AI processing failed')) {
+          userMessage = 'AI processing failed. Please try with a different file or try again later.';
+        } else if (error.message.includes('Invalid')) {
+          userMessage = 'Invalid file format or content. Please check your file and try again.';
+        } else {
+          userMessage = `Upload failed: ${error.message}`;
+        }
+      }
+
+      setError(userMessage);
     } finally {
       setIsUploading(false);
     }

@@ -101,17 +101,33 @@ export async function POST(request: NextRequest) {
     let arrayBuffer: ArrayBuffer;
     try {
       arrayBuffer = await file.arrayBuffer();
-    } catch {
-      return withCORS(createErrorResponse('Failed to read file', 400), request);
+    } catch (error) {
+      console.error('File reading error:', error);
+      return withCORS(createErrorResponse('Failed to read file. The file may be corrupted or too large.', 400), request);
     }
 
     const buffer = Buffer.from(arrayBuffer);
     let text: string;
-    
+
     try {
       text = await extractTextFromFile(buffer, file.type);
-    } catch {
-      return withCORS(createErrorResponse('Failed to extract text from file', 400), request);
+    } catch (error) {
+      console.error('Text extraction error:', error);
+      let errorMessage = 'Failed to extract text from file';
+
+      if (error instanceof Error) {
+        if (error.message.includes('Insufficient text content')) {
+          errorMessage = 'The uploaded file does not contain enough readable text. Please ensure the file is a valid resume with text content.';
+        } else if (error.message.includes('File too large')) {
+          errorMessage = 'The file is too large to process. Please upload a file smaller than 5MB.';
+        } else if (error.message.includes('Unsupported file type')) {
+          errorMessage = 'Unsupported file format. Please upload a PDF or DOCX file.';
+        } else {
+          errorMessage = `File processing failed: ${error.message}`;
+        }
+      }
+
+      return withCORS(createErrorResponse(errorMessage, 400), request);
     }
 
     const sanitizedText = sanitizeInput(text);
@@ -184,7 +200,20 @@ ${sanitizedText.slice(0, 2000)}`;
       rawData = JSON.parse(cleanedContent);
     } catch (error) {
       console.error('JSON parse error:', error);
-      return withCORS(createErrorResponse('Invalid AI response format', 500), request);
+      console.error('AI response content:', cleanedContent);
+
+      // Try to provide a more helpful error message
+      let errorMessage = 'The AI service returned an invalid response format';
+
+      if (cleanedContent.length === 0) {
+        errorMessage = 'The AI service returned an empty response. Please try again.';
+      } else if (cleanedContent.includes('error') || cleanedContent.includes('Error')) {
+        errorMessage = 'The AI service encountered an error processing your file. Please try with a different file.';
+      } else {
+        errorMessage = 'The AI service response could not be processed. This may be a temporary issue - please try again.';
+      }
+
+      return withCORS(createErrorResponse(errorMessage, 502), request);
     }
 
     if (rawData && typeof rawData === 'object') {
@@ -271,7 +300,23 @@ ${sanitizedText.slice(0, 2000)}`;
         console.error('Hint:', insertError.hint);
         console.error('Code:', insertError.code);
         console.error('Full error object:', JSON.stringify(insertError, null, 2));
-        return withCORS(createErrorResponse(`Database error: ${insertError.message}`, 500), request);
+
+        // Provide user-friendly error messages based on error type
+        let userMessage = 'Failed to save candidate data';
+
+        if (insertError.code === '23505') {
+          userMessage = 'A candidate with this email already exists in the database';
+        } else if (insertError.code === '23502') {
+          userMessage = 'Required candidate information is missing';
+        } else if (insertError.message.includes('permission')) {
+          userMessage = 'Database permission error. Please contact support.';
+        } else if (insertError.message.includes('connection')) {
+          userMessage = 'Database connection error. Please try again later.';
+        } else {
+          userMessage = `Database error: ${insertError.message}`;
+        }
+
+        return withCORS(createErrorResponse(userMessage, 500), request);
       }
 
       console.log(`Candidate saved to Supabase successfully:`, insertedData);
@@ -281,6 +326,30 @@ ${sanitizedText.slice(0, 2000)}`;
     
   } catch (error) {
     console.error('Parse error:', error);
-    return withCORS(createErrorResponse('Internal server error', 500), request);
+
+    // Provide more specific error messages based on error type
+    let errorMessage = 'Internal server error';
+    let statusCode = 500;
+
+    if (error instanceof Error) {
+      // Handle specific error types
+      if (error.message.includes('fetch')) {
+        errorMessage = 'Network error occurred while processing request';
+        statusCode = 503;
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Request timed out. Please try again with a smaller file';
+        statusCode = 408;
+      } else if (error.message.includes('JSON')) {
+        errorMessage = 'Invalid data format received';
+        statusCode = 422;
+      } else if (error.message.includes('validation')) {
+        errorMessage = 'Data validation failed';
+        statusCode = 400;
+      } else {
+        errorMessage = `Processing failed: ${error.message}`;
+      }
+    }
+
+    return withCORS(createErrorResponse(errorMessage, statusCode), request);
   }
 }

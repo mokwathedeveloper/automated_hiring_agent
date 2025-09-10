@@ -21,9 +21,16 @@ export default function Pricing() {
       return;
     }
 
+    // Check if Paystack is loaded
+    if (typeof window === 'undefined' || !window.PaystackPop) {
+      alert('Payment system is not available. Please refresh the page and try again.');
+      return;
+    }
+
     setIsLoading(true);
 
-    const handler = window.PaystackPop.setup({
+    try {
+      const handler = window.PaystackPop.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
       email: user.email,
       amount: 5000 * 100,
@@ -57,7 +64,12 @@ export default function Pricing() {
       },
     });
 
-    handler.openIframe();
+      handler.openIframe();
+    } catch (error) {
+      console.error('Paystack setup error:', error);
+      setIsLoading(false);
+      alert('Payment setup failed. Please try again or contact support.');
+    }
   };
 
   return (

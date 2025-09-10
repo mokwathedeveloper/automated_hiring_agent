@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import QueryProvider from '@/components/QueryProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export const metadata: Metadata = {
   title: 'HiringAgent',
@@ -23,19 +24,21 @@ export default function RootLayout({
         <script async src="https://js.paystack.co/v1/inline.js"></script>
       </head>
       <body className="font-sans">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <QueryProvider>
-            <Navbar />
-            {children}
-            <Footer />
-            <Toaster />
-          </QueryProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <QueryProvider>
+              <Navbar />
+              {children}
+              <Footer />
+              <Toaster />
+            </QueryProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
