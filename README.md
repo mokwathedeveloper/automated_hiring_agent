@@ -1,14 +1,20 @@
-# 🤖 Automated Hiring Agent
+# 🚀 HiringAgent - Automated Resume Analysis & Candidate Management
 
-An AI-powered resume analysis platform designed specifically for the Nigerian job market. Streamline your hiring process with intelligent candidate evaluation, WhatsApp integration, and comprehensive analytics.
+A modern, AI-powered hiring platform that automates resume parsing, candidate management, and communication workflows. Built with Next.js, Supabase, and integrated WhatsApp messaging for streamlined hiring processes.
+
+![HiringAgent Dashboard](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
+![Next.js](https://img.shields.io/badge/Next.js-14.0.3-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Supabase](https://img.shields.io/badge/Supabase-Latest-green)
 
 ## ✨ Features
 
 ### 🎯 **Core Functionality**
-- **AI-Powered Resume Analysis**: Advanced OpenAI integration with HR-focused prompting
-- **Nigerian Market Optimization**: Specialized for local companies, universities, and formats
-- **Drag-and-Drop Upload**: Modern file upload with PDF/DOCX support
-- **Real-time Processing**: Instant candidate scoring and detailed feedback
+- **AI-Powered Resume Parsing**: Automatically extract candidate information from PDF resumes
+- **Candidate Management**: Comprehensive dashboard for managing candidates and applications
+- **Real-time Updates**: Live data synchronization with automatic refresh every 30 seconds
+- **Responsive Design**: Mobile-first design with cards (mobile/tablet) and table (desktop) views
+- **Search & Filter**: Real-time search across candidate names, emails, phone numbers, and skills
 
 ### 🔐 **Authentication & Security**
 - **Magic Link Authentication**: Passwordless login via Supabase Auth
@@ -17,10 +23,18 @@ An AI-powered resume analysis platform designed specifically for the Nigerian jo
 - **File Validation**: Strict type and size checking (PDF/DOCX, max 5MB)
 
 ### 💬 **WhatsApp Integration**
-- **Twilio WhatsApp API**: Direct candidate communication
-- **Media Handling**: Resume upload via WhatsApp
-- **Automated Responses**: Intelligent conversation flow
-- **Session Management**: Persistent chat state tracking
+- **Message Templates**: Pre-built templates for interview invitations, follow-ups, and job offers
+- **Real-time Status**: Live configuration checking and status indicators
+- **Interactive Setup**: Built-in guide for Twilio WhatsApp API configuration
+- **Error Handling**: Comprehensive error handling with user-friendly messages
+- **Candidate Context**: Shows candidate skills, experience, and contact info in messaging interface
+
+### 📊 **Dashboard Features**
+- **Candidate Overview**: View all candidates in responsive cards or table format
+- **Statistics Dashboard**: Live metrics showing total candidates, recent uploads, and system status
+- **Resume Upload**: Drag-and-drop interface for uploading and parsing resumes
+- **WhatsApp Integration**: Send messages directly from candidate cards with one click
+- **Auto-refresh**: Data updates automatically every 30 seconds for real-time information
 
 ### 💳 **Payment & Subscriptions**
 - **Paystack Integration**: Nigerian payment gateway
@@ -41,12 +55,13 @@ An AI-powered resume analysis platform designed specifically for the Nigerian jo
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling
 - **React Query**: Client-side caching and state management
+- **React Icons & Lucide**: Modern icon libraries
 
 ### **Backend**
 - **Next.js API Routes**: Serverless functions
-- **OpenAI GPT-3.5**: AI-powered analysis
-- **Zod**: Runtime type validation
-- **Middleware**: Rate limiting and security
+- **PDF-Parse**: Resume parsing and text extraction
+- **Joi**: Input validation and security
+- **Twilio**: WhatsApp Business API integration
 
 ### **Database & Auth**
 - **Supabase**: PostgreSQL database and authentication
@@ -69,7 +84,7 @@ An AI-powered resume analysis platform designed specifically for the Nigerian jo
 ### Prerequisites
 - Node.js 18+ and npm
 - Supabase account and project
-- OpenAI API key
+- DeepSeek API key
 - Twilio account (for WhatsApp)
 - Paystack account (for payments)
 
@@ -88,10 +103,11 @@ npm install
 Create `.env.local` file with the following configuration:
 
 ```env
-# OpenAI Configuration
-OPENAI_API_KEY=sk-your-openai-api-key-here
+# DeepSeek Configuration
+DEEPSEEK_API_KEY_1=sk-your-deepseek-api-key-here
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
 
-# Supabase Configuration  
+# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -111,7 +127,7 @@ PAYSTACK_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 **Environment Variables Guide:**
-- **OpenAI**: Get API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+- **DeepSeek**: Get API key from [DeepSeek Platform](https://platform.deepseek.com/api_keys)
 - **Supabase**: Create project at [Supabase Dashboard](https://supabase.com/dashboard)
 - **NextAuth**: Generate secret with `openssl rand -base64 32`
 - **Twilio**: Sign up at [Twilio Console](https://console.twilio.com/)
@@ -122,25 +138,36 @@ PAYSTACK_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 **Option A: Supabase Dashboard (Recommended)**
 1. Go to your Supabase project dashboard
 2. Navigate to SQL Editor
-3. Copy and execute the contents of `database/schema.sql`
+3. Run the migration files in order:
+   ```sql
+   -- Execute these files in order:
+   -- 1. migrations/supabase/20250906145518_database_schema.up.sql
+   -- 2. migrations/supabase/20250909100000_create_candidates_view.up.sql
+   -- 3. migrations/supabase/20250909135157_create_candidates_table.up.sql
+   ```
 
 **Option B: Command Line**
 ```bash
 # Connect to Supabase database
 psql "postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
 
-# Run schema
-\i database/schema.sql
+# Run migrations in order
+\i migrations/supabase/20250906145518_database_schema.up.sql
+\i migrations/supabase/20250909100000_create_candidates_view.up.sql
+\i migrations/supabase/20250909135157_create_candidates_table.up.sql
 ```
 
 **Verify Setup:**
 ```sql
--- Check if tables were created
+-- Check if tables were created (should include candidates table)
 \dt
 
+-- Verify candidates table structure
+\d candidates
+
 -- Verify RLS policies
-SELECT schemaname, tablename, policyname 
-FROM pg_policies 
+SELECT schemaname, tablename, policyname
+FROM pg_policies
 WHERE schemaname = 'public';
 ```
 
@@ -179,6 +206,46 @@ automated_hiring_agent/
 ├── __tests__/                 # Test files
 ├── doc/                       # Documentation
 └── .amazonq/rules/            # Development rules
+```
+
+## 📖 API Documentation
+
+### **Candidates API**
+- `GET /api/candidates` - Fetch all candidates with pagination
+- `POST /api/candidates` - Create new candidate (used internally by resume parser)
+
+### **Resume Parsing API**
+- `POST /api/parse` - Parse single resume PDF and extract candidate data
+- `POST /api/parse/batch` - Parse multiple resumes (future enhancement)
+
+### **WhatsApp API**
+- `POST /api/whatsapp` - Send WhatsApp message to candidate
+- `GET /api/whatsapp/status` - Check Twilio configuration status
+
+### **Authentication API**
+- `POST /api/auth/[...nextauth]` - NextAuth endpoints for authentication
+- `GET /api/auth/callback` - Authentication callback handler
+
+### **Example API Usage**
+
+#### Send WhatsApp Message
+```bash
+curl -X POST http://localhost:3000/api/whatsapp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "+254724745666",
+    "message": "Hello! We would like to schedule an interview with you."
+  }'
+```
+
+#### Check WhatsApp Status
+```bash
+curl -X GET http://localhost:3000/api/whatsapp/status
+```
+
+#### Fetch Candidates
+```bash
+curl -X GET http://localhost:3000/api/candidates
 ```
 
 ## 🧪 Testing
@@ -330,9 +397,9 @@ Content-Type: application/json
 
 ## 🔧 Configuration
 
-### OpenAI Optimization
-- **Model**: GPT-3.5-turbo for cost efficiency
-- **Temperature**: 0.2 for consistent responses
+### DeepSeek Optimization
+- **Model**: deepseek-chat for cost efficiency and performance
+- **Temperature**: 0.1 for consistent responses
 - **Max Tokens**: 500 for concise analysis
 - **Prompt Engineering**: HR-focused evaluation framework
 

@@ -105,9 +105,9 @@ export default function Dashboard() {
     setIsWhatsAppModalOpen(true);
   };
 
-  const { data: candidates = [], isLoading, error } = useQuery<Candidate[]>({ 
-    queryKey: ['candidates', user?.id], 
-    queryFn: fetchCandidates, 
+  const { data: candidates = [], isLoading, error } = useQuery<Candidate[]>({
+    queryKey: ['candidates', user?.id],
+    queryFn: fetchCandidates,
     enabled: !!user, // Only run the query if the user is authenticated
   });
 

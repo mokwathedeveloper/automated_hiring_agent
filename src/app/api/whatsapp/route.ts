@@ -15,13 +15,37 @@ import Joi from 'joi';
 let client: any = null;
 
 function getTwilioClient() {
-  if (!client && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-    client = twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN
-    );
+  // Check if credentials are properly configured
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+
+  if (!accountSid || !authToken) {
+    console.error('Twilio credentials not configured');
+    return null;
+  }
+
+  if (accountSid === 'your_account_sid_here' || authToken === 'your_auth_token_here') {
+    console.error('Please replace placeholder Twilio credentials with real ones');
+    return null;
+  }
+
+  if (!client) {
+    try {
+      client = twilio(accountSid, authToken);
+      console.log('Twilio client initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize Twilio client:', error);
+      return null;
+    }
   }
   return client;
+}
+
+// Function to validate phone number format
+function validatePhoneNumber(phone: string): boolean {
+  // Remove any whitespace and check if it starts with +
+  const cleanPhone = phone.trim();
+  return /^\+[1-9]\d{1,14}$/.test(cleanPhone);
 }
 
 // WhatsApp message validation schema
@@ -140,15 +164,31 @@ export async function POST(request: NextRequest) {
 
       const { to, message, mediaUrl } = validation.data!;
 
+      // Validate phone number format
+      if (!validatePhoneNumber(to)) {
+        return createErrorResponse('Invalid phone number format. Please use international format (e.g., +1234567890)', 400);
+      }
+
       // Send WhatsApp message
       try {
         const twilioClient = getTwilioClient();
         if (!twilioClient) {
-          return createErrorResponse('WhatsApp service not configured', 503);
+          return createErrorResponse(
+            'WhatsApp service not configured. Please set up your Twilio credentials in the environment variables.',
+            503
+          );
         }
-        
+
+        const whatsappNumber = process.env.TWILIO_WHATSAPP_NUMBER;
+        if (!whatsappNumber || whatsappNumber === 'whatsapp:+your_whatsapp_number_here') {
+          return createErrorResponse(
+            'WhatsApp number not configured. Please set TWILIO_WHATSAPP_NUMBER in environment variables.',
+            503
+          );
+        }
+
         const messageOptions: any = {
-          from: process.env.TWILIO_WHATSAPP_NUMBER,
+          from: whatsappNumber,
           to: `whatsapp:${to}`,
           body: message
         };
@@ -157,26 +197,39 @@ export async function POST(request: NextRequest) {
           messageOptions.mediaUrl = [mediaUrl];
         }
 
+        console.log(`Attempting to send WhatsApp message to ${to}`);
         const result = await twilioClient.messages.create(messageOptions);
 
-        console.log(`WhatsApp message sent to ${to}: ${result.sid}`);
+        console.log(`WhatsApp message sent successfully to ${to}: ${result.sid}`);
 
         return createSuccessResponse({
           messageSid: result.sid,
-          status: result.status
+          status: result.status,
+          to: to,
+          message: 'Message sent successfully'
         });
 
       } catch (error: any) {
         console.error('Twilio error:', error);
-        
+
+        // Handle specific Twilio error codes
         if (error.code === 21211) {
-          return createErrorResponse('Invalid phone number format', 400);
+          return createErrorResponse('Invalid phone number format. Please check the number and try again.', 400);
         } else if (error.code === 21408) {
-          return createErrorResponse('Permission denied for this number', 403);
+          return createErrorResponse('Permission denied. This number may not be authorized for WhatsApp.', 403);
         } else if (error.code === 21610) {
-          return createErrorResponse('Message contains prohibited content', 400);
+          return createErrorResponse('Message contains prohibited content. Please modify your message.', 400);
+        } else if (error.code === 20003) {
+          return createErrorResponse('Authentication failed. Please check your Twilio credentials.', 401);
+        } else if (error.code === 21614) {
+          return createErrorResponse('WhatsApp number not verified. Please verify your WhatsApp Business number with Twilio.', 403);
+        } else if (error.status === 401) {
+          return createErrorResponse('Invalid Twilio credentials. Please check your Account SID and Auth Token.', 401);
         } else {
-          return createErrorResponse('Failed to send message', 500);
+          return createErrorResponse(
+            `Failed to send message: ${error.message || 'Unknown error occurred'}`,
+            500
+          );
         }
       }
     }

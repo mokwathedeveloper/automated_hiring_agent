@@ -126,55 +126,44 @@ Resume text:
 ${sanitizedText.slice(0, 2000)}`;
 
     let completion;
-    let attempts = 0;
-    const MAX_ATTEMPTS = 3; // Max attempts to try different API keys
 
-    while (attempts < MAX_ATTEMPTS) {
-      try {
-        const { client: openai, model } = getOpenAIClient(); // Get an OpenAI client and model with the current active key
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-        
-        completion = await openai.chat.completions.create({
-          model: model,
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.1,
-          max_tokens: 500,
-        });
-        
-        clearTimeout(timeoutId);
-        break; // Success, exit loop
-      } catch (error) {
-        console.error('OpenAI API Error:', error); 
+    try {
+      // Use DeepSeek API for resume parsing
+      const { client: deepseekClient, model } = getOpenAIClient();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-        if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
-          markApiKeyAsInvalid(); // Mark current key as invalid and switch
-          attempts++;
-          if (attempts < MAX_ATTEMPTS) {
-            console.warn(`Retrying API call with a new key (attempt ${attempts}/${MAX_ATTEMPTS}).`);
-            continue; // Retry with next key
-          } else {
-            console.error('All API keys exhausted after multiple attempts.');
-            return withCORS(createErrorResponse('AI processing failed: All API keys exhausted.', 500), request);
+      completion = await deepseekClient.chat.completions.create({
+        model: model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+        max_tokens: 500,
+      });
+
+      clearTimeout(timeoutId);
+    } catch (error) {
+      console.error('DeepSeek API Error:', error);
+
+      if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
+        console.error('DeepSeek API authentication failed.');
+        return withCORS(createErrorResponse('AI processing failed: Invalid API key. Please check DeepSeek configuration.', 500), request);
+      } else {
+        // Handle other types of API errors or network errors
+        let errorMessage = 'AI processing failed. Please try again later.';
+        if (error && typeof error === 'object' && 'status' in error) {
+          switch (error.status) {
+            case 429:
+              errorMessage = 'You have exceeded your API quota. Please check your DeepSeek plan and billing details.';
+              break;
+            case 500:
+              errorMessage = 'The DeepSeek API is currently experiencing issues. Please try again later.';
+              break;
+            default:
+              errorMessage = `An unexpected error occurred with the DeepSeek API (Status: ${error.status}).`;
+              break;
           }
-        } else {
-          // Handle other types of API errors or network errors
-          let errorMessage = 'AI processing failed. Please try again later.';
-          if (error && typeof error === 'object' && 'status' in error) {
-            switch (error.status) {
-              case 429:
-                errorMessage = 'You have exceeded your API quota. Please check your plan and billing details.';
-                break;
-              case 500:
-                errorMessage = 'The AI API is currently experiencing issues. Please try again later.';
-                break;
-              default:
-                errorMessage = `An unexpected error occurred with the AI API (Status: ${error.status}).`;
-                break;
-            }
-          }
-          return withCORS(createErrorResponse(errorMessage, 500), request);
         }
+        return withCORS(createErrorResponse(errorMessage, 500), request);
       }
     }
 
@@ -233,25 +222,60 @@ ${sanitizedText.slice(0, 2000)}`;
     const supabase = await createClient();
 
     // Save parsed data to Supabase candidates table
+    // Note: Requires candidates table with education JSONB column
+    // Run migration: migrations/supabase/20250909135157_create_candidates_table.up.sql
     console.log('Data to be inserted into Supabase:', validationResult.data);
-    const { data: candidateData, error: insertError } = await supabase
-      .from('candidates')
-      .insert({
+
+    // TEMPORARY: Skip Supabase insert for testing (remove this when migration is complete)
+    const SKIP_DATABASE_INSERT = process.env.SKIP_DATABASE_INSERT === 'true';
+
+    if (SKIP_DATABASE_INSERT) {
+      console.log('⚠️  SKIPPING DATABASE INSERT (SKIP_DATABASE_INSERT=true)');
+      console.log('✅ Resume parsing successful, but not saved to database');
+    } else {
+      // First, let's check if the candidates table exists
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('candidates')
+        .select('id')
+        .limit(1);
+
+      if (tableError) {
+        console.error('Candidates table check failed:', tableError);
+        console.error('This likely means the migration has not been run yet.');
+        console.error('Please run the migration: migrations/supabase/20250909135157_create_candidates_table.up.sql');
+        console.error('💡 Temporary fix: Add SKIP_DATABASE_INSERT=true to your .env to test without database');
+        return withCORS(createErrorResponse('Database not properly configured. Please run migrations.', 500), request);
+      }
+
+      // Prepare the data for insertion
+      const candidateData = {
         name: validationResult.data.name,
         email: validationResult.data.email,
         phone: validationResult.data.phone,
-        work_experience: validationResult.data.experience,
-        skills: validationResult.data.skills,
-        education: validationResult.data.education,
-      })
-      .select();
+        work_experience: validationResult.data.experience, // JSONB field
+        skills: validationResult.data.skills, // TEXT[] array
+        education: validationResult.data.education, // JSONB field
+      };
 
-    if (insertError) {
-      console.error('Error saving candidate to Supabase:', insertError.message, insertError.details, insertError.hint, insertError.code);
-      return withCORS(createErrorResponse('Failed to save candidate data.', 500), request);
+      console.log('Attempting to insert candidate data:', candidateData);
+
+      const { data: insertedData, error: insertError } = await supabase
+        .from('candidates')
+        .insert(candidateData)
+        .select();
+
+      if (insertError) {
+        console.error('Error saving candidate to Supabase:');
+        console.error('Message:', insertError.message);
+        console.error('Details:', insertError.details);
+        console.error('Hint:', insertError.hint);
+        console.error('Code:', insertError.code);
+        console.error('Full error object:', JSON.stringify(insertError, null, 2));
+        return withCORS(createErrorResponse(`Database error: ${insertError.message}`, 500), request);
+      }
+
+      console.log(`Candidate saved to Supabase successfully:`, insertedData);
     }
-
-    console.log(`Candidate saved to Supabase:`, candidateData);
 
     return withCORS(createSuccessResponse(validationResult.data), request);
     

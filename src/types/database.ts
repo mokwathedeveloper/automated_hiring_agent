@@ -83,6 +83,39 @@ export type Database = {
           },
         ]
       }
+      candidates: {
+        Row: {
+          created_at: string | null
+          education: Json | null
+          email: string | null
+          id: string
+          name: string | null
+          phone: string | null
+          skills: string[] | null
+          work_experience: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          education?: Json | null
+          email?: string | null
+          id?: string
+          name?: string | null
+          phone?: string | null
+          skills?: string[] | null
+          work_experience?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          education?: Json | null
+          email?: string | null
+          id?: string
+          name?: string | null
+          phone?: string | null
+          skills?: string[] | null
+          work_experience?: Json | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
