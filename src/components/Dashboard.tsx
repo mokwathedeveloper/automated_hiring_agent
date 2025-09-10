@@ -3,13 +3,14 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-import { FaUser, FaFileAlt, FaChartLine, FaAward, FaClock, FaSearch } from 'react-icons/fa';
+import { FaUser, FaFileAlt, FaChartLine, FaAward, FaClock, FaSearch, FaWhatsapp } from 'react-icons/fa';
 import { useState, useMemo } from 'react';
 import LoadingSkeleton from './LoadingSkeleton';
 import ErrorMessage from './ErrorMessage';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import WhatsAppModal from './WhatsAppModal';
 
 // Define types for the data we expect from the API
 interface WorkExperience {
@@ -54,7 +55,7 @@ const fetchCandidates = async (): Promise<Candidate[]> => {
 
 import { Badge } from '@/components/ui/badge';
 
-const CandidateCard = ({ candidate }: { candidate: Candidate }) => (
+const CandidateCard = ({ candidate, openWhatsAppModal }: { candidate: Candidate, openWhatsAppModal: (candidate: Candidate) => void }) => (
   <Card className="flex flex-col justify-between transition-all hover:shadow-lg">
     <CardHeader>
       <div className="flex justify-between items-start">
@@ -97,6 +98,7 @@ const CandidateCard = ({ candidate }: { candidate: Candidate }) => (
         Added: {new Date(candidate.created_at).toLocaleDateString()}
       </div>
       <Button variant="outline" size="sm">View Details</Button>
+      <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)}><FaWhatsapp /></Button>
     </CardFooter>
   </Card>
 );
@@ -104,6 +106,13 @@ const CandidateCard = ({ candidate }: { candidate: Candidate }) => (
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+
+  const openWhatsAppModal = (candidate: Candidate) => {
+    setSelectedCandidate(candidate);
+    setIsWhatsAppModalOpen(true);
+  };
 
   const { data: candidates = [], isLoading, error } = useQuery<Candidate[]>({ 
     queryKey: ['candidates', user?.id], 
@@ -212,7 +221,7 @@ export default function Dashboard() {
                     {/* Mobile and Tablet View (Cards) */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden gap-6">
                       {filteredCandidates.map((candidate) => (
-                        <CandidateCard key={candidate.id} candidate={candidate} />
+                        <CandidateCard key={candidate.id} candidate={candidate} openWhatsAppModal={openWhatsAppModal} />
                       ))}
                     </div>
 
@@ -259,6 +268,7 @@ export default function Dashboard() {
                               <TableCell>{new Date(candidate.created_at).toLocaleDateString()}</TableCell>
                               <TableCell>
                                 <Button variant="outline" size="sm">View</Button>
+                                <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)}><FaWhatsapp /></Button>
                               </TableCell>
                             </TableRow>
                           ))}
@@ -272,6 +282,13 @@ export default function Dashboard() {
           </>
         )}
       </main>
+      {isWhatsAppModalOpen && selectedCandidate && (
+        <WhatsAppModal
+          isOpen={isWhatsAppModalOpen}
+          onClose={() => setIsWhatsAppModalOpen(false)}
+          candidate={selectedCandidate}
+        />
+      )}
     </div>
   );
 }
