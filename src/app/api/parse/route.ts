@@ -225,24 +225,48 @@ ${sanitizedText.slice(0, 2000)}`;
     // Note: Requires candidates table with education JSONB column
     // Run migration: migrations/supabase/20250909135157_create_candidates_table.up.sql
     console.log('Data to be inserted into Supabase:', validationResult.data);
-    const { data: candidateData, error: insertError } = await supabase
+
+    // First, let's check if the candidates table exists
+    const { data: tableCheck, error: tableError } = await supabase
       .from('candidates')
-      .insert({
-        name: validationResult.data.name,
-        email: validationResult.data.email,
-        phone: validationResult.data.phone,
-        work_experience: validationResult.data.experience, // JSONB field
-        skills: validationResult.data.skills, // TEXT[] array
-        education: validationResult.data.education, // JSONB field
-      })
+      .select('id')
+      .limit(1);
+
+    if (tableError) {
+      console.error('Candidates table check failed:', tableError);
+      console.error('This likely means the migration has not been run yet.');
+      console.error('Please run the migration: migrations/supabase/20250909135157_create_candidates_table.up.sql');
+      return withCORS(createErrorResponse('Database not properly configured. Please run migrations.', 500), request);
+    }
+
+    // Prepare the data for insertion
+    const candidateData = {
+      name: validationResult.data.name,
+      email: validationResult.data.email,
+      phone: validationResult.data.phone,
+      work_experience: validationResult.data.experience, // JSONB field
+      skills: validationResult.data.skills, // TEXT[] array
+      education: validationResult.data.education, // JSONB field
+    };
+
+    console.log('Attempting to insert candidate data:', candidateData);
+
+    const { data: insertedData, error: insertError } = await supabase
+      .from('candidates')
+      .insert(candidateData)
       .select();
 
     if (insertError) {
-      console.error('Error saving candidate to Supabase:', insertError.message, insertError.details, insertError.hint, insertError.code);
-      return withCORS(createErrorResponse('Failed to save candidate data.', 500), request);
+      console.error('Error saving candidate to Supabase:');
+      console.error('Message:', insertError.message);
+      console.error('Details:', insertError.details);
+      console.error('Hint:', insertError.hint);
+      console.error('Code:', insertError.code);
+      console.error('Full error object:', JSON.stringify(insertError, null, 2));
+      return withCORS(createErrorResponse(`Database error: ${insertError.message}`, 500), request);
     }
 
-    console.log(`Candidate saved to Supabase:`, candidateData);
+    console.log(`Candidate saved to Supabase successfully:`, insertedData);
 
     return withCORS(createSuccessResponse(validationResult.data), request);
     
