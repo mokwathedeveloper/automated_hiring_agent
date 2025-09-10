@@ -305,7 +305,7 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
         <div className="mt-6 text-sm text-center">
           {mode !== 'signup' && (
             <p>
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Button variant="link" onClick={() => switchMode('signup')} className="text-primary-600">
                 Sign Up
               </Button>

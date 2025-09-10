@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script src="https://js.paystack.co/v1/inline.js"></script>
+        <script async src="https://js.paystack.co/v1/inline.js"></script>
       </head>
       <body className="font-sans">
         <ThemeProvider

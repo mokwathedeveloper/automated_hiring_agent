@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -32,13 +32,7 @@ export default function Dashboard() {
     }
   }, [user, loading, router]);
 
-  useEffect(() => {
-    if (user) {
-      fetchAnalyses();
-    }
-  }, [user]);
-
-  const fetchAnalyses = async () => {
+  const fetchAnalyses = useCallback(async () => {
     if (!user?.id) return;
 
     const { data } = await supabase
@@ -54,7 +48,13 @@ export default function Dashboard() {
       const avgScore = total > 0 ? data.reduce((sum, a: any) => sum + a.score, 0) / total : 0;
       setStats({ total, avgScore });
     }
-  };
+  }, [user, supabase]);
+
+  useEffect(() => {
+    if (user) {
+      fetchAnalyses();
+    }
+  }, [user, fetchAnalyses, supabase]);
 
   const handleUploadSuccess = (results: any[]) => {
     // Refresh analyses after successful upload

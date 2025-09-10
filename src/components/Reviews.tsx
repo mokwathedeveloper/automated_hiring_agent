@@ -216,7 +216,7 @@ export default function Reviews() {
                 </div>
                 
                 <p className="text-gray-700 dark:text-gray-300 transition-colors duration-500">
-                  "{review.comment}"
+                  &quot;{review.comment}&quot;
                 </p>
               </motion.div>
             ))}

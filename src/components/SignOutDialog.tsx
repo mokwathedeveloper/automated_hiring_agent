@@ -56,7 +56,7 @@ export default function SignOutDialog({ onConfirm, trigger }: SignOutDialogProps
             <span>Confirm Sign Out</span>
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to sign out? You'll need to sign in again to access your dashboard.
+            Are you sure you want to sign out? You&apos;ll need to sign in again to access your dashboard.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col sm:flex-row gap-2">
