@@ -12,28 +12,28 @@ describe('ResumeUploader', () => {
   it('renders upload interface correctly', () => {
     render(<ResumeUploader />)
     
-    expect(screen.getByText('Upload Resume')).toBeInTheDocument()
-    expect(screen.getByText('Drag & Drop Resume Here')).toBeInTheDocument()
-    expect(screen.getByText('or click to browse files • PDF, DOC, DOCX supported')).toBeInTheDocument()
-    expect(screen.getByText('Choose File')).toBeInTheDocument()
+    expect(screen.getByText('Upload Resumes for Analysis')).toBeInTheDocument()
+    expect(screen.getByText('Drag & drop resumes, or click to select')).toBeInTheDocument()
+    expect(screen.getByText('PDF or DOCX, up to 5MB each. Maximum 100 files.')).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /job description/i })).toBeInTheDocument()
   })
 
   it('handles file selection', () => {
     render(<ResumeUploader />)
     
-    const fileInput = screen.getByLabelText('Choose File')
+    const fileInput = screen.getByTestId('file-input')
     const file = new File(['test content'], 'test-resume.pdf', { type: 'application/pdf' })
     
     fireEvent.change(fileInput, { target: { files: [file] } })
     
     expect(screen.getByText('test-resume.pdf')).toBeInTheDocument()
-    expect(screen.getByText('Analyze Resume')).toBeInTheDocument()
+    expect(screen.getByText(/Analyze.*Resume/i)).toBeInTheDocument()
   })
 
   it('handles drag and drop', () => {
     render(<ResumeUploader />)
     
-    const dropZone = screen.getByText('Drag & Drop Resume Here').closest('div')
+    const dropZone = screen.getByText('Drag & drop resumes, or click to select').closest('div')
     const file = new File(['test content'], 'dropped-resume.pdf', { type: 'application/pdf' })
     
     fireEvent.dragOver(dropZone!)
@@ -52,13 +52,13 @@ describe('ResumeUploader', () => {
 
     render(<ResumeUploader />)
     
-    const fileInput = screen.getByLabelText('Choose File')
+    const fileInput = screen.getByTestId('file-input')
     const file = new File(['test content'], 'test-resume.pdf', { type: 'application/pdf' })
     
     fireEvent.change(fileInput, { target: { files: [file] } })
-    fireEvent.click(screen.getByText('Analyze Resume'))
+    fireEvent.click(screen.getByText(/Analyze.*Resume/i))
     
-    expect(screen.getByText('Parsing Resume...')).toBeInTheDocument()
+    expect(screen.getByText('Analyzing...')).toBeInTheDocument()
   })
 
   it('handles successful upload', async () => {
@@ -80,11 +80,11 @@ describe('ResumeUploader', () => {
 
     render(<ResumeUploader />)
     
-    const fileInput = screen.getByLabelText('Choose File')
+    const fileInput = screen.getByTestId('file-input')
     const file = new File(['test content'], 'test-resume.pdf', { type: 'application/pdf' })
     
     fireEvent.change(fileInput, { target: { files: [file] } })
-    fireEvent.click(screen.getByText('Analyze Resume'))
+    fireEvent.click(screen.getByText(/Analyze.*Resume/i))
     
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument()
@@ -103,14 +103,14 @@ describe('ResumeUploader', () => {
 
     render(<ResumeUploader />)
     
-    const fileInput = screen.getByLabelText('Choose File')
+    const fileInput = screen.getByTestId('file-input')
     const file = new File(['test content'], 'test-resume.pdf', { type: 'application/pdf' })
     
     fireEvent.change(fileInput, { target: { files: [file] } })
-    fireEvent.click(screen.getByText('Analyze Resume'))
+    fireEvent.click(screen.getByText(/Analyze.*Resume/i))
     
     await waitFor(() => {
-      expect(screen.getByText('Failed to parse resume')).toBeInTheDocument()
+      expect(screen.getByText(/Upload failed/i)).toBeInTheDocument()
     })
   })
 
@@ -120,21 +120,21 @@ describe('ResumeUploader', () => {
 
     render(<ResumeUploader />)
     
-    const fileInput = screen.getByLabelText('Choose File')
+    const fileInput = screen.getByTestId('file-input')
     const file = new File(['test content'], 'test-resume.pdf', { type: 'application/pdf' })
     
     fireEvent.change(fileInput, { target: { files: [file] } })
-    fireEvent.click(screen.getByText('Analyze Resume'))
+    fireEvent.click(screen.getByText(/Analyze.*Resume/i))
     
     await waitFor(() => {
-      expect(screen.getByText('Network error. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText(/Upload failed/i)).toBeInTheDocument()
     })
   })
 
   it('shows drag over state', () => {
     render(<ResumeUploader />)
     
-    const dropZone = screen.getByText('Drag & Drop Resume Here').closest('div')
+    const dropZone = screen.getByText('Drag & drop resumes, or click to select').closest('div')
     
     fireEvent.dragOver(dropZone!)
     
@@ -144,7 +144,7 @@ describe('ResumeUploader', () => {
   it('removes drag over state on drag leave', () => {
     render(<ResumeUploader />)
     
-    const dropZone = screen.getByText('Drag & Drop Resume Here').closest('div')
+    const dropZone = screen.getByText('Drag & drop resumes, or click to select').closest('div')
     
     fireEvent.dragOver(dropZone!)
     fireEvent.dragLeave(dropZone!)
