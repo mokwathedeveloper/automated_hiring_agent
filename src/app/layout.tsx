@@ -22,6 +22,43 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script async src="https://js.paystack.co/v1/inline.js"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Global error handler for third-party script warnings
+              window.addEventListener('error', function(event) {
+                // Suppress Datadog SDK storage warnings
+                if (event.message && event.message.includes('Datadog Browser SDK')) {
+                  console.warn('Datadog SDK warning suppressed:', event.message);
+                  event.preventDefault();
+                  return false;
+                }
+
+                // Suppress other non-critical third-party warnings
+                if (event.message && (
+                  event.message.includes('No storage available') ||
+                  event.message.includes('Script error')
+                )) {
+                  console.warn('Third-party script warning suppressed:', event.message);
+                  event.preventDefault();
+                  return false;
+                }
+              });
+
+              // Console override for Datadog warnings
+              const originalWarn = console.warn;
+              console.warn = function(...args) {
+                const message = args.join(' ');
+                if (message.includes('Datadog Browser SDK') ||
+                    message.includes('No storage available for session')) {
+                  // Silently ignore Datadog warnings
+                  return;
+                }
+                originalWarn.apply(console, args);
+              };
+            `,
+          }}
+        />
       </head>
       <body className="font-sans">
         <ErrorBoundary>
