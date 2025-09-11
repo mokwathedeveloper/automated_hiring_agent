@@ -2,9 +2,21 @@
 
 import { useState, useCallback } from 'react';
 import { useDropzone, FileRejection } from 'react-dropzone';
-import { motion } from 'framer-motion';
-import { FaUpload, FaFileAlt, FaSpinner, FaCheck, FaTimes } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Upload, 
+  FileText, 
+  Loader2, 
+  Check, 
+  X, 
+  AlertCircle,
+  File,
+  Trash2
+} from 'lucide-react';
 import { sanitizeInput } from '@/lib/security';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 // Import shared types instead of duplicating
 import { ParsedResume, WorkExperience, Education } from '@/types';
@@ -213,130 +225,165 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
   };
 
   return (
-    <section id="upload" className="py-20 bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-500">
-            Upload Resumes for Analysis
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 transition-colors duration-500">
-            Get instant, AI-powered feedback on candidate resumes against your job description.
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 transition-colors duration-500">
-          <div className="mb-6">
-            <label htmlFor="job-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Job Description <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              id="job-description"
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Paste the job description here to get a tailored analysis..."
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-500"
-              rows={5}
-              maxLength={10000}
-              required
-            />
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {jobDescription.length}/10000 characters
-            </p>
-          </div>
-
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300 ${
-              isDragActive
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500'
-            }`}
-          >
-            <input {...getInputProps()} data-testid="file-input" />
-            <FaUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
-            <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              {isDragActive ? 'Drop files here' : 'Drag & drop resumes, or click to select'}
-            </p>
-            <p className="text-gray-600 dark:text-gray-400">
-              PDF or DOCX, up to 5MB each. Maximum 100 files.
-            </p>
-          </div>
-
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-red-700 dark:text-red-400 font-medium">{error}</p>
-            </div>
-          )}
-
-          {files.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Selected Files ({files.length})
-              </h3>
-              <ul className="space-y-2">
-                {files.map((file, index) => (
-                  <motion.li
-                    key={index}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                  >
-                    <div className="flex items-center min-w-0">
-                      <FaFileAlt className="text-primary-600 mr-3 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-white truncate">
-                          {file.name}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => removeFile(index)}
-                      className="text-red-500 hover:text-red-700 transition-colors disabled:opacity-50 ml-4"
-                      disabled={isUploading}
-                      aria-label={`Remove ${file.name}`}
-                    >
-                      <FaTimes />
-                    </button>
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="mt-6 flex flex-col sm:flex-row gap-4">
-            <button
-              onClick={handleUpload}
-              disabled={files.length === 0 || isUploading || jobDescription.trim().length < 10}
-              className="flex-1 bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
-            >
-              {isUploading ? (
-                <>
-                  <FaSpinner className="animate-spin mr-2" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <FaCheck className="mr-2" />
-                  Analyze {files.length > 1 ? `${files.length} Resumes` : 'Resume'}
-                </>
-              )}
-            </button>
-            
-            {(files.length > 0 || results.length > 0) && (
-              <button
-                onClick={clearAll}
-                disabled={isUploading}
-                className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
-              >
-                Clear All
-              </button>
-            )}
+    <div className="space-y-6">
+      {/* Job Description Input */}
+      <div className="space-y-3">
+        <label htmlFor="job-description" className="block text-sm font-medium text-foreground">
+          Job Description <span className="text-destructive">*</span>
+        </label>
+        <div className="relative">
+          <textarea
+            id="job-description"
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            placeholder="Paste the job description here to get a tailored analysis..."
+            className="w-full px-4 py-3 border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring bg-background text-foreground transition-all duration-200 resize-none"
+            rows={4}
+            maxLength={10000}
+            required
+          />
+          <div className="absolute bottom-3 right-3 text-xs text-muted-foreground bg-background px-2 py-1 rounded">
+            {jobDescription.length}/10000
           </div>
         </div>
       </div>
-    </section>
+
+      {/* Enhanced Dropzone */}
+      <div
+        {...getRootProps()}
+        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ${
+          isDragActive
+            ? 'border-primary bg-primary/5 scale-105'
+            : 'border-border hover:border-primary/50 hover:bg-muted/50'
+        }`}
+      >
+        <input {...getInputProps()} data-testid="file-input" />
+        <motion.div
+          animate={isDragActive ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
+          transition={{ duration: 0.2 }}
+          className="flex flex-col items-center space-y-4"
+        >
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <Upload className="w-8 h-8 text-primary" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-lg font-semibold text-foreground">
+              {isDragActive ? 'Drop files here' : 'Drag & drop resumes, or click to select'}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              PDF or DOCX, up to 5MB each. Maximum 100 files.
+            </p>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Error Display */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl"
+          >
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="w-5 h-5 text-destructive" />
+              <p className="text-destructive font-medium">{error}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* File List */}
+      <AnimatePresence>
+        {files.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-foreground">
+                Selected Files ({files.length})
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAll}
+                disabled={isUploading}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                Clear All
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {files.map((file, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="card-hover">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3 min-w-0 flex-1">
+                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <FileText className="w-5 h-5 text-primary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-foreground truncate">
+                              {file.name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          disabled={isUploading}
+                          className="text-muted-foreground hover:text-destructive"
+                          aria-label={`Remove ${file.name}`}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Button
+          onClick={handleUpload}
+          disabled={files.length === 0 || isUploading || jobDescription.trim().length < 10}
+          className="flex-1 button-hover bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+          size="lg"
+        >
+          {isUploading ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Analyzing...
+            </>
+          ) : (
+            <>
+              <Check className="w-5 h-5 mr-2" />
+              Analyze {files.length > 1 ? `${files.length} Resumes` : 'Resume'}
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }
