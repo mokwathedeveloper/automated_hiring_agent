@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script async src="https://js.paystack.co/v1/inline.js"></script>
+        <script async src="https://js.paystack.co/v1/inline.js" onLoad="console.log('Paystack script loaded successfully')" onError="console.error('Failed to load Paystack script')"></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `

@@ -46,7 +46,7 @@ export default function Pricing() {
 
     // Check for specific error types
     if (error.message && error.message.includes('Currency not supported')) {
-      alert('❌ Payment Error: Currency not supported. We have switched to USD for better compatibility. Please try again.');
+      alert('❌ Payment Error: Currency not supported by merchant account. Please contact support to configure NGN currency.');
     } else if (error.message && error.message.includes('Invalid public key')) {
       alert('❌ Payment Error: Payment system configuration issue. Please contact support.');
     } else if (error.message && error.message.includes('Network')) {
@@ -87,9 +87,12 @@ export default function Pricing() {
 
     // Check if Paystack is loaded
     if (typeof window === 'undefined' || !window.PaystackPop) {
+      console.error('Paystack not loaded. Window object:', typeof window, 'PaystackPop:', window?.PaystackPop);
       alert('Payment system is not available. Please refresh the page and try again.');
       return;
     }
+
+    console.log('Paystack is available:', !!window.PaystackPop);
 
     // Validate required data
     if (!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY) {
@@ -108,9 +111,9 @@ export default function Pricing() {
     const cleanupErrorListener = setupPaystackErrorListener();
 
     try {
-      // Use USD currency for better international compatibility
-      const currency = 'USD';
-      const amount = 50 * 100; // $50.00 in cents
+      // Use NGN currency to match Paystack merchant account configuration
+      const currency = 'NGN';
+      const amount = 5000 * 100; // ₦5,000 in kobo
 
       // Validate Paystack key format
       const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
@@ -193,7 +196,7 @@ export default function Pricing() {
           >
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">Free Plan</h3>
-              <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">$0</div>
+              <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">₦0</div>
               <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">Perfect for getting started</p>
             </div>
 
@@ -235,7 +238,7 @@ export default function Pricing() {
 
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">Pro Plan</h3>
-              <div className="text-4xl font-bold text-blue-600 mb-2">$50</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">₦5,000</div>
               <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">Per month</p>
             </div>
 
