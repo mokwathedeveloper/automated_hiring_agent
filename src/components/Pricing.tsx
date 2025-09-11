@@ -178,29 +178,14 @@ export default function Pricing() {
         key: publicKey.substring(0, 10) + '...' // Log partial key for debugging
       });
 
-      // Add a timeout to catch setup errors
-      let setupError = null;
-      const setupTimeout = setTimeout(() => {
-        setupError = new Error('Paystack setup timeout - possible configuration issue');
-      }, 5000);
+      // Initialize Paystack payment
+      const handler = window.PaystackPop.setup(paystackConfig);
 
-      try {
-        const handler = window.PaystackPop.setup(paystackConfig);
-        clearTimeout(setupTimeout);
-
-        if (setupError) {
-          throw setupError;
-        }
-
-        // Add error handling for iframe opening
-        if (handler && typeof handler.openIframe === 'function') {
-          handler.openIframe();
-        } else {
-          throw new Error('Paystack handler not properly initialized');
-        }
-      } catch (setupErr) {
-        clearTimeout(setupTimeout);
-        throw setupErr;
+      // Add error handling for iframe opening
+      if (handler && typeof handler.openIframe === 'function') {
+        handler.openIframe();
+      } else {
+        throw new Error('Paystack handler not properly initialized');
       }
     } catch (error) {
       console.error('Paystack setup error:', error);
