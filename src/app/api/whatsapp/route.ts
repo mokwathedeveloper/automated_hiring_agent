@@ -179,16 +179,16 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const whatsappNumber = process.env.TWILIO_WHATSAPP_NUMBER;
-        if (!whatsappNumber || whatsappNumber === 'whatsapp:+your_whatsapp_number_here') {
+        const whatsappFrom = process.env.TWILIO_WHATSAPP_FROM;
+        if (!whatsappFrom || whatsappFrom === 'whatsapp:+your_whatsapp_from_number_here') {
           return createErrorResponse(
-            'WhatsApp number not configured. Please set TWILIO_WHATSAPP_NUMBER in environment variables.',
+            'WhatsApp "From" address not configured. Please set the TWILIO_WHATSAPP_FROM environment variable.',
             503
           );
         }
 
         const messageOptions: any = {
-          from: whatsappNumber,
+          from: whatsappFrom,
           to: `whatsapp:${to}`,
           body: message
         };
@@ -215,6 +215,11 @@ export async function POST(request: NextRequest) {
         // Handle specific Twilio error codes
         if (error.code === 21211) {
           return createErrorResponse('Invalid phone number format. Please check the number and try again.', 400);
+        } else if (error.code === 21612) { // 'From' number is not a valid Twilio number
+          return createErrorResponse(
+            'Invalid "From" address. The sending number is not a valid, WhatsApp-enabled Twilio number. Please check the TWILIO_WHATSAPP_FROM environment variable.',
+            400
+          );
         } else if (error.code === 21408) {
           return createErrorResponse('Permission denied. This number may not be authorized for WhatsApp.', 403);
         } else if (error.code === 21610) {
