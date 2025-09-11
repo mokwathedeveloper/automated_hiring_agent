@@ -173,7 +173,7 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
           <form onSubmit={handleLogin} className="space-y-4">
             {renderEmailInput()}
             {renderPasswordInput()}
-            <Button variant="link" onClick={() => setIsResettingPassword(true)} className="text-sm text-primary-600 p-0 h-auto justify-start">
+            <Button variant="link" onClick={() => setIsResettingPassword(true)} className="text-sm text-primary-600 p-2 h-auto justify-start">
               Forgot Password?
             </Button>
             {renderSubmitButton('Login')}
