@@ -65,8 +65,27 @@ export default function Pricing() {
     const handlePaystackIframeError = (event: any) => {
       if (event.origin === 'https://api.paystack.co' || event.origin === 'https://checkout.paystack.com') {
         console.error('Paystack iframe error:', event.data);
-        if (event.data && event.data.error) {
-          handlePaystackError(new Error(event.data.error));
+
+        // Handle specific error events
+        if (event.data && typeof event.data === 'object') {
+          if (event.data.event === 'error') {
+            console.error('Paystack error details:', event.data.data);
+
+            // Check for specific error types
+            if (event.data.data && event.data.data.message) {
+              const errorMessage = event.data.data.message;
+              if (errorMessage.includes('Currency not supported')) {
+                alert('❌ Currency Error: Your Paystack account does not support NGN currency. Please contact Paystack support to enable NGN.');
+              } else if (errorMessage.includes('Invalid public key')) {
+                alert('❌ Configuration Error: Invalid Paystack public key. Please check your environment variables.');
+              } else if (errorMessage.includes('Merchant not found')) {
+                alert('❌ Account Error: Paystack merchant account not found. Please verify your API keys.');
+              } else {
+                alert('❌ Payment Error: ' + errorMessage);
+              }
+              setIsLoading(false);
+            }
+          }
         }
       }
     };
@@ -159,13 +178,29 @@ export default function Pricing() {
         key: publicKey.substring(0, 10) + '...' // Log partial key for debugging
       });
 
-      const handler = window.PaystackPop.setup(paystackConfig);
+      // Add a timeout to catch setup errors
+      let setupError = null;
+      const setupTimeout = setTimeout(() => {
+        setupError = new Error('Paystack setup timeout - possible configuration issue');
+      }, 5000);
 
-      // Add error handling for iframe opening
-      if (handler && typeof handler.openIframe === 'function') {
-        handler.openIframe();
-      } else {
-        throw new Error('Paystack handler not properly initialized');
+      try {
+        const handler = window.PaystackPop.setup(paystackConfig);
+        clearTimeout(setupTimeout);
+
+        if (setupError) {
+          throw setupError;
+        }
+
+        // Add error handling for iframe opening
+        if (handler && typeof handler.openIframe === 'function') {
+          handler.openIframe();
+        } else {
+          throw new Error('Paystack handler not properly initialized');
+        }
+      } catch (setupErr) {
+        clearTimeout(setupTimeout);
+        throw setupErr;
       }
     } catch (error) {
       console.error('Paystack setup error:', error);
