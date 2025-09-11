@@ -34,14 +34,14 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="group flex items-center space-x-3 button-hover">
               <motion.div 
-                className="w-9 h-9 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg"
-                whileHover={{ scale: 1.05, rotate: 5 }}
+                className="w-9 h-9 bg-gradient-to-br from-primary to-primary/90 rounded-xl flex items-center justify-center shadow-professional"
+                whileHover={{ scale: 1.05, rotate: 2 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <CheckCircle2 className="w-5 h-5 text-white" />
               </motion.div>
-              <span className="text-xl font-bold gradient-text">HiringAgent</span>
+              <span className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-200">HiringAgent</span>
             </Link>
             <div className="hidden md:ml-10 md:flex md:space-x-1">
               <Link href="/" className="group relative px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center rounded-lg hover:bg-accent">
@@ -100,7 +100,7 @@ export default function Navbar() {
                       setMode("signup");
                       setIsAuthModalOpen(true);
                     }}
-                    className="button-hover bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+                    className="button-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-professional"
                   >
                     <UserPlus className="w-4 h-4 mr-2" />
                     Sign Up

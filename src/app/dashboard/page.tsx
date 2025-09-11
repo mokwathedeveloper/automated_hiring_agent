@@ -223,9 +223,9 @@ export default function Dashboard() {
           className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8 space-y-4 lg:space-y-0"
         >
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold gradient-text">Dashboard</h1>
+            <h1 className="text-4xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground text-lg">
-              Welcome back, <span className="font-semibold text-foreground">{user.email}</span>
+              Welcome back, <span className="font-semibold text-primary">{user.email}</span>
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -251,7 +251,7 @@ export default function Dashboard() {
             </Button>
             <Button
               onClick={() => setShowUploader(!showUploader)}
-              className="button-hover bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+              className="button-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-professional"
             >
               <Upload className="w-4 h-4 mr-2" />
               {showUploader ? 'Hide Uploader' : 'Analyze Resume'}
@@ -363,7 +363,7 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">Active</div>
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400">Active</div>
                 <p className="text-xs text-muted-foreground">
                   System operational
                 </p>

@@ -2,21 +2,11 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { 
-  MessageCircle, 
-  Send, 
-  X, 
-  User, 
-  Mail, 
-  Phone,
-  CheckCircle,
-  AlertCircle,
-  Loader2
-} from 'lucide-react';
+import { FaWhatsapp, FaTimes, FaUser, FaEnvelope, FaPhone, FaPaperPlane } from 'react-icons/fa';
+import { MessageCircle, Send, X, User, Mail, Phone } from 'lucide-react';
 
 interface Candidate {
   id: string;
@@ -138,53 +128,32 @@ export default function WhatsAppModal({ isOpen, onClose, candidate }: WhatsAppMo
   }
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-center items-center p-4"
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-        >
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto card-hover">
-            <CardHeader className="border-b bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center text-green-600 dark:text-green-400">
-                  <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mr-3">
-                    <MessageCircle className="w-5 h-5" />
-                  </div>
-                  Send WhatsApp Message
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClose}
-                  className="h-8 w-8 p-0 button-hover"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <CardHeader className="border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center text-green-600">
+              <FaWhatsapp className="mr-2 text-2xl" />
+              Send WhatsApp Message
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
 
-            <CardContent className="p-6">
-              {/* Enhanced Candidate Info */}
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-muted/50 rounded-xl p-4 mb-6"
-              >
-                <h3 className="font-semibold text-lg mb-3 flex items-center">
-                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-2">
-                    <User className="w-4 h-4 text-primary" />
-                  </div>
-                  Candidate Information
-                </h3>
+        <CardContent className="p-6">
+          {/* Candidate Info */}
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
+            <h3 className="font-semibold text-lg mb-3 flex items-center">
+              <User className="mr-2 h-5 w-5" />
+              Candidate Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center">
                 <User className="mr-2 h-4 w-4 text-gray-500" />
@@ -275,69 +244,55 @@ export default function WhatsAppModal({ isOpen, onClose, candidate }: WhatsAppMo
             </div>
           </div>
 
-              {/* Enhanced Status Messages */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-xl"
-                  >
-                    <p className="text-destructive text-sm flex items-center">
-                      <AlertCircle className="mr-2 h-4 w-4" />
-                      {error}
-                    </p>
-                  </motion.div>
-                )}
+          {/* Status Messages */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-red-600 dark:text-red-400 text-sm flex items-center">
+                <X className="mr-2 h-4 w-4" />
+                {error}
+              </p>
+            </div>
+          )}
 
-                {success && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-xl"
-                  >
-                    <p className="text-green-600 dark:text-green-400 text-sm flex items-center">
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      {success}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          {success && (
+            <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <p className="text-green-600 dark:text-green-400 text-sm flex items-center">
+                <MessageCircle className="mr-2 h-4 w-4" />
+                {success}
+              </p>
+            </div>
+          )}
 
-              {/* Enhanced Action Buttons */}
-              <div className="flex justify-end space-x-3">
-                <Button
-                  variant="outline"
-                  onClick={handleClose}
-                  disabled={isSending}
-                  className="button-hover px-6"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={isSending || !message.trim() || message.length > 1600}
-                  className="button-hover bg-green-600 hover:bg-green-700 text-white px-6 shadow-lg"
-                >
-                  {isSending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-4 w-4" />
-                      Send Message
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              disabled={isSending}
+              className="px-6"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendMessage}
+              disabled={isSending || !message.trim() || message.length > 1600}
+              className="bg-green-600 hover:bg-green-700 text-white px-6"
+            >
+              {isSending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Message
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -368,7 +368,7 @@ export default function ResumeUploader({ onUploadSuccess }: ResumeUploaderProps)
         <Button
           onClick={handleUpload}
           disabled={files.length === 0 || isUploading || jobDescription.trim().length < 10}
-          className="flex-1 button-hover bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+          className="flex-1 button-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-professional"
           size="lg"
         >
           {isUploading ? (

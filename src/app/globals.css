@@ -6,54 +6,56 @@
 
 @layer base {
   :root {
-    /* Light theme colors */
+    /* Professional Light Theme - Clean and Corporate */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 244 78% 60%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 244 78% 60%;
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.75rem;
     
-    /* Chart colors for data visualization */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* Professional Chart Colors */
+    --chart-1: 221.2 83.2% 53.3%;
+    --chart-2: 142.1 76.2% 36.3%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 199 89% 48%;
+    --chart-5: 43 96% 56%;
     
-    /* Custom brand colors */
-    --success: 142 76% 36%;
-    --success-foreground: 355 7% 97%;
+    /* Professional Brand Colors */
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 355.7 100% 97.3%;
     --warning: 38 92% 50%;
     --warning-foreground: 48 96% 89%;
     --info: 199 89% 48%;
     --info-foreground: 213 31% 91%;
+    --error: 0 84.2% 60.2%;
+    --error-foreground: 210 40% 98%;
   }
 
   .dark {
-    /* Dark theme colors */
+    /* Professional Dark Theme - Sophisticated and Modern */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 244 78% 60%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
@@ -64,22 +66,24 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 244 78% 60%;
+    --ring: 224.3 76.3% 94.1%;
     
-    /* Dark chart colors */
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Professional Dark Chart Colors */
+    --chart-1: 217.2 91.2% 59.8%;
+    --chart-2: 142.1 70.6% 45.3%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 199 89% 48%;
+    --chart-5: 43 96% 56%;
     
-    /* Dark custom brand colors */
-    --success: 142 76% 36%;
-    --success-foreground: 355 7% 97%;
+    /* Professional Dark Brand Colors */
+    --success: 142.1 70.6% 45.3%;
+    --success-foreground: 144.9 80.4% 10%;
     --warning: 38 92% 50%;
     --warning-foreground: 48 96% 89%;
     --info: 199 89% 48%;
     --info-foreground: 213 31% 91%;
+    --error: 0 62.8% 30.6%;
+    --error-foreground: 210 40% 98%;
   }
 }
 
@@ -105,21 +109,21 @@
 }
 
 @layer components {
-  /* Custom component styles */
+  /* Professional component styles */
   .glass-effect {
-    @apply bg-background/80 backdrop-blur-md border border-border/50;
+    @apply bg-background/95 backdrop-blur-md border border-border/60 shadow-sm;
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary via-primary to-primary/80 bg-clip-text text-transparent;
   }
   
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1;
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 border-border/80;
   }
   
   .button-hover {
-    @apply transition-all duration-200 hover:scale-105 active:scale-95;
+    @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
   }
   
   .fade-in {
@@ -128,5 +132,36 @@
   
   .slide-up {
     @apply animate-in slide-in-from-bottom-4 duration-500;
+  }
+  
+  /* Professional status colors */
+  .status-success {
+    @apply bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200;
+  }
+  
+  .status-warning {
+    @apply bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200;
+  }
+  
+  .status-error {
+    @apply bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200;
+  }
+  
+  .status-info {
+    @apply bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200;
+  }
+  
+  /* Professional form elements */
+  .form-input {
+    @apply border-border/60 focus:border-primary focus:ring-primary/20 bg-background/50;
+  }
+  
+  /* Professional shadows */
+  .shadow-professional {
+    @apply shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .shadow-elevated {
+    @apply shadow-md hover:shadow-lg transition-shadow duration-200;
   }
 }
