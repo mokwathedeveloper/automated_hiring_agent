@@ -4,11 +4,25 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, FileText, User, Inbox, Plus, Upload, Search, MessageCircle } from 'lucide-react';
+import { 
+  LogOut, 
+  FileText, 
+  User, 
+  Inbox, 
+  Plus, 
+  Upload, 
+  Search, 
+  MessageCircle,
+  TrendingUp,
+  Clock,
+  Users,
+  Activity
+} from 'lucide-react';
 import ResumeUploader from '@/components/ResumeUploader';
 import WhatsAppModal from '@/components/WhatsAppModal';
 import WhatsAppSetupGuide from '@/components/WhatsAppSetupGuide';
@@ -42,56 +56,89 @@ const fetchCandidates = async (): Promise<Candidate[]> => {
   return result.data;
 };
 
-// Candidate Card Component
+// Enhanced Candidate Card Component with animations
 const CandidateCard = ({ candidate, openWhatsAppModal }: { candidate: Candidate, openWhatsAppModal: (candidate: Candidate) => void }) => (
-  <Card className="flex flex-col justify-between transition-all hover:shadow-lg">
-    <CardHeader>
-      <div className="flex justify-between items-start">
-        <div>
-          <CardTitle className="truncate">{candidate.name || 'N/A'}</CardTitle>
-          <CardDescription className="truncate">{candidate.email || 'No email found'}</CardDescription>
-          <CardDescription className="truncate">{candidate.phone || 'No phone found'}</CardDescription>
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    whileHover={{ y: -4 }}
+  >
+    <Card className="card-hover h-full flex flex-col justify-between">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start">
+          <div className="space-y-1">
+            <CardTitle className="text-lg font-semibold truncate">
+              {candidate.name || 'N/A'}
+            </CardTitle>
+            <CardDescription className="truncate flex items-center">
+              <User className="w-3 h-3 mr-1" />
+              {candidate.email || 'No email found'}
+            </CardDescription>
+            <CardDescription className="truncate flex items-center">
+              <MessageCircle className="w-3 h-3 mr-1" />
+              {candidate.phone || 'No phone found'}
+            </CardDescription>
+          </div>
         </div>
-      </div>
-    </CardHeader>
-    <CardContent>
-      <div className="mt-4">
-        <h4 className="text-sm font-semibold mb-2">Skills</h4>
-        <div className="flex flex-wrap gap-1">
-          {candidate.skills?.slice(0, 5).map(skill => (
-            <Badge key={skill} variant="outline" className="text-xs">{skill}</Badge>
-          ))}
-          {candidate.skills?.length > 5 && (
-            <Badge variant="outline" className="text-xs">+{candidate.skills.length - 5} more</Badge>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <h4 className="text-sm font-semibold mb-2 flex items-center">
+            <Activity className="w-3 h-3 mr-1" />
+            Skills
+          </h4>
+          <div className="flex flex-wrap gap-1">
+            {candidate.skills?.slice(0, 4).map((skill, index) => (
+              <motion.div
+                key={skill}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Badge variant="secondary" className="text-xs">
+                  {skill}
+                </Badge>
+              </motion.div>
+            ))}
+            {candidate.skills?.length > 4 && (
+              <Badge variant="outline" className="text-xs">
+                +{candidate.skills.length - 4} more
+              </Badge>
+            )}
+          </div>
+        </div>
+        <div>
+          <h4 className="text-sm font-semibold mb-2 flex items-center">
+            <TrendingUp className="w-3 h-3 mr-1" />
+            Experience
+          </h4>
+          {candidate.work_experience?.length > 0 ? (
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">{candidate.work_experience[0].title}</p>
+              <p>{candidate.work_experience[0].company}</p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No experience listed</p>
           )}
         </div>
-      </div>
-      <div className="mt-4">
-        <h4 className="text-sm font-semibold mb-2">Experience</h4>
-        {candidate.work_experience?.length > 0 ? (
-          <div className="text-sm text-gray-600">
-            <p className="font-medium">{candidate.work_experience[0].title}</p>
-            <p>{candidate.work_experience[0].company}</p>
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500">No experience listed</p>
-        )}
-      </div>
-      <div className="mt-4 flex justify-between items-center">
-        <span className="text-xs text-gray-500">
-          Added {new Date(candidate.created_at).toLocaleDateString()}
-        </span>
-        <Button
-          size="sm"
-          onClick={() => openWhatsAppModal(candidate)}
-          className="bg-green-600 hover:bg-green-700 text-white"
-        >
-          <MessageCircle className="w-4 h-4 mr-1" />
-          WhatsApp
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
+        <div className="flex justify-between items-center pt-2 border-t">
+          <span className="text-xs text-muted-foreground flex items-center">
+            <Clock className="w-3 h-3 mr-1" />
+            Added {new Date(candidate.created_at).toLocaleDateString()}
+          </span>
+          <Button
+            size="sm"
+            onClick={() => openWhatsAppModal(candidate)}
+            className="button-hover bg-green-600 hover:bg-green-700 text-white"
+          >
+            <MessageCircle className="w-4 h-4 mr-1" />
+            WhatsApp
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  </motion.div>
 );
 
 export default function Dashboard() {
@@ -166,34 +213,45 @@ export default function Dashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-500">Dashboard</h1>
-            <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">Welcome back, {user.email}</p>
+        {/* Enhanced Header with animations */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8 space-y-4 lg:space-y-0"
+        >
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground text-lg">
+              Welcome back, <span className="font-semibold text-primary">{user.email}</span>
+            </p>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-3">
             <Button
               onClick={() => setIsSetupGuideOpen(true)}
               variant="outline"
               size="sm"
-              className={`${
+              className={`button-hover ${
                 whatsappStatus?.status?.configured
-                  ? 'text-green-600 border-green-600 hover:bg-green-50'
-                  : 'text-orange-600 border-orange-600 hover:bg-orange-50'
+                  ? 'text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950'
+                  : 'text-orange-600 border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950'
               }`}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               {whatsappStatus?.status?.configured ? 'WhatsApp Ready' : 'Setup WhatsApp'}
               {whatsappStatus?.status?.configured && (
-                <span className="ml-2 w-2 h-2 bg-green-500 rounded-full"></span>
+                <motion.span 
+                  className="ml-2 w-2 h-2 bg-green-500 rounded-full"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
               )}
             </Button>
             <Button
               onClick={() => setShowUploader(!showUploader)}
-              className="bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+              className="button-hover bg-primary hover:bg-primary/90 text-primary-foreground shadow-professional"
             >
               <Upload className="w-4 h-4 mr-2" />
               {showUploader ? 'Hide Uploader' : 'Analyze Resume'}
@@ -201,118 +259,177 @@ export default function Dashboard() {
             <Button
               variant="outline"
               onClick={signOut}
-              className="text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-600 transition-colors duration-500"
+              className="button-hover"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
             </Button>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Resume Uploader */}
-        {showUploader && (
-          <div className="mb-8">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 transition-colors duration-500">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 transition-colors duration-500">
-                Resume Analysis
-              </h2>
-              <ResumeUploader onUploadSuccess={handleUploadSuccess} />
-            </div>
-          </div>
-        )}
+        {/* Enhanced Resume Uploader with animations */}
+        <AnimatePresence>
+          {showUploader && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="mb-8 overflow-hidden"
+            >
+              <Card className="card-hover">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Upload className="w-5 h-5 mr-2" />
+                    Resume Analysis
+                  </CardTitle>
+                  <CardDescription>
+                    Upload and analyze candidate resumes with AI-powered insights
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResumeUploader onUploadSuccess={handleUploadSuccess} />
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Candidates</CardTitle>
-              <User className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalCandidates}</div>
-              <p className="text-xs text-muted-foreground">
-                Candidates in database
-              </p>
-            </CardContent>
-          </Card>
+        {/* Enhanced Stats with animations */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="card-hover">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Candidates</CardTitle>
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Users className="h-4 w-4 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{stats.totalCandidates}</div>
+                <p className="text-xs text-muted-foreground">
+                  Candidates in database
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Recent Uploads</CardTitle>
-              <Upload className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {candidates.filter(c => {
-                  const dayAgo = new Date();
-                  dayAgo.setDate(dayAgo.getDate() - 1);
-                  return new Date(c.created_at) > dayAgo;
-                }).length}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="card-hover">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Recent Uploads</CardTitle>
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {candidates.filter(c => {
+                    const dayAgo = new Date();
+                    dayAgo.setDate(dayAgo.getDate() - 1);
+                    return new Date(c.created_at) > dayAgo;
+                  }).length}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  In the last 24 hours
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Card className="card-hover">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">System Status</CardTitle>
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <Activity className="h-4 w-4 text-green-500" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400">Active</div>
+                <p className="text-xs text-muted-foreground">
+                  System operational
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
+
+        {/* Enhanced Candidates Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <Card className="card-hover">
+            <CardHeader className="space-y-4">
+              <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-4 lg:space-y-0">
+                <div>
+                  <CardTitle className="text-2xl">Candidate List</CardTitle>
+                  <CardDescription className="text-base">
+                    Manage your candidate profiles and track their progress
+                  </CardDescription>
+                </div>
+                <div className="relative w-full lg:w-80">
+                  <Search className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, phone, skills..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-input rounded-xl bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-all duration-200"
+                  />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                In the last 24 hours
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Status</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Active</div>
-              <p className="text-xs text-muted-foreground">
-                System operational
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Candidates Section */}
-        <Card>
-          <CardHeader className="flex-row justify-between items-center">
-            <div>
-              <CardTitle>Candidate List</CardTitle>
-              <CardDescription>Manage your candidate profiles</CardDescription>
-            </div>
-            <div className="relative">
-              <Search className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Search by name, email, phone, skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-500"
-              />
-            </div>
-          </CardHeader>
           <CardContent>
             {isLoading ? (
               <LoadingSkeleton />
             ) : error ? (
               <ErrorMessage message={error.message} />
             ) : filteredCandidates.length === 0 ? (
-              <div className="text-center py-12">
-                <Inbox className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 transition-colors duration-500" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white transition-colors duration-500">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="text-center py-16"
+              >
+                <div className="mx-auto w-24 h-24 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+                  <Inbox className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   {searchTerm ? `No candidates found for "${searchTerm}"` : 'No candidates added yet'}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-500">
-                  {searchTerm ? 'Try adjusting your search terms.' : 'Get started by uploading your first resume.'}
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  {searchTerm ? 'Try adjusting your search terms or clear the search to see all candidates.' : 'Get started by uploading your first resume to begin building your candidate database.'}
                 </p>
                 {!searchTerm && (
-                  <div className="mt-6">
-                    <Button
-                      onClick={() => setShowUploader(true)}
-                      className="shadow-sm text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      <Plus className="-ml-1 mr-2 h-5 w-5" />
-                      Upload Resume
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={() => setShowUploader(true)}
+                    className="button-hover bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg"
+                  >
+                    <Plus className="mr-2 h-5 w-5" />
+                    Upload Resume
+                  </Button>
                 )}
-              </div>
+              </motion.div>
             ) : (
               <>
                 {/* Mobile and Tablet View (Cards) */}
@@ -322,66 +439,88 @@ export default function Dashboard() {
                   ))}
                 </div>
 
-                {/* Desktop View (Table) */}
+                {/* Enhanced Desktop View (Table) */}
                 <div className="hidden lg:block">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Phone</TableHead>
-                        <TableHead>Skills</TableHead>
-                        <TableHead>Experience</TableHead>
-                        <TableHead>Added On</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredCandidates.map((candidate) => (
-                        <TableRow key={candidate.id}>
-                          <TableCell className="font-medium">{candidate.name}</TableCell>
-                          <TableCell>{candidate.email}</TableCell>
-                          <TableCell>{candidate.phone}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                              {candidate.skills?.slice(0, 3).map(skill => (
-                                <Badge key={skill} variant="outline">{skill}</Badge>
-                              ))}
-                              {candidate.skills?.length > 3 && (
-                                <Badge variant="outline">+{candidate.skills.length - 3}</Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {candidate.work_experience?.length > 0 ? (
-                              <div>
-                                <div className="font-medium">{candidate.work_experience[0].title}</div>
-                                <div className="text-sm text-gray-500">{candidate.work_experience[0].company}</div>
-                              </div>
-                            ) : (
-                              <span className="text-gray-500">No experience</span>
-                            )}
-                          </TableCell>
-                          <TableCell>{new Date(candidate.created_at).toLocaleDateString()}</TableCell>
-                          <TableCell>
-                            <Button
-                              size="sm"
-                              onClick={() => openWhatsAppModal(candidate)}
-                              className="bg-green-600 hover:bg-green-700 text-white"
-                            >
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              WhatsApp
-                            </Button>
-                          </TableCell>
+                  <div className="rounded-lg border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent">
+                          <TableHead className="font-semibold">Name</TableHead>
+                          <TableHead className="font-semibold">Email</TableHead>
+                          <TableHead className="font-semibold">Phone</TableHead>
+                          <TableHead className="font-semibold">Skills</TableHead>
+                          <TableHead className="font-semibold">Experience</TableHead>
+                          <TableHead className="font-semibold">Added On</TableHead>
+                          <TableHead className="font-semibold">Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredCandidates.map((candidate, index) => (
+                          <motion.tr
+                            key={candidate.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="hover:bg-muted/50 transition-colors"
+                          >
+                            <TableCell className="font-medium">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                  <User className="w-4 h-4 text-primary" />
+                                </div>
+                                <span>{candidate.name}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">{candidate.email}</TableCell>
+                            <TableCell className="text-muted-foreground">{candidate.phone}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {candidate.skills?.slice(0, 2).map(skill => (
+                                  <Badge key={skill} variant="secondary" className="text-xs">
+                                    {skill}
+                                  </Badge>
+                                ))}
+                                {candidate.skills?.length > 2 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{candidate.skills.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {candidate.work_experience?.length > 0 ? (
+                                <div>
+                                  <div className="font-medium text-sm">{candidate.work_experience[0].title}</div>
+                                  <div className="text-xs text-muted-foreground">{candidate.work_experience[0].company}</div>
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground text-sm">No experience</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              {new Date(candidate.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                size="sm"
+                                onClick={() => openWhatsAppModal(candidate)}
+                                className="button-hover bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                <MessageCircle className="w-4 h-4 mr-1" />
+                                WhatsApp
+                              </Button>
+                            </TableCell>
+                          </motion.tr>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
 
       {/* WhatsApp Modal */}
