@@ -30,14 +30,53 @@ export default function Pricing() {
       if (result.success) {
         alert('✅ Payment successful! Premium features unlocked.');
       } else {
-        alert('❌ Payment verification failed');
+        alert('❌ Payment verification failed: ' + (result.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Payment verification error:', error);
-      alert('❌ Payment verification error');
+      alert('❌ Payment verification error. Please contact support if this persists.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Enhanced Paystack error handler
+  const handlePaystackError = (error: any) => {
+    console.error('Paystack error details:', error);
+
+    // Check for specific error types
+    if (error.message && error.message.includes('Currency not supported')) {
+      alert('❌ Payment Error: Currency not supported. We have switched to USD for better compatibility. Please try again.');
+    } else if (error.message && error.message.includes('Invalid public key')) {
+      alert('❌ Payment Error: Payment system configuration issue. Please contact support.');
+    } else if (error.message && error.message.includes('Network')) {
+      alert('❌ Network Error: Please check your internet connection and try again.');
+    } else if (error.message && error.message.includes('400')) {
+      alert('❌ Payment Error: Invalid payment configuration. This may be due to currency or merchant account settings. Please contact support.');
+    } else {
+      alert('❌ Payment setup failed: ' + (error.message || 'Unknown error. Please try again or contact support.'));
+    }
+
+    setIsLoading(false);
+  };
+
+  // Add global error listener for Paystack iframe errors
+  const setupPaystackErrorListener = () => {
+    const handlePaystackIframeError = (event: any) => {
+      if (event.origin === 'https://api.paystack.co' || event.origin === 'https://checkout.paystack.com') {
+        console.error('Paystack iframe error:', event.data);
+        if (event.data && event.data.error) {
+          handlePaystackError(new Error(event.data.error));
+        }
+      }
+    };
+
+    window.addEventListener('message', handlePaystackIframeError);
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener('message', handlePaystackIframeError);
+    };
   };
 
   const handlePayment = () => {
@@ -65,35 +104,70 @@ export default function Pricing() {
 
     setIsLoading(true);
 
+    // Setup error listener for Paystack iframe
+    const cleanupErrorListener = setupPaystackErrorListener();
+
     try {
+      // Use USD currency for better international compatibility
+      const currency = 'USD';
+      const amount = 50 * 100; // $50.00 in cents
+
+      // Validate Paystack key format
+      const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+      if (!publicKey.startsWith('pk_')) {
+        throw new Error('Invalid Paystack public key format');
+      }
+
       const paystackConfig = {
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+        key: publicKey,
         email: user.email,
-        amount: 5000 * 100, // Amount in kobo (₦5,000)
-        currency: 'NGN',
-        ref: `ref_${Date.now()}`,
+        amount: amount,
+        currency: currency,
+        ref: `hiring_agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        metadata: {
+          custom_fields: [
+            {
+              display_name: "Service",
+              variable_name: "service",
+              value: "Premium Subscription"
+            }
+          ]
+        },
         callback: function(response: any) {
           // Ensure response has reference before proceeding
           if (response && response.reference) {
+            console.log('Payment successful, verifying...', response.reference);
             handlePaymentVerification(response.reference);
           } else {
             console.error('Invalid payment response:', response);
-            alert('❌ Payment response is invalid');
+            alert('❌ Payment response is invalid. Please contact support.');
             setIsLoading(false);
           }
         },
         onClose: function() {
+          console.log('Payment popup closed by user');
           setIsLoading(false);
+          cleanupErrorListener(); // Clean up error listener when popup closes
         },
       };
 
+      console.log('Initializing Paystack with config:', {
+        ...paystackConfig,
+        key: publicKey.substring(0, 10) + '...' // Log partial key for debugging
+      });
+
       const handler = window.PaystackPop.setup(paystackConfig);
 
-      handler.openIframe();
+      // Add error handling for iframe opening
+      if (handler && typeof handler.openIframe === 'function') {
+        handler.openIframe();
+      } else {
+        throw new Error('Paystack handler not properly initialized');
+      }
     } catch (error) {
       console.error('Paystack setup error:', error);
-      setIsLoading(false);
-      alert('Payment setup failed. Please try again or contact support.');
+      cleanupErrorListener(); // Clean up error listener on error
+      handlePaystackError(error);
     }
   };
 
@@ -119,7 +193,7 @@ export default function Pricing() {
           >
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">Free Plan</h3>
-              <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">₦0</div>
+              <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">$0</div>
               <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">Perfect for getting started</p>
             </div>
 
@@ -161,7 +235,7 @@ export default function Pricing() {
 
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">Pro Plan</h3>
-              <div className="text-4xl font-bold text-blue-600 mb-2">₦5,000</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">$50</div>
               <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">Per month</p>
             </div>
 
