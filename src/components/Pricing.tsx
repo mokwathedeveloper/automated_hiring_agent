@@ -30,14 +30,72 @@ export default function Pricing() {
       if (result.success) {
         alert('✅ Payment successful! Premium features unlocked.');
       } else {
-        alert('❌ Payment verification failed');
+        alert('❌ Payment verification failed: ' + (result.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Payment verification error:', error);
-      alert('❌ Payment verification error');
+      alert('❌ Payment verification error. Please contact support if this persists.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Enhanced Paystack error handler
+  const handlePaystackError = (error: any) => {
+    console.error('Paystack error details:', error);
+
+    // Check for specific error types
+    if (error.message && error.message.includes('Currency not supported')) {
+      alert('❌ Payment Error: Currency not supported by merchant account. Please contact support to configure NGN currency.');
+    } else if (error.message && error.message.includes('Invalid public key')) {
+      alert('❌ Payment Error: Payment system configuration issue. Please contact support.');
+    } else if (error.message && error.message.includes('Network')) {
+      alert('❌ Network Error: Please check your internet connection and try again.');
+    } else if (error.message && error.message.includes('400')) {
+      alert('❌ Payment Error: Invalid payment configuration. This may be due to currency or merchant account settings. Please contact support.');
+    } else {
+      alert('❌ Payment setup failed: ' + (error.message || 'Unknown error. Please try again or contact support.'));
+    }
+
+    setIsLoading(false);
+  };
+
+  // Add global error listener for Paystack iframe errors
+  const setupPaystackErrorListener = () => {
+    const handlePaystackIframeError = (event: any) => {
+      if (event.origin === 'https://api.paystack.co' || event.origin === 'https://checkout.paystack.com') {
+        console.error('Paystack iframe error:', event.data);
+
+        // Handle specific error events
+        if (event.data && typeof event.data === 'object') {
+          if (event.data.event === 'error') {
+            console.error('Paystack error details:', event.data.data);
+
+            // Check for specific error types
+            if (event.data.data && event.data.data.message) {
+              const errorMessage = event.data.data.message;
+              if (errorMessage.includes('Currency not supported')) {
+                alert('❌ Currency Error: Your Paystack account does not support NGN currency. Please contact Paystack support to enable NGN.');
+              } else if (errorMessage.includes('Invalid public key')) {
+                alert('❌ Configuration Error: Invalid Paystack public key. Please check your environment variables.');
+              } else if (errorMessage.includes('Merchant not found')) {
+                alert('❌ Account Error: Paystack merchant account not found. Please verify your API keys.');
+              } else {
+                alert('❌ Payment Error: ' + errorMessage);
+              }
+              setIsLoading(false);
+            }
+          }
+        }
+      }
+    };
+
+    window.addEventListener('message', handlePaystackIframeError);
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener('message', handlePaystackIframeError);
+    };
   };
 
   const handlePayment = () => {
@@ -48,9 +106,12 @@ export default function Pricing() {
 
     // Check if Paystack is loaded
     if (typeof window === 'undefined' || !window.PaystackPop) {
+      console.error('Paystack not loaded. Window object:', typeof window, 'PaystackPop:', window?.PaystackPop);
       alert('Payment system is not available. Please refresh the page and try again.');
       return;
     }
+
+    console.log('Paystack is available:', !!window.PaystackPop);
 
     // Validate required data
     if (!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY) {
@@ -65,35 +126,71 @@ export default function Pricing() {
 
     setIsLoading(true);
 
+    // Setup error listener for Paystack iframe
+    const cleanupErrorListener = setupPaystackErrorListener();
+
     try {
+      // Use NGN currency to match Paystack merchant account configuration
+      const currency = 'NGN';
+      const amount = 5000 * 100; // ₦5,000 in kobo
+
+      // Validate Paystack key format
+      const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+      if (!publicKey.startsWith('pk_')) {
+        throw new Error('Invalid Paystack public key format');
+      }
+
       const paystackConfig = {
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+        key: publicKey,
         email: user.email,
-        amount: 5000 * 100, // Amount in kobo (₦5,000)
-        currency: 'NGN',
-        ref: `ref_${Date.now()}`,
+        amount: amount,
+        currency: currency,
+        ref: `hiring_agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        metadata: {
+          custom_fields: [
+            {
+              display_name: "Service",
+              variable_name: "service",
+              value: "Premium Subscription"
+            }
+          ]
+        },
         callback: function(response: any) {
           // Ensure response has reference before proceeding
           if (response && response.reference) {
+            console.log('Payment successful, verifying...', response.reference);
             handlePaymentVerification(response.reference);
           } else {
             console.error('Invalid payment response:', response);
-            alert('❌ Payment response is invalid');
+            alert('❌ Payment response is invalid. Please contact support.');
             setIsLoading(false);
           }
         },
         onClose: function() {
+          console.log('Payment popup closed by user');
           setIsLoading(false);
+          cleanupErrorListener(); // Clean up error listener when popup closes
         },
       };
 
+      console.log('Initializing Paystack with config:', {
+        ...paystackConfig,
+        key: publicKey.substring(0, 10) + '...' // Log partial key for debugging
+      });
+
+      // Initialize Paystack payment
       const handler = window.PaystackPop.setup(paystackConfig);
 
-      handler.openIframe();
+      // Add error handling for iframe opening
+      if (handler && typeof handler.openIframe === 'function') {
+        handler.openIframe();
+      } else {
+        throw new Error('Paystack handler not properly initialized');
+      }
     } catch (error) {
       console.error('Paystack setup error:', error);
-      setIsLoading(false);
-      alert('Payment setup failed. Please try again or contact support.');
+      cleanupErrorListener(); // Clean up error listener on error
+      handlePaystackError(error);
     }
   };
 

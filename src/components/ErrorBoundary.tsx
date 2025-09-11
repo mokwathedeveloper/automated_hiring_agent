@@ -27,14 +27,23 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error details
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     // Check if it's a cross-origin error
-    if (error.message.includes('cross-origin') || 
+    if (error.message.includes('cross-origin') ||
         error.message.includes('Script error') ||
         error.name === 'SecurityError') {
       console.warn('Cross-origin error detected - this is likely from external scripts');
     }
-    
+
+    // Check if it's a Datadog SDK error and handle gracefully
+    if (error.message.includes('Datadog') ||
+        error.message.includes('No storage available for session')) {
+      console.warn('Datadog SDK error handled gracefully - continuing normal operation');
+      // Reset error state for Datadog errors
+      this.setState({ hasError: false });
+      return;
+    }
+
     this.setState({
       error,
       errorInfo
@@ -47,18 +56,18 @@ class ErrorBoundary extends Component<Props, State> {
       const isCrossOriginError = this.state.error?.message.includes('cross-origin') ||
                                 this.state.error?.message.includes('Script error') ||
                                 this.state.error?.name === 'SecurityError';
-      
+
       if (isCrossOriginError) {
         // For cross-origin errors, just log and continue rendering children
         console.warn('Cross-origin error handled gracefully');
         return this.props.children;
       }
-      
+
       // Custom fallback UI
       if (this.props.fallback) {
         return this.props.fallback;
       }
-      
+
       // Default fallback UI
       return (
         <div className="min-h-[200px] flex items-center justify-center bg-red-50 border border-red-200 rounded-lg p-6">
