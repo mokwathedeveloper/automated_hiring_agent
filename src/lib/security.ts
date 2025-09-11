@@ -7,7 +7,11 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 // Allowed origins for CORS
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://your-production-domain.com' 
+  'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'https://your-production-domain.com',
+  // Add more development origins as needed
+  ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3002', 'http://localhost:3003'] : [])
 ];
 
 // Input validation schemas
@@ -141,14 +145,22 @@ export const securityHeaders = {
 // CORS wrapper for API responses
 export function withCORS(response: NextResponse, request: NextRequest): NextResponse {
   const origin = request.headers.get('origin');
-  if (origin && allowedOrigins.includes(origin)) {
+
+  // In development, allow all localhost origins
+  if (process.env.NODE_ENV === 'development' && origin && origin.includes('localhost')) {
     response.headers.set('Access-Control-Allow-Origin', origin);
+  } else if (origin && allowedOrigins.includes(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+  } else if (!origin) {
+    // For same-origin requests (no origin header)
+    response.headers.set('Access-Control-Allow-Origin', '*');
   }
-  
+
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   response.headers.set('Access-Control-Allow-Credentials', 'true');
-  
+  response.headers.set('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
+
   return response;
 }
 

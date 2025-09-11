@@ -15,49 +15,86 @@ export default function Pricing() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
+  const handlePaymentVerification = async (reference: string) => {
+    try {
+      const verifyResponse = await fetch('/api/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reference }),
+      });
+
+      const result = await verifyResponse.json();
+
+      if (result.success) {
+        alert('✅ Payment successful! Premium features unlocked.');
+      } else {
+        alert('❌ Payment verification failed');
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      alert('❌ Payment verification error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handlePayment = () => {
     if (!user) {
       alert('Please login to upgrade');
       return;
     }
 
+    // Check if Paystack is loaded
+    if (typeof window === 'undefined' || !window.PaystackPop) {
+      alert('Payment system is not available. Please refresh the page and try again.');
+      return;
+    }
+
+    // Validate required data
+    if (!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY) {
+      alert('Payment system is not configured. Please contact support.');
+      return;
+    }
+
+    if (!user.email) {
+      alert('User email is required for payment. Please ensure you are logged in.');
+      return;
+    }
+
     setIsLoading(true);
 
-    const handler = window.PaystackPop.setup({
-      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-      email: user.email,
-      amount: 5000 * 100,
-      currency: 'NGN',
-      ref: `ref_${Date.now()}`,
-      callback: async function(response: any) {
-        try {
-          const verifyResponse = await fetch('/api/payment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ reference: response.reference }),
-          });
-
-          const result = await verifyResponse.json();
-          
-          if (result.success) {
-            alert('✅ Payment successful! Premium features unlocked.');
+    try {
+      const paystackConfig = {
+        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+        email: user.email,
+        amount: 5000 * 100, // Amount in kobo (₦5,000)
+        currency: 'NGN',
+        ref: `ref_${Date.now()}`,
+        callback: function(response: any) {
+          // Ensure response has reference before proceeding
+          if (response && response.reference) {
+            handlePaymentVerification(response.reference);
           } else {
-            alert('❌ Payment verification failed');
+            console.error('Invalid payment response:', response);
+            alert('❌ Payment response is invalid');
+            setIsLoading(false);
           }
-        } catch (error) {
-          alert('❌ Payment verification error');
-        } finally {
+        },
+        onClose: function() {
           setIsLoading(false);
-        }
-      },
-      onClose: function() {
-        setIsLoading(false);
-      },
-    });
+        },
+      };
 
-    handler.openIframe();
+      const handler = window.PaystackPop.setup(paystackConfig);
+
+      handler.openIframe();
+    } catch (error) {
+      console.error('Paystack setup error:', error);
+      setIsLoading(false);
+      alert('Payment setup failed. Please try again or contact support.');
+    }
   };
 
   return (
