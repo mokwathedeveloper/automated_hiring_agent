@@ -122,7 +122,7 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
           },
         },
       });
-      handleResponse(error?.message ?? null, 'Signup successful! Please check your email to verify your account.');
+      handleResponse(error?.message ?? null, 'Account created successfully! Please check your email to verify your account before logging in.');
     } catch (err: any) {
       handleResponse(err.message || 'An unexpected error occurred.', '');
     } finally {
