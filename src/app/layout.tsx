@@ -9,8 +9,25 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 export const metadata: Metadata = {
-  title: 'HiringAgent',
-  description: 'AI-powered hiring platform',
+  title: 'HiringAgent - AI-Powered Hiring Platform',
+  description: 'Transform your recruitment process with intelligent resume analysis designed specifically for the Nigerian job market. Streamline hiring with AI-powered candidate evaluation.',
+  keywords: 'hiring, recruitment, AI, resume analysis, Nigerian jobs, HR technology, candidate evaluation, job matching',
+  authors: [{ name: 'HiringAgent Team' }],
+  openGraph: {
+    title: 'HiringAgent - AI-Powered Hiring Platform',
+    description: 'Transform your recruitment process with intelligent resume analysis designed specifically for the Nigerian job market.',
+    type: 'website',
+    locale: 'en_NG',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'HiringAgent - AI-Powered Hiring Platform',
+    description: 'Transform your recruitment process with intelligent resume analysis designed specifically for the Nigerian job market.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
