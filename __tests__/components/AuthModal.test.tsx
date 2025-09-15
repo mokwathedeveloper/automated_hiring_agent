@@ -101,7 +101,6 @@ describe('AuthModal', () => {
         email: 'test@example.com',
         password: 'Password123!',
         options: {
-          emailRedirectTo: expect.stringContaining('/auth/callback'),
           data: {
             first_name: 'John',
             last_name: 'Doe',
@@ -111,7 +110,7 @@ describe('AuthModal', () => {
       })
     })
 
-    expect(screen.getByText('Account created successfully! Please check your email to verify your account before logging in.')).toBeInTheDocument()
+    expect(screen.getByText('Account created successfully! You can now log in.')).toBeInTheDocument()
   })
 
   it('handles authentication errors', async () => {
