@@ -1,17 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { FaCheck, FaCreditCard } from 'react-icons/fa';
 import { formatCurrency } from '@/lib/ng-utils';
-import { PaystackButton } from 'react-paystack';
+import dynamic from 'next/dynamic';
+
+// Dynamically import PaystackButton to avoid SSR issues
+const PaystackButton = dynamic(
+  () => import('react-paystack').then((mod) => mod.PaystackButton),
+  { ssr: false }
+);
 
 // PaystackButton from react-paystack handles all the popup logic
 
 export default function Pricing() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure component only renders PaystackButton on client-side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Get the configured currency - only use NEXT_PUBLIC_ vars for client consistency
   const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || 'NGN';
@@ -177,24 +189,34 @@ export default function Pricing() {
             </ul>
 
             {user ? (
-              <PaystackButton
-                {...paystackProps}
-                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center"
-                onSuccess={(response) => {
-                  console.log("Payment successful!", response);
-                  if (response && response.reference) {
-                    handlePaymentVerification(response.reference);
-                  } else {
-                    console.error('Invalid payment response:', response);
-                    alert('❌ Payment response is invalid. Please contact support.');
+              isClient ? (
+                <PaystackButton
+                  {...paystackProps}
+                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center"
+                  onSuccess={(response) => {
+                    console.log("Payment successful!", response);
+                    if (response && response.reference) {
+                      handlePaymentVerification(response.reference);
+                    } else {
+                      console.error('Invalid payment response:', response);
+                      alert('❌ Payment response is invalid. Please contact support.');
+                      setIsLoading(false);
+                    }
+                  }}
+                  onClose={() => {
+                    console.log("Payment dialog closed");
                     setIsLoading(false);
-                  }
-                }}
-                onClose={() => {
-                  console.log("Payment dialog closed");
-                  setIsLoading(false);
-                }}
-              />
+                  }}
+                />
+              ) : (
+                <button
+                  disabled
+                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold opacity-50 transition-colors flex items-center justify-center"
+                >
+                  <FaCreditCard className="mr-2" />
+                  Loading Payment...
+                </button>
+              )
             ) : (
               <button
                 onClick={() => alert('Please login to upgrade')}
