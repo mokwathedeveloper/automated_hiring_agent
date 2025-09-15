@@ -16,8 +16,8 @@ export default function Pricing() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
-  // Get the configured currency
-  const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
+  // Get the configured currency - only use NEXT_PUBLIC_ vars for client consistency
+  const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || 'NGN';
 
   // Format prices based on currency
   const freePrice = formatCurrency(0, currency);
@@ -54,7 +54,7 @@ export default function Pricing() {
 
     // Check for specific error types
     if (error.message && error.message.includes('Currency not supported')) {
-      const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
+      const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || 'NGN';
       alert(`❌ Payment Error: Currency not supported by merchant account. Please contact support to configure ${currency} currency.`);
     } else if (error.message && error.message.includes('Invalid public key')) {
       alert('❌ Payment Error: Payment system configuration issue. Please contact support.');
@@ -73,20 +73,19 @@ export default function Pricing() {
 
   // Add global error listener for Paystack iframe errors
   const setupPaystackErrorListener = () => {
-    const handlePaystackIframeError = (event: any) => {
+    const handlePaystackMessage = (event: any) => {
       if (event.origin === 'https://api.paystack.co' || event.origin === 'https://checkout.paystack.com') {
-        console.error('Paystack iframe error:', event.data);
-
-        // Handle specific error events
+        // Handle Paystack messages - distinguish between events and errors
         if (event.data && typeof event.data === 'object') {
           if (event.data.event === 'error') {
-            console.error('Paystack error details:', event.data.data);
+            // This is an actual error
+            console.error('Paystack error:', event.data);
 
             // Check for specific error types
             if (event.data.data && event.data.data.message) {
               const errorMessage = event.data.data.message;
               if (errorMessage.includes('Currency not supported')) {
-                const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
+                const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || 'NGN';
                 alert(`❌ Currency Error: Your Paystack account does not support ${currency} currency. Please contact Paystack support to enable ${currency}.`);
               } else if (errorMessage.includes('Invalid public key')) {
                 alert('❌ Configuration Error: Invalid Paystack public key. Please check your environment variables.');
@@ -97,16 +96,27 @@ export default function Pricing() {
               }
               setIsLoading(false);
             }
+          } else {
+            // This is a normal Paystack event (like loaded:transaction, cancelled, etc.)
+            console.log('Paystack event:', event.data.event, event.data);
+
+            // Handle specific successful events
+            if (event.data.event === 'loaded:transaction') {
+              console.log('✅ Paystack transaction loaded successfully');
+            } else if (event.data.event === 'cancelled') {
+              console.log('Payment cancelled by user');
+              setIsLoading(false);
+            }
           }
         }
       }
     };
 
-    window.addEventListener('message', handlePaystackIframeError);
+    window.addEventListener('message', handlePaystackMessage);
 
     // Cleanup function
     return () => {
-      window.removeEventListener('message', handlePaystackIframeError);
+      window.removeEventListener('message', handlePaystackMessage);
     };
   };
 
@@ -124,22 +134,17 @@ export default function Pricing() {
 
     setIsLoading(true);
 
-    // Enhanced waiting for Paystack with multiple checks
-    let attempts = 0;
-    const maxAttempts = 10;
+    // Quick check for Paystack availability
+    if (typeof window === 'undefined' || !window.PaystackPop || !window.PaystackPop.setup) {
+      console.log('Paystack not ready, waiting briefly...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-    while (attempts < maxAttempts) {
-      if (typeof window !== 'undefined' && window.PaystackPop && window.PaystackPop.setup) {
-        break;
+      // Final check
+      if (!window.PaystackPop || !window.PaystackPop.setup) {
+        alert('Payment system failed to load. Please refresh the page and try again.');
+        setIsLoading(false);
+        return;
       }
-      console.log(`Waiting for Paystack to load... (attempt ${attempts + 1}/${maxAttempts})`);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      attempts++;
-    }
-
-    if (attempts >= maxAttempts) {
-      alert('Payment system failed to load. Please refresh the page and try again.');
-      return;
     }
 
     // Check if Paystack is loaded with enhanced validation
@@ -176,7 +181,7 @@ export default function Pricing() {
 
     try {
       // Use configurable currency to match Paystack merchant account configuration
-      const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
+      const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || 'NGN';
       const amount = 5000 * 100; // 5,000 in smallest currency unit (kobo for NGN, pesewas for GHS, cents for KES/ZAR)
 
       // Validate Paystack key format
@@ -223,23 +228,23 @@ export default function Pricing() {
         key: publicKey.substring(0, 10) + '...' // Log partial key for debugging
       });
 
-      // Use requestAnimationFrame to ensure DOM is fully ready
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          try {
-            // Ensure we're in a clean state
-            if (document.querySelector('.paystack-popup')) {
-              document.querySelector('.paystack-popup')?.remove();
-            }
+      // Simplified Paystack initialization - let Paystack handle iframe timing
+      try {
+        // Clean up any existing popups first
+        const existingPopups = document.querySelectorAll('.paystack-popup, .paystack-container');
+        existingPopups.forEach(popup => popup.remove());
 
-            const handler = window.PaystackPop.setup(paystackConfig);
-            console.log('Paystack handler created successfully:', !!handler);
-          } catch (frameError) {
-            console.error('RequestAnimationFrame Paystack setup error:', frameError);
-            handlePaystackError(frameError);
-          }
-        });
-      });
+        // Initialize Paystack with the configuration
+        const handler = window.PaystackPop.setup(paystackConfig);
+        console.log('Paystack handler initialized:', !!handler);
+
+        // The setup() method automatically opens the popup
+        // No need to call additional methods
+
+      } catch (setupError) {
+        console.error('Paystack setup error:', setupError);
+        handlePaystackError(setupError);
+      }
     } catch (error) {
       console.error('Paystack setup error:', error);
       cleanupErrorListener(); // Clean up error listener on error
