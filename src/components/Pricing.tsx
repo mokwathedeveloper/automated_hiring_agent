@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { FaCheck, FaCreditCard } from 'react-icons/fa';
+import { formatCurrency } from '@/lib/ng-utils';
 
 declare global {
   interface Window {
@@ -14,6 +15,13 @@ declare global {
 export default function Pricing() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+
+  // Get the configured currency
+  const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
+
+  // Format prices based on currency
+  const freePrice = formatCurrency(0, currency);
+  const proPrice = formatCurrency(5000, currency);
 
   const handlePaymentVerification = async (reference: string) => {
     try {
@@ -46,7 +54,8 @@ export default function Pricing() {
 
     // Check for specific error types
     if (error.message && error.message.includes('Currency not supported')) {
-      alert('❌ Payment Error: Currency not supported by merchant account. Please contact support to configure NGN currency.');
+      const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
+      alert(`❌ Payment Error: Currency not supported by merchant account. Please contact support to configure ${currency} currency.`);
     } else if (error.message && error.message.includes('Invalid public key')) {
       alert('❌ Payment Error: Payment system configuration issue. Please contact support.');
     } else if (error.message && error.message.includes('Network')) {
@@ -75,7 +84,8 @@ export default function Pricing() {
             if (event.data.data && event.data.data.message) {
               const errorMessage = event.data.data.message;
               if (errorMessage.includes('Currency not supported')) {
-                alert('❌ Currency Error: Your Paystack account does not support NGN currency. Please contact Paystack support to enable NGN.');
+                const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
+                alert(`❌ Currency Error: Your Paystack account does not support ${currency} currency. Please contact Paystack support to enable ${currency}.`);
               } else if (errorMessage.includes('Invalid public key')) {
                 alert('❌ Configuration Error: Invalid Paystack public key. Please check your environment variables.');
               } else if (errorMessage.includes('Merchant not found')) {
@@ -130,9 +140,9 @@ export default function Pricing() {
     const cleanupErrorListener = setupPaystackErrorListener();
 
     try {
-      // Use NGN currency to match Paystack merchant account configuration
-      const currency = 'NGN';
-      const amount = 5000 * 100; // ₦5,000 in kobo
+      // Use configurable currency to match Paystack merchant account configuration
+      const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
+      const amount = 5000 * 100; // 5,000 in smallest currency unit (kobo for NGN, pesewas for GHS, cents for KES/ZAR)
 
       // Validate Paystack key format
       const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
@@ -216,7 +226,7 @@ export default function Pricing() {
           >
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">Free Plan</h3>
-              <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">₦0</div>
+              <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">{freePrice}</div>
               <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">Perfect for getting started</p>
             </div>
 
@@ -258,7 +268,7 @@ export default function Pricing() {
 
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">Pro Plan</h3>
-              <div className="text-4xl font-bold text-blue-600 mb-2">₦5,000</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{proPrice}</div>
               <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">Per month</p>
             </div>
 
