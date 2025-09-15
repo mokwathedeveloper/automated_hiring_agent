@@ -265,6 +265,23 @@ Insufficient Funds: 4084084084084089
 - **Cause**: Network issues or CDN problems
 - **Solution**: Check internet connection, refresh page
 
+#### **3. "Payment setup failed: this.iframe.contentWindow is null"**
+- **Cause**: Paystack iframe not fully loaded before initialization
+- **Root Issue**: Attempting to access iframe content before DOM is ready
+- **Solution**: The integration now includes:
+  - Async loading with timeout to wait for Paystack script
+  - Enhanced script validation before payment initialization
+  - Automatic fallback methods if standard initialization fails
+- **Prevention**: Ensure stable internet connection, avoid rapid clicking payment buttons
+
+#### **4. "Currency Error: Your Paystack account does not support [CURRENCY]"**
+- **Cause**: Mismatch between configured currency and Paystack account settings
+- **Solution**:
+  1. Check your Paystack account's supported currencies in the dashboard
+  2. Update `PAYSTACK_DEFAULT_CURRENCY` in your `.env` file to match your account
+  3. Supported currencies: NGN (Nigeria), GHS (Ghana), KES (Kenya), ZAR (South Africa)
+- **Example**: If your account supports KES, set `PAYSTACK_DEFAULT_CURRENCY=KES`
+
 #### **3. "Currency not supported"**
 - **Cause**: PAYSTACK_DEFAULT_CURRENCY doesn't match your account's supported currency
 - **Solution**: Update PAYSTACK_DEFAULT_CURRENCY in .env to match your account (NGN/GHS/KES/ZAR)
