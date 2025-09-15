@@ -25,6 +25,8 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  // Configure for production deployment
+  output: 'standalone',
 }
 
 module.exports = nextConfig
