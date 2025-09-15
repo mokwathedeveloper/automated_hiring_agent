@@ -108,16 +108,29 @@ export default function Pricing() {
     };
   };
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (!user) {
       alert('Please login to upgrade');
       return;
     }
 
-    // Check if Paystack is loaded
+    // Wait for Paystack to be fully loaded if needed
+    if (typeof window !== 'undefined' && !window.PaystackPop) {
+      console.log('Waiting for Paystack to load...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    // Check if Paystack is loaded with enhanced validation
     if (typeof window === 'undefined' || !window.PaystackPop) {
       console.error('Paystack not loaded. Window object:', typeof window, 'PaystackPop:', window?.PaystackPop);
       alert('Payment system is not available. Please refresh the page and try again.');
+      return;
+    }
+
+    // Additional check for Paystack methods
+    if (!window.PaystackPop.setup && !window.PaystackPop.newTransaction) {
+      console.error('Paystack methods not available:', Object.keys(window.PaystackPop || {}));
+      alert('Payment system is not fully loaded. Please refresh the page and try again.');
       return;
     }
 
@@ -188,15 +201,12 @@ export default function Pricing() {
         key: publicKey.substring(0, 10) + '...' // Log partial key for debugging
       });
 
-      // Initialize Paystack payment
+      // Use the standard Paystack initialization
       const handler = window.PaystackPop.setup(paystackConfig);
 
-      // Add error handling for iframe opening
-      if (handler && typeof handler.openIframe === 'function') {
-        handler.openIframe();
-      } else {
-        throw new Error('Paystack handler not properly initialized');
-      }
+      // The handler should automatically open the popup
+      // No need to call openIframe() or open() manually
+      console.log('Paystack handler created:', !!handler);
     } catch (error) {
       console.error('Paystack setup error:', error);
       cleanupErrorListener(); // Clean up error listener on error
