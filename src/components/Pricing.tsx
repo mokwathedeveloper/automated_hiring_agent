@@ -62,6 +62,8 @@ export default function Pricing() {
       alert('❌ Network Error: Please check your internet connection and try again.');
     } else if (error.message && error.message.includes('400')) {
       alert('❌ Payment Error: Invalid payment configuration. This may be due to currency or merchant account settings. Please contact support.');
+    } else if (error.message && error.message.includes('iframe.contentWindow')) {
+      alert('❌ Payment popup failed to load. Please refresh the page and try again.');
     } else {
       alert('❌ Payment setup failed: ' + (error.message || 'Unknown error. Please try again or contact support.'));
     }
@@ -114,10 +116,30 @@ export default function Pricing() {
       return;
     }
 
-    // Wait for Paystack to be fully loaded if needed
-    if (typeof window !== 'undefined' && !window.PaystackPop) {
-      console.log('Waiting for Paystack to load...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    // Prevent multiple simultaneous payment attempts
+    if (isLoading) {
+      console.log('Payment already in progress, ignoring click');
+      return;
+    }
+
+    setIsLoading(true);
+
+    // Enhanced waiting for Paystack with multiple checks
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (attempts < maxAttempts) {
+      if (typeof window !== 'undefined' && window.PaystackPop && window.PaystackPop.setup) {
+        break;
+      }
+      console.log(`Waiting for Paystack to load... (attempt ${attempts + 1}/${maxAttempts})`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      attempts++;
+    }
+
+    if (attempts >= maxAttempts) {
+      alert('Payment system failed to load. Please refresh the page and try again.');
+      return;
     }
 
     // Check if Paystack is loaded with enhanced validation
@@ -201,12 +223,23 @@ export default function Pricing() {
         key: publicKey.substring(0, 10) + '...' // Log partial key for debugging
       });
 
-      // Use the standard Paystack initialization
-      const handler = window.PaystackPop.setup(paystackConfig);
+      // Use requestAnimationFrame to ensure DOM is fully ready
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          try {
+            // Ensure we're in a clean state
+            if (document.querySelector('.paystack-popup')) {
+              document.querySelector('.paystack-popup')?.remove();
+            }
 
-      // The handler should automatically open the popup
-      // No need to call openIframe() or open() manually
-      console.log('Paystack handler created:', !!handler);
+            const handler = window.PaystackPop.setup(paystackConfig);
+            console.log('Paystack handler created successfully:', !!handler);
+          } catch (frameError) {
+            console.error('RequestAnimationFrame Paystack setup error:', frameError);
+            handlePaystackError(frameError);
+          }
+        });
+      });
     } catch (error) {
       console.error('Paystack setup error:', error);
       cleanupErrorListener(); // Clean up error listener on error
