@@ -4,17 +4,19 @@ import { ParsedResume, ParseResponse } from '@/types';
 import { ParsedResumeSchema } from '@/lib/validation';
 import pdf from 'pdf-parse';
 import mammoth from 'mammoth';
-import { 
-  validateFileUpload, 
-  sanitizeInput, 
-  checkRateLimit, 
-  getClientIP, 
-  createErrorResponse, 
+import {
+  validateFileUpload,
+  sanitizeInput,
+  checkRateLimit,
+  getClientIP,
+  createErrorResponse,
   createSuccessResponse,
   schemas,
   validateRequest,
   withCORS
 } from '@/lib/security';
+import { calculateEnhancedAnalysis } from '@/lib/analysis';
+import { JobCriteria } from '@/types/enhanced-analysis';
 import Joi from 'joi';
 import { OpenAI } from 'openai';
 import { createClient } from '@/lib/supabase/server'; // Use centralized Supabase client
@@ -276,7 +278,23 @@ ${sanitizedText.slice(0, 2000)}`;
         return withCORS(createErrorResponse('Database not properly configured. Please run migrations.', 500), request);
       }
 
-      // Prepare the data for insertion
+      // Perform enhanced analysis
+      const defaultJobCriteria: JobCriteria = {
+        requiredSkills: validationResult.data.skills.slice(0, 5), // Use first 5 skills as required
+        experienceLevel: 'mid', // Default to mid-level
+        educationLevel: 'bachelor', // Default to bachelor's degree
+        industry: 'technology', // Default industry
+        weights: {
+          technicalSkills: 0.4,
+          experience: 0.3,
+          education: 0.2,
+          cultural: 0.1,
+        }
+      };
+
+      const analysis = calculateEnhancedAnalysis(validationResult.data, defaultJobCriteria);
+
+      // Prepare the data for insertion (without analysis columns for now)
       const candidateData = {
         name: validationResult.data.name,
         email: validationResult.data.email,
@@ -284,6 +302,10 @@ ${sanitizedText.slice(0, 2000)}`;
         work_experience: validationResult.data.experience, // JSONB field
         skills: validationResult.data.skills, // TEXT[] array
         education: validationResult.data.education, // JSONB field
+        // TODO: Add analysis columns after migration is applied
+        // analysis_score: analysis.overallScore,
+        // analysis_data: analysis,
+        // last_analyzed: new Date().toISOString(),
       };
 
       console.log('Attempting to insert candidate data:', candidateData);
