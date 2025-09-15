@@ -48,7 +48,7 @@ describe('Payment Integration', () => {
     expect(screen.getByText('Free Plan')).toBeInTheDocument();
     expect(screen.getByText('Pro Plan')).toBeInTheDocument();
     // Check for currency formatting (will vary based on PAYSTACK_DEFAULT_CURRENCY)
-    expect(screen.getByText(/0\.00/)).toBeInTheDocument(); // Free plan price
+    expect(screen.getAllByText(/0\.00/)).toHaveLength(1); // Free plan price
     expect(screen.getByText(/5,000/)).toBeInTheDocument(); // Pro plan price
   });
 
