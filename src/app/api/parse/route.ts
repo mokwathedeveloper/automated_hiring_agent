@@ -252,10 +252,18 @@ ${sanitizedText.slice(0, 2000)}`;
     // Use centralized Supabase client
     const supabase = await createClient();
 
+    // Get the current user session for data isolation
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error('Authentication error in parse route:', authError);
+      return withCORS(createErrorResponse('Unauthorized. Please log in to upload resumes.', 401), request);
+    }
+
     // Save parsed data to Supabase candidates table
-    // Note: Requires candidates table with education JSONB column
-    // Run migration: migrations/supabase/20250909135157_create_candidates_table.up.sql
+    // Note: Requires candidates table with education JSONB column and user_id for isolation
     console.log('Data to be inserted into Supabase:', validationResult.data);
+    console.log('User ID:', user.id);
 
     // TEMPORARY: Skip Supabase insert for testing (remove this when migration is complete)
     const SKIP_DATABASE_INSERT = process.env.SKIP_DATABASE_INSERT === 'true';
@@ -294,18 +302,19 @@ ${sanitizedText.slice(0, 2000)}`;
 
       const analysis = calculateEnhancedAnalysis(validationResult.data, defaultJobCriteria);
 
-      // Prepare the data for insertion (without analysis columns for now)
+      // Prepare the data for insertion with user_id for data isolation
       const candidateData = {
+        user_id: user.id, // CRITICAL: Associate candidate with the logged-in user
         name: validationResult.data.name,
         email: validationResult.data.email,
         phone: validationResult.data.phone,
         work_experience: validationResult.data.experience, // JSONB field
         skills: validationResult.data.skills, // TEXT[] array
         education: validationResult.data.education, // JSONB field
-        // TODO: Add analysis columns after migration is applied
-        // analysis_score: analysis.overallScore,
-        // analysis_data: analysis,
-        // last_analyzed: new Date().toISOString(),
+        // Add analysis columns now that migration is applied
+        analysis_score: analysis.overallScore,
+        analysis_data: analysis,
+        last_analyzed: new Date().toISOString(),
       };
 
       console.log('Attempting to insert candidate data:', candidateData);
