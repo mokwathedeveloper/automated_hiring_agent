@@ -114,7 +114,6 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -122,7 +121,7 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
           },
         },
       });
-      handleResponse(error?.message ?? null, 'Signup successful! Please check your email to verify your account.');
+      handleResponse(error?.message ?? null, 'Account created successfully! You can now log in.');
     } catch (err: any) {
       handleResponse(err.message || 'An unexpected error occurred.', '');
     } finally {

@@ -4,12 +4,12 @@ import { createClient } from '@/lib/supabase/client'
 
 jest.mock('@/lib/supabase/client')
 
-const mockSignInWithOtp = jest.fn();
+const mockSignInWithPassword = jest.fn();
 const mockSignUp = jest.fn();
 
 (createClient as jest.Mock).mockReturnValue({
   auth: {
-    signInWithOtp: mockSignInWithOtp,
+    signInWithPassword: mockSignInWithPassword,
     signUp: mockSignUp,
   },
 });
@@ -45,7 +45,7 @@ describe('AuthModal', () => {
   it('handles successful login submission', async () => {
     const mockSupabaseClient = {
       auth: {
-        signInWithOtp: jest.fn().mockResolvedValue({ error: null })
+        signInWithPassword: jest.fn().mockResolvedValue({ error: null })
       }
     }
 
@@ -54,21 +54,21 @@ describe('AuthModal', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)
 
     const emailInput = screen.getByPlaceholderText('Enter your email')
+    const passwordInput = screen.getByPlaceholderText('Enter your password')
     const submitButton = screen.getByRole('button', { name: /login/i })
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'password123' } })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(mockSupabaseClient.auth.signInWithOtp).toHaveBeenCalledWith({
+      expect(mockSupabaseClient.auth.signInWithPassword).toHaveBeenCalledWith({
         email: 'test@example.com',
-        options: {
-          emailRedirectTo: expect.stringContaining('/auth/callback'),
-        },
+        password: 'password123'
       })
     })
 
-    expect(screen.getByText('Check your email for the login link!')).toBeInTheDocument()
+    expect(screen.getByText('Login successful! Redirecting...')).toBeInTheDocument()
   })
 
   it('handles signup submission', async () => {
@@ -82,45 +82,98 @@ describe('AuthModal', () => {
 
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="signup" />)
 
+    const firstNameInput = screen.getByPlaceholderText('Enter your first name')
+    const lastNameInput = screen.getByPlaceholderText('Enter your last name')
     const emailInput = screen.getByPlaceholderText('Enter your email')
+    const passwordInput = screen.getByPlaceholderText('Enter your password')
+    const confirmPasswordInput = screen.getByPlaceholderText('Confirm your password')
     const submitButton = screen.getByRole('button', { name: /sign up/i })
+
+    fireEvent.change(firstNameInput, { target: { value: 'John' } })
+    fireEvent.change(lastNameInput, { target: { value: 'Doe' } })
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'Password123!' } })
+    fireEvent.change(confirmPasswordInput, { target: { value: 'Password123!' } })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockSupabaseClient.auth.signUp).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'Password123!',
+        options: {
+          data: {
+            first_name: 'John',
+            last_name: 'Doe',
+            full_name: 'John Doe',
+          },
+        },
+      })
+    })
+
+    expect(screen.getByText('Account created successfully! You can now log in.')).toBeInTheDocument()
+  })
+
+  it('handles authentication errors', async () => {
+    const mockSupabaseClient = {
+      auth: {
+        signInWithPassword: jest.fn().mockResolvedValue({ error: { message: 'Invalid login credentials' } })
+      }
+    }
+
+    jest.mocked(createClient).mockReturnValue(mockSupabaseClient as any)
+
+    render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)
+
+    const emailInput = screen.getByPlaceholderText('Enter your email')
+    const passwordInput = screen.getByPlaceholderText('Enter your password')
+    const submitButton = screen.getByRole('button', { name: /login/i })
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Invalid login credentials')).toBeInTheDocument()
+    })
+  })
+
+  it('handles password reset correctly', async () => {
+    const mockSupabaseClient = {
+      auth: {
+        resetPasswordForEmail: jest.fn().mockResolvedValue({ error: null })
+      }
+    }
+
+    jest.mocked(createClient).mockReturnValue(mockSupabaseClient as any)
+
+    render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)
+
+    // Click "Forgot Password?" link
+    const forgotPasswordLink = screen.getByText('Forgot Password?')
+    fireEvent.click(forgotPasswordLink)
+
+    // Fill in email and submit
+    const emailInput = screen.getByPlaceholderText('Enter your email')
+    const submitButton = screen.getByRole('button', { name: /send reset email/i })
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(mockSignUp).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'temp-password',
-        options: {
-          emailRedirectTo: expect.stringContaining('/auth/callback'),
-        },
-      })
+      expect(mockSupabaseClient.auth.resetPasswordForEmail).toHaveBeenCalledWith(
+        'test@example.com',
+        {
+          redirectTo: expect.stringContaining('/auth/update-password'),
+        }
+      )
     })
 
-    expect(screen.getByText('Check your email to confirm your account!')).toBeInTheDocument()
-  })
-
-  it('handles authentication errors', async () => {
-    const mockSignInWithOtp = jest.mocked(mockSignInWithOtp)
-    mockSignInWithOtp.mockResolvedValue({ error: { message: 'Invalid email' } } as any)
-
-    render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)
-    
-    const emailInput = screen.getByPlaceholderText('Enter your email address')
-    const submitButton = screen.getByText('Send Login Link')
-
-    fireEvent.change(emailInput, { target: { value: 'invalid-email' } })
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Invalid email')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Password reset email sent! Please check your inbox.')).toBeInTheDocument()
   })
 
   it('closes modal when close button is clicked', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)
-    
+
     const closeButton = screen.getByText('✕')
     fireEvent.click(closeButton)
 
