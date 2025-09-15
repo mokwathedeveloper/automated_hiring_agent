@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaStar, FaUser, FaPaperPlane } from 'react-icons/fa';
+import LoadingState, { EmptyState } from './LoadingState';
+import { Button } from '@/components/ui/button';
 
 interface Review {
   id: string;
@@ -25,21 +27,51 @@ export default function Reviews() {
     comment: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load reviews from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedReviews = localStorage.getItem('hiringAgent_reviews');
+      if (savedReviews) {
+        const parsedReviews = JSON.parse(savedReviews);
+        setReviews(parsedReviews);
+      }
+    } catch (err) {
+      console.error('Error loading reviews from localStorage:', err);
+      setError('Failed to load reviews');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const newReview: Review = {
-      id: Date.now().toString(),
-      ...formData,
-      createdAt: new Date().toISOString()
-    };
+    try {
+      const newReview: Review = {
+        id: Date.now().toString(),
+        ...formData,
+        createdAt: new Date().toISOString()
+      };
 
-    setReviews(prev => [newReview, ...prev]);
-    setFormData({ name: '', company: '', role: '', rating: 5, comment: '' });
-    setShowForm(false);
-    setIsSubmitting(false);
+      const updatedReviews = [newReview, ...reviews];
+      setReviews(updatedReviews);
+
+      // Save to localStorage
+      localStorage.setItem('hiringAgent_reviews', JSON.stringify(updatedReviews));
+
+      setFormData({ name: '', company: '', role: '', rating: 5, comment: '' });
+      setShowForm(false);
+      setError(null);
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      setError('Failed to submit review. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStars = (rating: number, interactive = false, onRatingChange?: (rating: number) => void) => {
@@ -105,6 +137,11 @@ export default function Reviews() {
             transition={{ duration: 0.3 }}
             className="max-w-2xl mx-auto mb-12 bg-gray-50 dark:bg-gray-800 rounded-lg p-6 transition-colors duration-500"
           >
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
+                <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -187,7 +224,26 @@ export default function Reviews() {
         )}
 
         {/* Reviews Display */}
-        {reviews.length > 0 ? (
+        <LoadingState
+          isLoading={isLoading}
+          error={error}
+          isEmpty={reviews.length === 0}
+          emptyState={
+            <EmptyState
+              title="No Reviews Yet"
+              description="Be the first to share your experience with our AI-powered hiring platform!"
+              icon={<FaUser className="w-8 h-8 text-gray-400" />}
+              action={
+                <Button
+                  onClick={() => setShowForm(true)}
+                  className="mt-4"
+                >
+                  Write First Review
+                </Button>
+              }
+            />
+          }
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {reviews.map((review, index) => (
               <motion.div
@@ -207,27 +263,21 @@ export default function Reviews() {
                     <p className="text-sm font-medium text-primary-600">{review.company}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-1 mb-4">
                   {renderStars(review.rating)}
                   <span className="text-sm text-gray-500 dark:text-gray-400 ml-2 transition-colors duration-500">
                     {new Date(review.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                
+
                 <p className="text-gray-700 dark:text-gray-300 transition-colors duration-500">
                   &quot;{review.comment}&quot;
                 </p>
               </motion.div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <FaUser className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4 transition-colors duration-500" />
-            <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2 transition-colors duration-500">No Reviews Yet</h3>
-            <p className="text-gray-500 dark:text-gray-500 transition-colors duration-500">Be the first to share your experience!</p>
-          </div>
-        )}
+        </LoadingState>
       </div>
     </section>
   );
