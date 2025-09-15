@@ -1,27 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    // Create a service role client to bypass RLS for reading candidates
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    // Create authenticated client that respects RLS
+    const supabase = await createClient();
+
+    // Get the current user session
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { searchParams } = new URL(request.url);
     const searchTerm = searchParams.get('search') || '';
 
-    // Try to select with analysis columns, fall back to basic columns if they don't exist
-    let query = supabase.from('candidates').select('id, name, email, phone, work_experience, skills, education, created_at');
+    // Query candidates with analysis columns - RLS will automatically filter by user_id
+    let query = supabase
+      .from('candidates')
+      .select('id, name, email, phone, work_experience, skills, education, created_at, analysis_score, analysis_data, last_analyzed')
+      .eq('user_id', user.id); // Explicitly filter by user_id for extra security
 
     if (searchTerm) {
       query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query.order('analysis_score', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
 
     if (error) {
       console.error('Supabase error fetching candidates:', error);
