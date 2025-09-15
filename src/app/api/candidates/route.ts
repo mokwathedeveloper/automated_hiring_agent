@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const searchTerm = searchParams.get('search') || '';
 
+    // Try to select with analysis columns, fall back to basic columns if they don't exist
     let query = supabase.from('candidates').select('id, name, email, phone, work_experience, skills, education, created_at');
 
     if (searchTerm) {
