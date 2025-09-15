@@ -1,17 +1,27 @@
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import PageWrapper, { generatePageMetadata } from '@/components/PageWrapper';
+
+export const metadata = generatePageMetadata(
+  'Contact Us',
+  'Get in touch with our team for support, questions, or partnership opportunities.',
+  ['contact', 'support', 'help', 'customer service']
+);
 
 export default function Contact() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
-          <p className="text-xl text-gray-600">Get in touch with our team</p>
-        </div>
+    <PageWrapper
+      title="Contact Us"
+      description="Get in touch with our team for support, questions, or partnership opportunities."
+      className="py-12"
+    >
+      <div className="max-w-6xl mx-auto">{/* Removed duplicate container since PageWrapper provides it */}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card>
@@ -86,6 +96,6 @@ export default function Contact() {
           </div>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

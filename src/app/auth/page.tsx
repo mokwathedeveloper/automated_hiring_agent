@@ -1,5 +1,8 @@
 'use client';
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 import { useState } from 'react';
 import AuthModal from '@/components/AuthModal';
 

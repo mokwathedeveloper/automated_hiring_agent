@@ -1,4 +1,14 @@
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageWrapper, { generatePageMetadata } from '@/components/PageWrapper';
+
+export const metadata = generatePageMetadata(
+  'Terms of Service',
+  'Read our terms and conditions for using the HiringAgent platform.',
+  ['terms', 'conditions', 'legal', 'agreement', 'service terms']
+);
 
 export default function TermsOfService() {
   return (

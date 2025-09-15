@@ -1,9 +1,12 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
+import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 
-const DynamicUpdatePasswordForm = dynamic(() => import('./UpdatePasswordForm'), {
+const DynamicUpdatePasswordForm = dynamicImport(() => import('./UpdatePasswordForm'), {
   ssr: false,
 });
 

@@ -1,4 +1,14 @@
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageWrapper, { generatePageMetadata } from '@/components/PageWrapper';
+
+export const metadata = generatePageMetadata(
+  'Privacy Policy',
+  'Learn how we protect and handle your personal information and data.',
+  ['privacy', 'data protection', 'security', 'GDPR', 'personal information']
+);
 
 export default function PrivacyPolicy() {
   return (
