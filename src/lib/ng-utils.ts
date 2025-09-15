@@ -26,6 +26,27 @@ export const formatNaira = (amount: number): string => {
   }).format(amount);
 };
 
+// Generic currency formatter that supports multiple African currencies
+export const formatCurrency = (amount: number, currency?: string): string => {
+  const defaultCurrency = process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
+  const currencyCode = currency || defaultCurrency;
+
+  // Map currencies to their appropriate locales
+  const localeMap: { [key: string]: string } = {
+    'NGN': 'en-NG', // Nigerian Naira
+    'GHS': 'en-GH', // Ghanaian Cedi
+    'KES': 'en-KE', // Kenyan Shilling
+    'ZAR': 'en-ZA'  // South African Rand
+  };
+
+  const locale = localeMap[currencyCode] || 'en-US';
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currencyCode
+  }).format(amount);
+};
+
 export const formatNigerianPhone = (phone: string): string => {
   const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
   
