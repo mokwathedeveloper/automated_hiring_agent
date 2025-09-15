@@ -75,10 +75,16 @@ const CandidateCard = ({ candidate, openWhatsAppModal, rank }: { candidate: Cand
             <span>#{rank}</span>
           </div>
         )}
-        <div className="flex-1">
-          <CardTitle className="truncate">{candidate.name || 'N/A'}</CardTitle>
-          <CardDescription className="truncate">{candidate.email || 'No email found'}</CardDescription>
-          <CardDescription className="truncate">{candidate.phone || 'No phone found'}</CardDescription>
+        <div className="flex-1 min-w-0">
+          <CardTitle className="truncate text-sm sm:text-base" title={candidate.name || 'N/A'}>
+            {candidate.name || 'N/A'}
+          </CardTitle>
+          <CardDescription className="truncate text-xs sm:text-sm" title={candidate.email || 'No email found'}>
+            {candidate.email || 'No email found'}
+          </CardDescription>
+          <CardDescription className="truncate text-xs sm:text-sm" title={candidate.phone || 'No phone found'}>
+            {candidate.phone || 'No phone found'}
+          </CardDescription>
           {candidate.analysis_score && (
             <div className="flex items-center mt-2">
               <FaStar className="w-3 h-3 text-yellow-500 mr-1" />
@@ -97,37 +103,68 @@ const CandidateCard = ({ candidate, openWhatsAppModal, rank }: { candidate: Cand
     <CardContent>
       <div className="mt-4">
         <h4 className="text-sm font-semibold mb-2">Skills</h4>
-        <div className="flex flex-wrap">
-          {candidate.skills?.map(skill => <Badge key={skill} variant="secondary" className="mr-1 mb-1">{skill}</Badge>) ?? <Badge variant="secondary">No skills found</Badge>}
+        <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto scrollbar-thin">
+          {candidate.skills?.slice(0, 6).map(skill => (
+            <Badge key={skill} variant="secondary" className="text-xs">
+              {skill}
+            </Badge>
+          )) ?? <Badge variant="secondary" className="text-xs">No skills found</Badge>}
+          {candidate.skills && candidate.skills.length > 6 && (
+            <Badge variant="outline" className="text-xs">
+              +{candidate.skills.length - 6} more
+            </Badge>
+          )}
         </div>
       </div>
       <div className="mt-4">
         <h4 className="text-sm font-semibold mb-2">Work Experience</h4>
-        {candidate.work_experience?.map((exp, index) => (
-          <div key={index} className="mb-2">
-            <p className="font-medium">{exp.title} at {exp.company}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">{exp.duration}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">{exp.description}</p>
-          </div>
-        )) ?? <p className="text-sm text-gray-600 dark:text-gray-300">No work experience found</p>}
+        <div className="max-h-24 overflow-y-auto">
+          {candidate.work_experience?.slice(0, 2).map((exp, index) => (
+            <div key={index} className="mb-2">
+              <p className="font-medium text-sm truncate" title={`${exp.title} at ${exp.company}`}>
+                {exp.title} at {exp.company}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-300 truncate">{exp.duration}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{exp.description}</p>
+            </div>
+          )) ?? <p className="text-sm text-gray-600 dark:text-gray-300">No work experience found</p>}
+          {candidate.work_experience && candidate.work_experience.length > 2 && (
+            <p className="text-xs text-gray-500">+{candidate.work_experience.length - 2} more positions</p>
+          )}
+        </div>
       </div>
       <div className="mt-4">
         <h4 className="text-sm font-semibold mb-2">Education</h4>
-        {candidate.education?.map((edu, index) => (
-          <div key={index} className="mb-2">
-            <p className="font-medium">{edu.degree} from {edu.institution}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">{edu.year}</p>
-          </div>
-        )) ?? <p className="text-sm text-gray-600 dark:text-gray-300">No education found</p>}
+        <div className="max-h-20 overflow-y-auto">
+          {candidate.education?.slice(0, 2).map((edu, index) => (
+            <div key={index} className="mb-2">
+              <p className="font-medium text-sm truncate" title={`${edu.degree} from ${edu.institution}`}>
+                {edu.degree}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
+                {edu.institution} ({edu.year})
+              </p>
+            </div>
+          )) ?? <p className="text-sm text-gray-600 dark:text-gray-300">No education found</p>}
+          {candidate.education && candidate.education.length > 2 && (
+            <p className="text-xs text-gray-500">+{candidate.education.length - 2} more degrees</p>
+          )}
+        </div>
       </div>
     </CardContent>
     <CardFooter className="flex justify-between items-center">
       <div className="text-xs text-gray-500 dark:text-gray-400">
         Added: {new Date(candidate.created_at).toLocaleDateString()}
       </div>
-      <div className="flex space-x-2">
-        <Button variant="outline" size="sm">View Details</Button>
-        <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)}><FaWhatsapp className="mr-1" /> WhatsApp</Button>
+      <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
+        <Button variant="outline" size="sm" className="text-xs">
+          View Details
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)} className="text-xs">
+          <FaWhatsapp className="mr-1 w-3 h-3" />
+          <span className="hidden sm:inline">WhatsApp</span>
+          <span className="sm:hidden">Chat</span>
+        </Button>
       </div>
     </CardFooter>
   </Card>
@@ -359,23 +396,25 @@ export default function Dashboard() {
                   <CardTitle>Candidate List</CardTitle>
                   <CardDescription>Manage your candidate profiles</CardDescription>
                 </div>
-                <div className="flex items-center space-x-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                   <Button
                     onClick={() => setShowBatchUpload(!showBatchUpload)}
                     variant="outline"
                     size="sm"
+                    className="w-full sm:w-auto"
                   >
                     <FaUpload className="w-4 h-4 mr-2" />
-                    Batch Upload
+                    <span className="hidden sm:inline">Batch Upload</span>
+                    <span className="sm:hidden">Upload</span>
                   </Button>
-                  <div className="relative">
+                  <div className="relative w-full sm:w-auto">
                     <FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
                     <input
                       type="text"
-                      placeholder="Search by name, email, phone, skills..."
+                      placeholder="Search candidates..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-500"
+                      className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-500"
                     />
                   </div>
                 </div>
@@ -403,20 +442,20 @@ export default function Dashboard() {
                     </div>
 
                     {/* Desktop View (Table) */}
-                    <div className="hidden lg:block">
-                      <Table>
+                    <div className="hidden lg:block overflow-x-auto">
+                      <Table className="min-w-full">
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Rank</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Score</TableHead>
-                            <TableHead>Skills</TableHead>
-                            <TableHead>Education</TableHead>
-                            <TableHead>Experience</TableHead>
-                            <TableHead>Added On</TableHead>
-                            <TableHead>Actions</TableHead>
+                            <TableHead className="w-16">Rank</TableHead>
+                            <TableHead className="min-w-[120px]">Name</TableHead>
+                            <TableHead className="min-w-[180px]">Email</TableHead>
+                            <TableHead className="min-w-[120px]">Phone</TableHead>
+                            <TableHead className="w-20">Score</TableHead>
+                            <TableHead className="min-w-[200px]">Skills</TableHead>
+                            <TableHead className="min-w-[200px]">Education</TableHead>
+                            <TableHead className="min-w-[200px]">Experience</TableHead>
+                            <TableHead className="w-24">Added On</TableHead>
+                            <TableHead className="w-32">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -436,9 +475,21 @@ export default function Dashboard() {
                                   </div>
                                 )}
                               </TableCell>
-                              <TableCell className="font-medium">{candidate.name}</TableCell>
-                              <TableCell>{candidate.email}</TableCell>
-                              <TableCell>{candidate.phone}</TableCell>
+                              <TableCell className="font-medium">
+                                <div className="truncate max-w-[120px]" title={candidate.name}>
+                                  {candidate.name}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="truncate max-w-[180px]" title={candidate.email}>
+                                  {candidate.email}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="truncate max-w-[120px]" title={candidate.phone}>
+                                  {candidate.phone}
+                                </div>
+                              </TableCell>
                               <TableCell>
                                 {candidate.analysis_score ? (
                                   <div className={`flex items-center space-x-1 font-semibold ${
@@ -454,29 +505,56 @@ export default function Dashboard() {
                                 )}
                               </TableCell>
                               <TableCell>
-                                <div className="flex flex-wrap gap-1">
-                                  {candidate.skills?.map(skill => <Badge key={skill} variant="outline">{skill}</Badge>)}
+                                <div className="max-w-[200px]">
+                                  <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto">
+                                    {candidate.skills?.slice(0, 3).map(skill => (
+                                      <Badge key={skill} variant="outline" className="text-xs">
+                                        {skill}
+                                      </Badge>
+                                    ))}
+                                    {candidate.skills && candidate.skills.length > 3 && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        +{candidate.skills.length - 3} more
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                               </TableCell>
                               <TableCell>
-                                {candidate.education?.map((edu, index) => (
-                                  <div key={index}>
-                                    {edu.degree} from {edu.institution} ({edu.year})
-                                  </div>
-                                ))}
+                                <div className="max-w-[200px] max-h-16 overflow-y-auto">
+                                  {candidate.education?.slice(0, 2).map((edu, index) => (
+                                    <div key={index} className="text-xs mb-1 truncate" title={`${edu.degree} from ${edu.institution} (${edu.year})`}>
+                                      <div className="font-medium truncate">{edu.degree}</div>
+                                      <div className="text-gray-500 truncate">{edu.institution} ({edu.year})</div>
+                                    </div>
+                                  ))}
+                                  {candidate.education && candidate.education.length > 2 && (
+                                    <div className="text-xs text-gray-500">+{candidate.education.length - 2} more</div>
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell>
-                                {candidate.work_experience?.map((exp, index) => (
-                                  <div key={index}>
-                                    {exp.title} at {exp.company} ({exp.duration})
-                                  </div>
-                                ))}
+                                <div className="max-w-[200px] max-h-16 overflow-y-auto">
+                                  {candidate.work_experience?.slice(0, 2).map((exp, index) => (
+                                    <div key={index} className="text-xs mb-1 truncate" title={`${exp.title} at ${exp.company} (${exp.duration})`}>
+                                      <div className="font-medium truncate">{exp.title}</div>
+                                      <div className="text-gray-500 truncate">{exp.company} ({exp.duration})</div>
+                                    </div>
+                                  ))}
+                                  {candidate.work_experience && candidate.work_experience.length > 2 && (
+                                    <div className="text-xs text-gray-500">+{candidate.work_experience.length - 2} more</div>
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell>{new Date(candidate.created_at).toLocaleDateString()}</TableCell>
                               <TableCell>
-                                <div className="flex space-x-2">
-                                  <Button variant="outline" size="sm">View</Button>
-                                  <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)}><FaWhatsapp className="mr-1" /> WhatsApp</Button>
+                                <div className="flex space-x-1">
+                                  <Button variant="outline" size="sm" className="px-2">
+                                    View
+                                  </Button>
+                                  <Button variant="outline" size="sm" onClick={() => openWhatsAppModal(candidate)} className="px-2">
+                                    <FaWhatsapp className="w-3 h-3" />
+                                  </Button>
                                 </div>
                               </TableCell>
                             </TableRow>
