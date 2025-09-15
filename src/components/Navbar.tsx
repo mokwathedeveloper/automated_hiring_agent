@@ -4,17 +4,18 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Home, 
-  LayoutDashboard, 
-  DollarSign, 
-  LogIn, 
-  UserPlus, 
-  LogOut, 
-  User, 
+import {
+  Home,
+  LayoutDashboard,
+  DollarSign,
+  LogIn,
+  UserPlus,
+  LogOut,
+  User,
   Menu,
   X,
-  CheckCircle2
+  CheckCircle2,
+  Mail
 } from 'lucide-react';
 import AuthModal, { AuthMode } from './AuthModal';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,10 @@ export default function Navbar() {
               <Link href="/pricing" className="group relative px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground">
                 <DollarSign className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                 <span>Pricing</span>
+              </Link>
+              <Link href="/contact" className="group relative px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground">
+                <Mail className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                <span>Contact</span>
               </Link>
             </div>
           </div>
@@ -170,13 +175,21 @@ export default function Navbar() {
                   <LayoutDashboard className="w-4 h-4 mr-3" />
                   Dashboard
                 </Link>
-                <Link 
-                  href="/pricing" 
+                <Link
+                  href="/pricing"
                   className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center text-muted-foreground hover:text-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <DollarSign className="w-4 h-4 mr-3" />
                   Pricing
+                </Link>
+                <Link
+                  href="/contact"
+                  className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center text-muted-foreground hover:text-foreground"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Mail className="w-4 h-4 mr-3" />
+                  Contact
                 </Link>
                 <div className="pt-4 pb-3 border-t border-border">
                   <div className="flex items-center justify-between px-3 py-2">
