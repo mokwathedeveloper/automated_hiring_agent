@@ -2,7 +2,13 @@
 
 ## 📋 **Overview**
 
-This document provides comprehensive documentation for the Paystack payment gateway integration in the Automated Hiring Agent Next.js application. The integration enables Nigerian users to purchase premium subscriptions using the Paystack payment platform.
+This document provides comprehensive documentation for the Paystack payment gateway integration in the Automated Hiring Agent Next.js application. The integration supports multiple African currencies (NGN, GHS, KES, ZAR) and enables users to purchase premium subscriptions using the Paystack payment platform.
+
+## 🚨 **Currency Configuration Fix**
+
+**Problem Solved**: The application previously had hardcoded NGN currency, causing "Currency Error: Your Paystack account does not support NGN currency" for non-Nigerian accounts.
+
+**Solution**: Implemented configurable currency support via the `PAYSTACK_DEFAULT_CURRENCY` environment variable.
 
 ## 🔍 **Existing Implementation Analysis**
 
@@ -78,10 +84,19 @@ src/
 
 **Required Variables:**
 ```env
-# Paystack Configuration (Nigerian Payment Gateway)
+# Paystack Configuration (Multi-Currency African Payment Gateway)
 NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_test_your-paystack-public-key-here
 PAYSTACK_SECRET_KEY=sk_test_your-paystack-secret-key-here
+
+# Currency Configuration - CRITICAL: Must match your Paystack account
+PAYSTACK_DEFAULT_CURRENCY=KES  # NGN, GHS, KES, or ZAR
 ```
+
+**Supported Currencies:**
+- **NGN** - Nigerian Naira (Nigeria)
+- **GHS** - Ghanaian Cedi (Ghana)
+- **KES** - Kenyan Shilling (Kenya)
+- **ZAR** - South African Rand (South Africa)
 
 **How to Get Keys:**
 1. Visit [Paystack Dashboard](https://dashboard.paystack.com/)
@@ -100,11 +115,12 @@ PAYSTACK_SECRET_KEY=sk_test_your-paystack-secret-key-here
 
 **Payment Configuration:**
 ```typescript
+const currency = process.env.NEXT_PUBLIC_PAYSTACK_CURRENCY || process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN';
 const paystackConfig = {
   key: publicKey,
   email: user.email,
-  amount: 500000, // ₦5,000 in kobo
-  currency: 'NGN',
+  amount: 500000, // 5,000 in smallest currency unit (kobo/pesewas/cents)
+  currency: currency, // Dynamic currency based on account configuration
   ref: `hiring_agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
   callback: handlePaymentVerification,
   onClose: handlePaymentClose
@@ -250,8 +266,8 @@ Insufficient Funds: 4084084084084089
 - **Solution**: Check internet connection, refresh page
 
 #### **3. "Currency not supported"**
-- **Cause**: Paystack account not configured for NGN
-- **Solution**: Contact Paystack support to enable NGN currency
+- **Cause**: PAYSTACK_DEFAULT_CURRENCY doesn't match your account's supported currency
+- **Solution**: Update PAYSTACK_DEFAULT_CURRENCY in .env to match your account (NGN/GHS/KES/ZAR)
 
 #### **4. "Invalid public key format"**
 - **Cause**: Incorrect key format in environment variables
