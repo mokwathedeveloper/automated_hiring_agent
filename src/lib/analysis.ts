@@ -79,10 +79,36 @@ function calculateSkillsMatch(technicalSkills: { skill: string; proficiency: num
 }
 
 function calculateSkillProficiency(skill: string, requiredSkills: string[]): number {
-  const isRequired = requiredSkills.some(rs => 
+  const isRequired = requiredSkills.some(rs =>
     rs.toLowerCase().includes(skill.toLowerCase()) || skill.toLowerCase().includes(rs.toLowerCase())
   );
-  return isRequired ? Math.floor(Math.random() * 30) + 70 : Math.floor(Math.random() * 40) + 40;
+
+  // Calculate proficiency based on skill characteristics and requirements
+  let baseScore = 60; // Base proficiency score
+
+  if (isRequired) {
+    baseScore = 80; // Higher base for required skills
+
+    // Bonus for exact matches
+    const exactMatch = requiredSkills.some(rs =>
+      rs.toLowerCase() === skill.toLowerCase()
+    );
+    if (exactMatch) baseScore += 10;
+
+    // Bonus for popular/in-demand skills
+    const popularSkills = ['javascript', 'python', 'react', 'node.js', 'typescript', 'sql', 'aws', 'docker'];
+    if (popularSkills.some(ps => skill.toLowerCase().includes(ps))) {
+      baseScore += 5;
+    }
+  } else {
+    // For non-required skills, still give reasonable scores
+    const complementarySkills = ['git', 'agile', 'scrum', 'testing', 'debugging', 'problem-solving'];
+    if (complementarySkills.some(cs => skill.toLowerCase().includes(cs))) {
+      baseScore += 10;
+    }
+  }
+
+  return Math.min(100, baseScore);
 }
 
 function analyzeExperience(experience: any[], experienceLevel: string): number {
