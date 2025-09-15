@@ -94,8 +94,8 @@ describe('Payment Integration', () => {
     expect(window.PaystackPop.setup).toHaveBeenCalledWith(
       expect.objectContaining({
         email: 'test@example.com',
-        amount: 500000, // ₦5,000 in kobo
-        currency: 'NGN'
+        amount: 500000, // 5,000 in smallest currency unit
+        currency: process.env.PAYSTACK_DEFAULT_CURRENCY || 'NGN'
       })
     );
   });
