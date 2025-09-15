@@ -103,6 +103,20 @@ export default function Pricing() {
             // Handle specific successful events
             if (event.data.event === 'loaded:transaction') {
               console.log('✅ Paystack transaction loaded successfully');
+
+              // Check if popup is actually visible to user
+              const paystackIframe = document.querySelector('iframe[src*="paystack"]');
+              const paystackPopup = document.querySelector('.paystack-popup, .paystack-container');
+
+              if (!paystackIframe && !paystackPopup) {
+                console.warn('Transaction loaded but popup not visible - may need manual intervention');
+                setTimeout(() => {
+                  if (isLoading) {
+                    setIsLoading(false);
+                    alert('Payment popup loaded but not visible. Please try again or refresh the page.');
+                  }
+                }, 3000);
+              }
             } else if (event.data.event === 'cancelled') {
               console.log('Payment cancelled by user');
               setIsLoading(false);
@@ -228,18 +242,42 @@ export default function Pricing() {
         key: publicKey.substring(0, 10) + '...' // Log partial key for debugging
       });
 
-      // Simplified Paystack initialization - let Paystack handle iframe timing
+      // Initialize Paystack with explicit popup opening
       try {
         // Clean up any existing popups first
-        const existingPopups = document.querySelectorAll('.paystack-popup, .paystack-container');
+        const existingPopups = document.querySelectorAll('.paystack-popup, .paystack-container, iframe[src*="paystack"]');
         existingPopups.forEach(popup => popup.remove());
 
-        // Initialize Paystack with the configuration
+        console.log('Creating Paystack handler...');
         const handler = window.PaystackPop.setup(paystackConfig);
-        console.log('Paystack handler initialized:', !!handler);
+        console.log('Paystack handler created:', !!handler);
 
-        // The setup() method automatically opens the popup
-        // No need to call additional methods
+        // Check if handler has methods and try to open popup explicitly
+        if (handler) {
+          console.log('Handler methods:', Object.keys(handler));
+
+          // Try different methods to open the popup
+          if (typeof handler.openIframe === 'function') {
+            console.log('Opening popup with openIframe...');
+            handler.openIframe();
+          } else if (typeof handler.open === 'function') {
+            console.log('Opening popup with open...');
+            handler.open();
+          } else {
+            console.log('No explicit open method found, popup should auto-open');
+          }
+        } else {
+          throw new Error('Paystack handler creation failed');
+        }
+
+        // Add a timeout to reset loading state if popup doesn't appear
+        setTimeout(() => {
+          if (isLoading) {
+            console.warn('Payment popup timeout - resetting loading state');
+            setIsLoading(false);
+            alert('Payment popup failed to open. Please try again or refresh the page.');
+          }
+        }, 10000); // 10 second timeout
 
       } catch (setupError) {
         console.error('Paystack setup error:', setupError);
