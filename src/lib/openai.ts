@@ -19,14 +19,21 @@ interface DeepSeekConfig {
  */
 function getDeepSeekConfig(): DeepSeekConfig {
   const apiKey = process.env.DEEPSEEK_API_KEY_1;
-  const baseURL = process.env.DEEPSEEK_BASE_URL;
+  const baseURL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1';
+
+  console.log('🔧 DeepSeek Configuration Check:');
+  console.log('- API Key present:', !!apiKey);
+  console.log('- API Key length:', apiKey?.length || 0);
+  console.log('- Base URL:', baseURL);
 
   if (!apiKey) {
+    console.error('❌ DEEPSEEK_API_KEY_1 is missing from environment variables');
     throw new Error('DEEPSEEK_API_KEY_1 is required but not configured in environment variables.');
   }
 
-  if (!baseURL) {
-    throw new Error('DEEPSEEK_BASE_URL is required but not configured in environment variables.');
+  if (apiKey.length < 20) {
+    console.error('❌ DEEPSEEK_API_KEY_1 appears to be invalid (too short)');
+    throw new Error('DEEPSEEK_API_KEY_1 appears to be invalid. Please check your API key.');
   }
 
   return {
