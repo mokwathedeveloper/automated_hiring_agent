@@ -2,8 +2,47 @@
 
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+
+interface StatItem {
+  value: number;
+  display: string;
+  label: string;
+}
+
+interface StatsData {
+  resumesAnalyzed: StatItem;
+  accuracyRate: StatItem;
+  companiesSupported: StatItem;
+}
 
 export default function Hero() {
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats');
+        const result = await response.json();
+        if (result.success) {
+          setStats(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        // Fallback to default display values if API fails
+        setStats({
+          resumesAnalyzed: { value: 0, display: '0+', label: 'Resumes Analyzed' },
+          accuracyRate: { value: 85, display: '85%', label: 'Accuracy Rate' },
+          companiesSupported: { value: 100, display: '100+', label: 'Nigerian Companies' }
+        });
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
   const scrollToUpload = () => {
     const uploadSection = document.getElementById('upload');
     if (uploadSection) {
@@ -85,27 +124,51 @@ export default function Hero() {
         
         {/* Stats */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
-          <motion.div 
-            className="group text-center p-6 rounded-lg hover:bg-gray-900/5 dark:hover:bg-white/5 transition-all duration-300 cursor-pointer hover:scale-105"
-            whileHover={{ y: -5 }}
-          >
-            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-300 transition-colors duration-300">10,000+</div>
-            <div className="text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">Resumes Analyzed</div>
-          </motion.div>
-          <motion.div 
-            className="group text-center p-6 rounded-lg hover:bg-gray-900/5 dark:hover:bg-white/5 transition-all duration-300 cursor-pointer hover:scale-105"
-            whileHover={{ y: -5 }}
-          >
-            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-300 transition-colors duration-300">95%</div>
-            <div className="text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">Accuracy Rate</div>
-          </motion.div>
-          <motion.div 
-            className="group text-center p-6 rounded-lg hover:bg-gray-900/5 dark:hover:bg-white/5 transition-all duration-300 cursor-pointer hover:scale-105"
-            whileHover={{ y: -5 }}
-          >
-            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-300 transition-colors duration-300">500+</div>
-            <div className="text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">Nigerian Companies</div>
-          </motion.div>
+          {isLoadingStats ? (
+            // Loading skeleton for stats
+            Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="text-center p-6 rounded-lg">
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-2 animate-pulse"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              </div>
+            ))
+          ) : stats ? (
+            <>
+              <motion.div
+                className="group text-center p-6 rounded-lg hover:bg-gray-900/5 dark:hover:bg-white/5 transition-all duration-300 cursor-pointer hover:scale-105"
+                whileHover={{ y: -5 }}
+              >
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-300 transition-colors duration-300">
+                  {stats.resumesAnalyzed.display}
+                </div>
+                <div className="text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
+                  {stats.resumesAnalyzed.label}
+                </div>
+              </motion.div>
+              <motion.div
+                className="group text-center p-6 rounded-lg hover:bg-gray-900/5 dark:hover:bg-white/5 transition-all duration-300 cursor-pointer hover:scale-105"
+                whileHover={{ y: -5 }}
+              >
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-300 transition-colors duration-300">
+                  {stats.accuracyRate.display}
+                </div>
+                <div className="text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
+                  {stats.accuracyRate.label}
+                </div>
+              </motion.div>
+              <motion.div
+                className="group text-center p-6 rounded-lg hover:bg-gray-900/5 dark:hover:bg-white/5 transition-all duration-300 cursor-pointer hover:scale-105"
+                whileHover={{ y: -5 }}
+              >
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-300 transition-colors duration-300">
+                  {stats.companiesSupported.display}
+                </div>
+                <div className="text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
+                  {stats.companiesSupported.label}
+                </div>
+              </motion.div>
+            </>
+          ) : null}
         </div>
       </div>
     </section>
