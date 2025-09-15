@@ -18,7 +18,7 @@ export default function Pricing() {
   const handlePaymentVerification = async (reference: string) => {
     try {
       const verifyResponse = await fetch('/api/payment', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -28,7 +28,7 @@ export default function Pricing() {
       const result = await verifyResponse.json();
 
       if (result.success) {
-        alert('✅ Payment successful! Premium features unlocked.');
+        alert('✅ Payment successful! Premium features unlocked. (Demo Mode)');
       } else {
         alert('❌ Payment verification failed: ' + (result.error || 'Unknown error'));
       }
@@ -130,9 +130,9 @@ export default function Pricing() {
     const cleanupErrorListener = setupPaystackErrorListener();
 
     try {
-      // Use NGN currency to match Paystack merchant account configuration
-      const currency = 'NGN';
-      const amount = 5000 * 100; // ₦5,000 in kobo
+      // Use KES currency for hackathon demo (Kenyan Paystack account)
+      const currency = 'KES';
+      const amount = 1250 * 100; // KSh 1,250 in cents
 
       // Validate Paystack key format
       const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
@@ -197,6 +197,21 @@ export default function Pricing() {
   return (
     <section className="py-20 bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Demo Notice */}
+        <div className="text-center mb-8">
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 max-w-4xl mx-auto">
+            <div className="flex items-center justify-center mb-2">
+              <span className="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium">
+                🎪 HACKATHON DEMO
+              </span>
+            </div>
+            <p className="text-blue-700 dark:text-blue-300 text-sm">
+              <strong>Demo Mode:</strong> Pricing shown in KES (Kenyan Shilling) for demonstration.
+              Production version will use NGN (Nigerian Naira) for Nigerian users.
+            </p>
+          </div>
+        </div>
+
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-500">
             Choose Your Plan
@@ -216,7 +231,7 @@ export default function Pricing() {
           >
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">Free Plan</h3>
-              <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">₦0</div>
+              <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">KSh 0</div>
               <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">Perfect for getting started</p>
             </div>
 
@@ -258,7 +273,7 @@ export default function Pricing() {
 
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-500">Pro Plan</h3>
-              <div className="text-4xl font-bold text-blue-600 mb-2">₦5,000</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">KSh 1,250</div>
               <p className="text-gray-600 dark:text-gray-400 transition-colors duration-500">Per month</p>
             </div>
 

@@ -1,22 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/nextauth';
-import { verifyPayment, validatePaystackConfig } from '@/lib/paystack';
+import { createClient } from '@/lib/supabase/server';
+import {
+  verifyPayment,
+  validateFlutterwaveConfig,
+  initializePayment,
+  generateTxRef,
+  getRedirectUrl,
+  getCurrencyInfo,
+  type SupportedCountry
+} from '@/lib/flutterwave';
 
+// Initialize payment
 export async function POST(request: NextRequest) {
   try {
-    // Validate Paystack configuration first
-    const configValidation = validatePaystackConfig();
+    // Validate Flutterwave configuration first
+    const configValidation = validateFlutterwaveConfig();
     if (!configValidation.isValid) {
-      console.error('Paystack configuration errors:', configValidation.errors);
+      console.error('Flutterwave configuration errors:', configValidation.errors);
       return NextResponse.json({
         success: false,
         error: 'Payment system configuration error. Please contact support.'
       }, { status: 500 });
     }
 
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    // Get authenticated user
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
       return NextResponse.json({
         success: false,
         error: 'Authentication required'
@@ -33,81 +44,111 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const { reference } = requestBody;
+    const { amount, currency, planName, country } = requestBody;
 
-    if (!reference || typeof reference !== 'string') {
+    // Validate required fields
+    if (!amount || !currency || !planName) {
       return NextResponse.json({
         success: false,
-        error: 'Valid payment reference is required'
+        error: 'Amount, currency, and plan name are required'
       }, { status: 400 });
     }
 
-    console.log(`Processing payment verification for user ${session.user?.email}, reference: ${reference}`);
+    // Get currency info
+    const countryCode = (country || 'NG') as SupportedCountry;
+    const currencyInfo = getCurrencyInfo(countryCode);
 
-    const paymentData = await verifyPayment(reference);
+    console.log(`Initializing payment for user ${user.email}, plan: ${planName}, amount: ${currencyInfo.symbol}${amount}`);
 
-    // Enhanced validation of payment response
-    if (paymentData && paymentData.status === true && paymentData.data) {
-      const transactionData = paymentData.data;
+    // Generate unique transaction reference
+    const txRef = generateTxRef('hackathon_demo');
 
-      if (transactionData.status === 'success') {
-        // In production, update user's premium status in database
-        console.log(`Payment verified successfully for user ${session.user?.email}:`, {
-          reference: reference,
-          amount: transactionData.amount,
-          currency: transactionData.currency,
-          customer: transactionData.customer?.email
-        });
-
-        return NextResponse.json({
-          success: true,
-          message: 'Payment verified successfully',
-          data: {
-            reference: transactionData.reference,
-            amount: transactionData.amount,
-            currency: transactionData.currency,
-            status: transactionData.status
-          }
-        });
-      } else {
-        console.warn(`Payment verification failed - transaction status: ${transactionData.status}`);
-        return NextResponse.json({
-          success: false,
-          error: `Payment failed: ${transactionData.gateway_response || 'Transaction was not successful'}`
-        }, { status: 400 });
+    // Initialize payment with Paystack (keeping existing integration for demo)
+    const paymentPayload = {
+      email: user.email,
+      amount: amount * 100, // Convert to cents/kobo
+      currency: currency,
+      reference: txRef,
+      callback_url: getRedirectUrl(),
+      metadata: {
+        plan_name: planName,
+        user_id: user.id,
+        demo_mode: true
       }
-    } else {
-      console.warn('Invalid payment verification response:', paymentData);
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid payment verification response from Paystack'
-      }, { status: 400 });
-    }
+    };
+
+    // For demo, return payment initialization data
+    return NextResponse.json({
+      success: true,
+      message: 'Payment initialized successfully',
+      data: {
+        reference: txRef,
+        amount: amount,
+        currency: currency,
+        email: user.email,
+        demo_mode: true,
+        paystack_config: {
+          key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+          email: user.email,
+          amount: amount * 100,
+          currency: currency,
+          ref: txRef
+        }
+      }
+    });
   } catch (error: any) {
-    console.error('Payment verification error:', error);
-
-    // Provide specific error messages based on error type
-    let errorMessage = 'Payment verification failed';
-    let statusCode = 500;
-
-    if (error.message) {
-      if (error.message.includes('Invalid Paystack secret key')) {
-        errorMessage = 'Payment system configuration error';
-        statusCode = 500;
-      } else if (error.message.includes('Payment transaction not found')) {
-        errorMessage = 'Payment transaction not found';
-        statusCode = 404;
-      } else if (error.message.includes('Network')) {
-        errorMessage = 'Network error during payment verification';
-        statusCode = 503;
-      } else {
-        errorMessage = 'Payment verification failed: ' + error.message;
-      }
-    }
+    console.error('Payment initialization error:', error);
 
     return NextResponse.json({
       success: false,
-      error: errorMessage
-    }, { status: statusCode });
+      error: 'Payment initialization failed: ' + (error.message || 'Unknown error')
+    }, { status: 500 });
+  }
+}
+
+// Verify payment
+export async function PUT(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required'
+      }, { status: 401 });
+    }
+
+    const { reference } = await request.json();
+
+    if (!reference) {
+      return NextResponse.json({
+        success: false,
+        error: 'Payment reference is required'
+      }, { status: 400 });
+    }
+
+    console.log(`Verifying payment for user ${user.email}, reference: ${reference}`);
+
+    // For demo, simulate successful verification
+    // In production, this would call Paystack verification API
+    return NextResponse.json({
+      success: true,
+      message: 'Payment verified successfully (Demo Mode)',
+      data: {
+        reference: reference,
+        amount: 1250,
+        currency: 'KES',
+        status: 'success',
+        demo_mode: true
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Payment verification error:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Payment verification failed: ' + (error.message || 'Unknown error')
+    }, { status: 500 });
   }
 }
