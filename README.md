@@ -1,183 +1,122 @@
-# Supabase CLI
+# 🤖 AI-Driven Applicant Selection Tool
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-green)](https://supabase.com/)
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+An intelligent recruitment platform built specifically for the Nigerian job market, featuring AI-powered resume parsing, candidate ranking algorithms, and automated hiring workflows.
 
-This repository contains all the functionality for Supabase CLI.
+## 🎯 Built for PLP Nigeria Hackathon 2025
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+This project showcases advanced AI integration, modern web development practices, and scalable architecture designed to revolutionize hiring in Nigeria.
 
-## Getting started
+## ✨ Key Features
 
-### Install the CLI
+- 🧠 **AI-Powered Resume Analysis** - Advanced parsing with Nigerian context
+- 📊 **Intelligent Candidate Ranking** - Multi-criteria scoring algorithm
+- 💬 **WhatsApp Integration** - Automated candidate communication
+- 💳 **Secure Payment Processing** - Subscription-based pricing tiers
+- 🔒 **Enterprise Security** - Row-level security and data isolation
+- 📱 **Responsive Design** - Mobile-first UI with dark mode support
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+## 🚀 Quick Start
 
+### Prerequisites
+
+- Node.js 18+ and npm
+- Supabase account
+- OpenAI/DeepSeek API key
+
+### Installation
+
+1. **Clone the repository**
 ```bash
-npm i supabase --save-dev
+git clone https://github.com/godsplan/automated-hiring-agent.git
+cd automated-hiring-agent
 ```
 
-To install the beta release channel:
-
+2. **Install dependencies**
 ```bash
-npm i supabase@beta --save-dev
+npm install
 ```
 
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
-
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
-
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
-
-<details>
-  <summary><b>macOS</b></summary>
-
-  Available via [Homebrew](https://brew.sh). To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
-  
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Windows</b></summary>
-
-  Available via [Scoop](https://scoop.sh). To install:
-
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
-
-  To upgrade:
-
-  ```powershell
-  scoop update supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Linux</b></summary>
-
-  Available via [Homebrew](https://brew.sh) and Linux packages.
-
-  #### via Homebrew
-
-  To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-
-  #### via Linux packages
-
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
-
-  ```sh
-  sudo dpkg -i <...>.deb
-  ```
-
-  ```sh
-  sudo rpm -i <...>.rpm
-  ```
-
-  ```sh
-  sudo pacman -U <...>.pkg.tar.zst
-  ```
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-  ```sh
-  go install github.com/supabase/cli@latest
-  ```
-
-  Add a symlink to the binary in `$PATH` for easier access:
-
-  ```sh
-  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-  ```
-
-  This works on other non-standard Linux distros.
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-  To install in your working directory:
-
-  ```bash
-  pkgx install supabase
-  ```
-
-  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-</details>
-
-### Run the CLI
-
+3. **Set up environment variables**
 ```bash
-supabase bootstrap
+cp .env.example .env
+# Edit .env with your API keys and database credentials
 ```
 
-Or using npx:
-
+4. **Run database migrations**
 ```bash
-npx supabase bootstrap
+npm run migrate
 ```
 
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
-
-## Docs
-
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
-
-## Breaking changes
-
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
-
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
-
-## Developing
-
-To run from source:
-
-```sh
-# Go >= 1.22
-go run . help
+5. **Start development server**
+```bash
+npm run dev
 ```
+
+Visit `http://localhost:3001` to see your application running!
+
+## 🏗️ Tech Stack
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, Node.js
+- **Database**: Supabase (PostgreSQL)
+- **AI**: OpenAI GPT-3.5-turbo, DeepSeek API
+- **Authentication**: Supabase Auth
+- **Payments**: Paystack (Demo: KES, Production: NGN)
+- **Communication**: Twilio WhatsApp API
+- **Testing**: Jest, React Testing Library
+- **Deployment**: Vercel
+
+## 📊 Features Overview
+
+### 🤖 AI-Powered Analysis
+- Resume parsing with Nigerian context awareness
+- Skills extraction and proficiency scoring
+- Experience validation and ranking
+- Education verification with local university recognition
+
+### 📈 Intelligent Ranking
+- Multi-criteria scoring algorithm (40% skills, 30% experience, 20% education, 10% cultural fit)
+- Customizable ranking weights
+- Batch processing capabilities
+- Export functionality (CSV, PDF, Excel)
+
+### 💬 WhatsApp Integration
+- Automated candidate notifications
+- Interview scheduling
+- Status updates and feedback collection
+- Multi-language support
+
+### 🔒 Enterprise Security
+- Row-level security (RLS)
+- User data isolation
+- Encrypted payment processing
+- Rate limiting and input validation
+
+## 🎪 Demo Mode (Hackathon)
+
+Currently configured for demonstration with:
+- **Currency**: KES (Kenyan Shilling)
+- **Pricing**: KSh 1,250 ≈ ₦5,000 NGN equivalent
+- **Payment**: Paystack Kenya account
+- **Production Roadmap**: Nigerian business registration → NGN pricing
+
+## 📝 License
+
+MIT License - Copyright (c) 2025 Godsplan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+## 🤝 Contributing
+
+Built with ❤️ for the Nigerian tech ecosystem. Contributions welcome!
+
+---
+
+**© 2025 Godsplan - AI-Driven Applicant Selection Tool**

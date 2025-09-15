@@ -43,7 +43,7 @@ export default function Footer() {
         
         <div className="mt-8 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2024 HiringAgent. Built with ❤️ for the Nigerian tech ecosystem.
+            © 2025 HiringAgent. Built with ❤️ for the Nigerian tech ecosystem.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="group text-gray-400 hover:text-white transition-all duration-200 hover:scale-125 hover:-translate-y-1">

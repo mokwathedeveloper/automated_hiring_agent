@@ -2,6 +2,22 @@
   "name": "automated-hiring-agent",
   "version": "0.1.0",
   "private": true,
+  "description": "AI-Driven Applicant Selection Tool for the Nigerian job market",
+  "author": "Godsplan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/godsplan/automated-hiring-agent"
+  },
+  "keywords": [
+    "ai",
+    "hiring",
+    "recruitment",
+    "resume-parser",
+    "nigeria",
+    "nextjs",
+    "typescript"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -30,6 +46,7 @@
     "cors": "^2.8.5",
     "express-rate-limit": "^8.1.0",
     "express-validator": "^7.2.1",
+    "flutterwave-node-v3": "^1.3.0",
     "framer-motion": "^10.16.5",
     "helmet": "^8.1.0",
     "joi": "^18.0.1",
