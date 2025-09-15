@@ -7,11 +7,30 @@ import { cookies } from "next/headers";
  * it.
  */
 export async function createClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Handle missing environment variables gracefully during build
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Supabase environment variables not found, using mock client for build');
+    // Return a mock client during build time to prevent errors
+    return createServerClient(
+      'https://placeholder.supabase.co',
+      'placeholder-anon-key',
+      {
+        cookies: {
+          getAll() { return []; },
+          setAll() { /* no-op */ },
+        },
+      }
+    );
+  }
+
   const cookieStore = await cookies();
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
