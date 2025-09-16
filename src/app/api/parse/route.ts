@@ -166,64 +166,28 @@ ${sanitizedText.slice(0, 2000)}`;
       console.error('DeepSeek API Error:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
 
-      // For hackathon demo: provide a fallback response when AI fails
-      console.log('🎪 HACKATHON MODE: Providing fallback response due to AI API failure');
-
-      // Create a basic parsed resume structure from the extracted text
-      const fallbackData = {
-        name: "Demo Candidate",
-        email: "demo@example.com",
-        phone: "+234-XXX-XXX-XXXX",
-        skills: ["JavaScript", "React", "Node.js", "Python", "SQL"],
-        experience: [{
-          title: "Software Developer",
-          company: "Tech Company",
-          duration: "2022-2024",
-          description: "Developed web applications using modern technologies"
-        }],
-        education: [{
-          degree: "Bachelor of Science in Computer Science",
-          institution: "University of Lagos",
-          year: "2022"
-        }],
-        summary: "Experienced software developer with expertise in full-stack development"
-      };
-
-      // Validate the fallback data
-      const fallbackValidation = ParsedResumeSchema.safeParse(fallbackData);
-      if (fallbackValidation.success) {
-        console.log('✅ Using fallback data for hackathon demo');
-
-        // Continue with the fallback data instead of returning error
-        const content = JSON.stringify(fallbackData);
-        completion = {
-          choices: [{
-            message: {
-              content: content
-            }
-          }]
-        };
-      } else {
-        // If even fallback fails, return error
-        let errorMessage = 'AI processing failed. Please try again later.';
-        if (error && typeof error === 'object' && 'status' in error) {
-          switch (error.status) {
-            case 401:
-              errorMessage = 'AI service authentication failed. Please check API configuration.';
-              break;
-            case 429:
-              errorMessage = 'AI service quota exceeded. Please try again later.';
-              break;
-            case 500:
-              errorMessage = 'AI service is currently experiencing issues. Please try again later.';
-              break;
-            default:
-              errorMessage = `AI service error (Status: ${error.status}). Please try again.`;
-              break;
-          }
+      // Return proper error instead of fallback data
+      let errorMessage = 'AI processing failed. Please try again later.';
+      if (error && typeof error === 'object' && 'status' in error) {
+        switch (error.status) {
+          case 401:
+            errorMessage = 'AI service authentication failed. Please check API configuration.';
+            break;
+          case 429:
+            errorMessage = 'AI service quota exceeded. Please try again later.';
+            break;
+          case 500:
+            errorMessage = 'AI service is currently experiencing issues. Please try again later.';
+            break;
+          default:
+            errorMessage = `AI service error (Status: ${error.status}). Please try again.`;
+            break;
         }
-        return withCORS(createErrorResponse(errorMessage, 500), request);
+      } else if (error instanceof Error) {
+        errorMessage = `AI processing failed: ${error.message}`;
       }
+
+      return withCORS(createErrorResponse(errorMessage, 503), request);
     }
 
     const content = completion!.choices[0]?.message?.content;
