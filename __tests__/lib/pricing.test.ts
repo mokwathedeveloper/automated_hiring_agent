@@ -98,17 +98,17 @@ describe('pricing', () => {
 
   describe('calculatePayPerUse', () => {
     it('calculates basic pay per use pricing', () => {
-      expect(calculatePayPerUse(1)).toBe(100) // 1 * 100
-      expect(calculatePayPerUse(10)).toBe(1000) // 10 * 100
-      expect(calculatePayPerUse(25)).toBe(2500) // 25 * 100
+      expect(calculatePayPerUse(1)).toBe(25) // 1 * 25
+      expect(calculatePayPerUse(10)).toBe(250) // 10 * 25
+      expect(calculatePayPerUse(25)).toBe(625) // 25 * 25
     })
 
     it('applies bulk discount for 50+ resumes', () => {
-      const basePrice = 50 * PAY_PER_USE.resumeAnalysis // 5000
-      const discountedPrice = Math.round(basePrice * PAY_PER_USE.bulkDiscount) // 4000
-      
+      const basePrice = 50 * PAY_PER_USE.resumeAnalysis // 1250
+      const discountedPrice = Math.round(basePrice * PAY_PER_USE.bulkDiscount) // 1000
+
       expect(calculatePayPerUse(50)).toBe(discountedPrice)
-      expect(calculatePayPerUse(100)).toBe(Math.round(10000 * 0.8)) // 8000
+      expect(calculatePayPerUse(100)).toBe(Math.round(2500 * 0.8)) // 2000
     })
 
     it('handles zero resumes', () => {
@@ -117,7 +117,7 @@ describe('pricing', () => {
 
     it('handles large numbers', () => {
       const result = calculatePayPerUse(1000)
-      expect(result).toBe(Math.round(100000 * 0.8)) // bulk discount applied
+      expect(result).toBe(Math.round(25000 * 0.8)) // bulk discount applied
     })
   })
 

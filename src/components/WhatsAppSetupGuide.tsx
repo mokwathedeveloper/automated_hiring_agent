@@ -106,8 +106,8 @@ export default function WhatsAppSetupGuide({ isOpen, onClose }: WhatsAppSetupGui
               </Button>
               <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded p-3">
                 <p className="text-yellow-800 dark:text-yellow-200 text-sm">
-                  <strong>For Testing:</strong> You can use Twilio's WhatsApp Sandbox for testing.
-                  For production, you'll need to get your WhatsApp Business number approved.
+                  <strong>For Testing:</strong> You can use Twilio&apos;s WhatsApp Sandbox for testing.
+                  For production, you&apos;ll need to get your WhatsApp Business number approved.
                 </p>
               </div>
             </div>
@@ -175,7 +175,7 @@ TWILIO_WHATSAPP_NUMBER=whatsapp:+your_whatsapp_number_here`, 'env')}
                 </p>
                 <ul className="list-disc list-inside mt-2 text-green-700 dark:text-green-300 text-sm space-y-1">
                   <li>Start with the Twilio WhatsApp Sandbox for testing</li>
-                  <li>Make sure the recipient's number is verified in the sandbox</li>
+                  <li>Make sure the recipient&apos;s number is verified in the sandbox</li>
                   <li>Check the Twilio Console logs for any errors</li>
                 </ul>
               </div>
