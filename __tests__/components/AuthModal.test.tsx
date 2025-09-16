@@ -24,7 +24,7 @@ describe('AuthModal', () => {
   it('renders login modal correctly', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)
 
-    expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Enter your email')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument()
   })
@@ -32,7 +32,10 @@ describe('AuthModal', () => {
   it('renders signup modal correctly', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="signup" />)
 
-    expect(screen.getByRole('heading', { name: /sign up/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Enter your first name')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Enter your last name')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Enter your email')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument()
   })
 
@@ -174,7 +177,7 @@ describe('AuthModal', () => {
   it('closes modal when close button is clicked', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} mode="login" />)
 
-    const closeButton = screen.getByText('✕')
+    const closeButton = screen.getByRole('button', { name: /close/i })
     fireEvent.click(closeButton)
 
     expect(mockOnClose).toHaveBeenCalled()

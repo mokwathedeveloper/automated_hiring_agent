@@ -1,5 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { useAuth } from '@/hooks/useAuth';
 import Pricing from '@/components/Pricing';
 
@@ -41,9 +40,7 @@ describe('Payment Integration', () => {
       isAuthenticated: false,
     });
 
-    act(() => {
-      render(<Pricing />);
-    });
+    render(<Pricing />);
     
     expect(screen.getByText('Free Plan')).toBeInTheDocument();
     expect(screen.getByText('Pro Plan')).toBeInTheDocument();

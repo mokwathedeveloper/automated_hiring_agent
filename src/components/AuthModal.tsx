@@ -29,10 +29,7 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
   const [success, setSuccess] = useState('');
   const [isResettingPassword, setIsResettingPassword] = useState(false);
 
-  // Debug logging for mobile issues
-  useEffect(() => {
-    console.log('AuthModal state:', { mode, isResettingPassword, isLoading });
-  }, [mode, isResettingPassword, isLoading]);
+
 
   useEffect(() => {
     setMode(initialMode);
@@ -68,7 +65,6 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
       return;
     }
 
-    console.log('Processing login...');
     setIsLoading(true);
     setError('');
     setSuccess('');
@@ -96,7 +92,6 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
       return;
     }
 
-    console.log('Processing password reset...');
     setIsLoading(true);
     setError('');
     setSuccess('');

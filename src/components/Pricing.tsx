@@ -111,7 +111,7 @@ export default function Pricing() {
       return;
     }
 
-    console.log('Paystack is available:', !!window.PaystackPop);
+
 
     // Validate required data
     if (!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY) {
@@ -158,7 +158,7 @@ export default function Pricing() {
         callback: function(response: any) {
           // Ensure response has reference before proceeding
           if (response && response.reference) {
-            console.log('Payment successful, verifying...', response.reference);
+
             handlePaymentVerification(response.reference);
           } else {
             console.error('Invalid payment response:', response);
@@ -167,16 +167,13 @@ export default function Pricing() {
           }
         },
         onClose: function() {
-          console.log('Payment popup closed by user');
+
           setIsLoading(false);
           cleanupErrorListener(); // Clean up error listener when popup closes
         },
       };
 
-      console.log('Initializing Paystack with config:', {
-        ...paystackConfig,
-        key: publicKey.substring(0, 10) + '...' // Log partial key for debugging
-      });
+
 
       // Initialize Paystack payment
       const handler = window.PaystackPop.setup(paystackConfig);

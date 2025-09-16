@@ -1,5 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { useAuth } from '@/hooks/useAuth';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { ParsedResume } from '@/types';
