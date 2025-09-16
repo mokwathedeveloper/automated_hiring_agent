@@ -8,17 +8,18 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: 'HiringAgent - AI-Powered Hiring Platform',
   description: 'Transform your recruitment process with intelligent resume analysis designed specifically for the Nigerian job market. Streamline hiring with AI-powered candidate evaluation.',
   keywords: 'hiring, recruitment, AI, resume analysis, Nigerian jobs, HR technology, candidate evaluation, job matching',
   authors: [{ name: 'HiringAgent Team' }],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
   openGraph: {
     title: 'HiringAgent - AI-Powered Hiring Platform',
     description: 'Transform your recruitment process with intelligent resume analysis designed specifically for the Nigerian job market.',

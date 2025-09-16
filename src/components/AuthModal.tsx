@@ -29,6 +29,11 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
   const [success, setSuccess] = useState('');
   const [isResettingPassword, setIsResettingPassword] = useState(false);
 
+  // Debug logging for mobile issues
+  useEffect(() => {
+    console.log('AuthModal state:', { mode, isResettingPassword, isLoading });
+  }, [mode, isResettingPassword, isLoading]);
+
   useEffect(() => {
     setMode(initialMode);
     // Reset password reset state when mode changes
@@ -49,12 +54,21 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     // Ensure we're not in password reset mode
     if (isResettingPassword) {
+      console.log('Blocked login attempt - in password reset mode');
       return;
     }
 
+    // Ensure we're in login mode
+    if (mode !== 'login') {
+      console.log('Blocked login attempt - not in login mode');
+      return;
+    }
+
+    console.log('Processing login...');
     setIsLoading(true);
     setError('');
     setSuccess('');
@@ -74,6 +88,15 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    // Only allow password reset when explicitly in reset mode
+    if (!isResettingPassword) {
+      console.log('Blocked password reset - not in reset mode');
+      return;
+    }
+
+    console.log('Processing password reset...');
     setIsLoading(true);
     setError('');
     setSuccess('');
@@ -185,14 +208,25 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
       case 'login':
       default:
         return (
-          <form onSubmit={handleLogin} className="space-y-4">
-            {renderEmailInput()}
-            {renderPasswordInput()}
-            <Button variant="link" onClick={() => setIsResettingPassword(true)} className="text-sm text-primary-600 p-2 h-auto justify-start">
+          <div className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4">
+              {renderEmailInput()}
+              {renderPasswordInput()}
+              {renderSubmitButton('Login')}
+            </form>
+            <Button
+              variant="link"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsResettingPassword(true);
+              }}
+              className="text-sm text-primary-600 p-2 h-auto justify-start w-full"
+            >
               Forgot Password?
             </Button>
-            {renderSubmitButton('Login')}
-          </form>
+          </div>
         );
     }
   };
