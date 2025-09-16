@@ -22,8 +22,8 @@ export default function HomePage() {
     }
   };
 
-  // You can set the YouTube URL here when you have it
-  const youtubeUrl = ''; // Will be provided later
+  // YouTube demo video URL
+  const youtubeUrl = 'https://www.youtube.com/watch?v=4eAUj_ZjvLw';
 
   return (
     <main>
