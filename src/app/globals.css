@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Optimized font loading - moved to layout.tsx for better performance */
 
 @tailwind base;
 @tailwind components;
@@ -113,6 +113,17 @@
   .glass-effect {
     @apply bg-background/95 backdrop-blur-md border border-border/60 shadow-sm;
   }
+
+  /* Optimized navbar styles for mobile performance */
+  .navbar-glass {
+    @apply bg-background/95 border border-border/60 shadow-sm;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .navbar-logo-hover {
+    @apply transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98];
+  }
   
   .gradient-text {
     @apply bg-gradient-to-r from-primary via-primary to-primary/80 bg-clip-text text-transparent;
@@ -120,10 +131,12 @@
   
   .card-hover {
     @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 border-border/80;
+    will-change: transform, box-shadow;
   }
   
   .button-hover {
-    @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
+    @apply transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98];
+    will-change: transform;
   }
   
   .fade-in {
@@ -222,5 +235,52 @@
 
   .dark .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: rgb(71 85 105);
+  }
+
+  /* Optimized mobile menu animations */
+  .mobile-menu {
+    @apply md:hidden overflow-hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+    will-change: max-height, opacity;
+  }
+
+  .mobile-menu.open {
+    max-height: 400px;
+    opacity: 1;
+  }
+
+  /* Optimized hamburger button */
+  .hamburger-button {
+    @apply transition-transform duration-200 hover:scale-105 active:scale-95;
+    will-change: transform;
+  }
+
+  .hamburger-icon {
+    @apply transition-transform duration-200;
+    will-change: transform;
+  }
+
+  .hamburger-icon.open {
+    transform: rotate(90deg);
+  }
+
+  /* Performance optimizations for mobile */
+  @media (max-width: 768px) {
+    .navbar-glass {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    /* Reduce motion for users who prefer it */
+    @media (prefers-reduced-motion: reduce) {
+      .mobile-menu,
+      .hamburger-icon,
+      .hamburger-button,
+      .navbar-logo-hover {
+        transition: none;
+      }
+    }
   }
 }

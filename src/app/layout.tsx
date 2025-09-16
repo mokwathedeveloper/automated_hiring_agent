@@ -7,6 +7,7 @@ import QueryProvider from '@/components/QueryProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import PerformanceMonitor from '@/components/PerformanceMonitor';
 
 export const viewport = {
   width: 'device-width',
@@ -45,6 +46,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Optimized font loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
         <script async src="https://js.paystack.co/v1/inline.js"></script>
         <script
           dangerouslySetInnerHTML={{
@@ -102,6 +110,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <QueryProvider>
+              <PerformanceMonitor />
               <Navbar />
               {children}
               <Footer />

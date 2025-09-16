@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home,
   LayoutDashboard,
@@ -17,9 +16,13 @@ import {
   CheckCircle2,
   Mail
 } from 'lucide-react';
-import AuthModal, { AuthMode } from './AuthModal';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from './ThemeToggle';
+
+// Lazy load AuthModal to reduce initial bundle size
+const AuthModal = lazy(() => import('./AuthModal'));
+
+export type AuthMode = 'login' | 'signup';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,19 +32,14 @@ export default function Navbar() {
   const [mode, setMode] = useState<AuthMode>("login");
 
   return (
-    <nav className="glass-effect sticky top-0 z-50 border-b">
+    <nav className="navbar-glass sticky top-0 z-50 border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="group flex items-center space-x-3 button-hover">
-              <motion.div 
-                className="w-9 h-9 bg-gradient-to-br from-primary to-primary/90 rounded-xl flex items-center justify-center shadow-professional"
-                whileHover={{ scale: 1.05, rotate: 2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
+            <Link href="/" className="group flex items-center space-x-3 navbar-logo-hover">
+              <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary/90 rounded-xl flex items-center justify-center shadow-professional">
                 <CheckCircle2 className="w-5 h-5 text-white" />
-              </motion.div>
+              </div>
               <span className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-200">HiringAgent</span>
             </Link>
             <div className="hidden md:ml-10 md:flex md:space-x-1">
@@ -119,141 +117,122 @@ export default function Navbar() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="button-hover"
+                className="hamburger-button"
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               >
-                <AnimatePresence mode="wait">
+                <div className={`hamburger-icon ${isMenuOpen ? 'open' : ''}`}>
                   {isMenuOpen ? (
-                    <motion.div
-                      key="close"
-                      initial={{ rotate: -90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <X className="w-5 h-5" />
-                    </motion.div>
+                    <X className="w-5 h-5" />
                   ) : (
-                    <motion.div
-                      key="menu"
-                      initial={{ rotate: 90, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: -90, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Menu className="w-5 h-5" />
-                    </motion.div>
+                    <Menu className="w-5 h-5" />
                   )}
-                </AnimatePresence>
+                </div>
               </Button>
             </div>
           </div>
         </div>
         
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden"
+        {/* Mobile menu with optimized animations */}
+        <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <Link
+              href="/"
+              className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center"
+              onClick={() => setIsMenuOpen(false)}
             >
-              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <Link 
-                  href="/" 
-                  className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Home className="w-4 h-4 mr-3" />
-                  Home
-                </Link>
-                <Link 
-                  href="/dashboard" 
-                  className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center text-muted-foreground hover:text-foreground"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <LayoutDashboard className="w-4 h-4 mr-3" />
-                  Dashboard
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center text-muted-foreground hover:text-foreground"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <DollarSign className="w-4 h-4 mr-3" />
-                  Pricing
-                </Link>
-                <Link
-                  href="/contact"
-                  className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center text-muted-foreground hover:text-foreground"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Mail className="w-4 h-4 mr-3" />
-                  Contact
-                </Link>
-                <div className="pt-4 pb-3 border-t border-border">
-                  <div className="flex items-center justify-between px-3 py-2">
-                    <ThemeToggle />
-                    {user ? (
-                      <div className="flex items-center space-x-2">
-                        <User className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-foreground truncate max-w-32">
-                          {user.email}
-                        </span>
-                      </div>
-                    ) : null}
+              <Home className="w-4 h-4 mr-3" />
+              Home
+            </Link>
+            <Link
+              href="/dashboard"
+              className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center text-muted-foreground hover:text-foreground"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <LayoutDashboard className="w-4 h-4 mr-3" />
+              Dashboard
+            </Link>
+            <Link
+              href="/pricing"
+              className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center text-muted-foreground hover:text-foreground"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <DollarSign className="w-4 h-4 mr-3" />
+              Pricing
+            </Link>
+            <Link
+              href="/contact"
+              className="block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent transition-colors flex items-center text-muted-foreground hover:text-foreground"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Mail className="w-4 h-4 mr-3" />
+              Contact
+            </Link>
+            <div className="pt-4 pb-3 border-t border-border">
+              <div className="flex items-center justify-between px-3 py-2">
+                <ThemeToggle />
+                {user ? (
+                  <div className="flex items-center space-x-2">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground truncate max-w-32">
+                      {user.email}
+                    </span>
                   </div>
-                  {user ? (
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        signOut();
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-full justify-start text-base font-medium"
-                    >
-                      <LogOut className="w-4 h-4 mr-3" />
-                      Logout
-                    </Button>
-                  ) : (
-                    <div className="space-y-2">
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          setMode("login");
-                          setIsAuthModalOpen(true);
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full justify-start text-base font-medium"
-                      >
-                        <LogIn className="w-4 h-4 mr-3" />
-                        Login
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setMode("signup");
-                          setIsAuthModalOpen(true);
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full justify-start text-base font-medium bg-gradient-to-r from-primary to-primary/90"
-                      >
-                        <UserPlus className="w-4 h-4 mr-3" />
-                        Sign Up
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                ) : null}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              {user ? (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    signOut();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full justify-start text-base font-medium"
+                >
+                  <LogOut className="w-4 h-4 mr-3" />
+                  Logout
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setMode("login");
+                      setIsAuthModalOpen(true);
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full justify-start text-base font-medium"
+                  >
+                    <LogIn className="w-4 h-4 mr-3" />
+                    Login
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setMode("signup");
+                      setIsAuthModalOpen(true);
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full justify-start text-base font-medium bg-gradient-to-r from-primary to-primary/90"
+                  >
+                    <UserPlus className="w-4 h-4 mr-3" />
+                    Sign Up
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        mode={mode}
-      />
+
+      {/* Lazy load AuthModal only when needed */}
+      {isAuthModalOpen && (
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50" />}>
+          <AuthModal
+            isOpen={isAuthModalOpen}
+            onClose={() => setIsAuthModalOpen(false)}
+            mode={mode}
+          />
+        </Suspense>
+      )}
     </nav>
   );
 }
