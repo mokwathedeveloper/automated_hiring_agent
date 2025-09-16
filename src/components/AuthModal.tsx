@@ -31,6 +31,10 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
 
   useEffect(() => {
     setMode(initialMode);
+    // Reset password reset state when mode changes
+    setIsResettingPassword(false);
+    setError('');
+    setSuccess('');
   }, [initialMode]);
 
   const handleResponse = (errorMsg: string | null, successMsg: string) => {
@@ -45,6 +49,12 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Ensure we're not in password reset mode
+    if (isResettingPassword) {
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setSuccess('');
@@ -85,6 +95,12 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Ensure we're not in password reset mode
+    if (isResettingPassword) {
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setSuccess('');
@@ -188,6 +204,8 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        autoComplete="email"
+        inputMode="email"
         placeholder="Enter your email"
         required
         id="email"
@@ -202,6 +220,7 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
         placeholder="Enter your password"
         required
         minLength={8}
@@ -266,6 +285,8 @@ export default function AuthModal({ isOpen, onClose, mode: initialMode }: AuthMo
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode);
     resetForm();
+    // Ensure password reset state is cleared when switching modes
+    setIsResettingPassword(false);
   };
 
   return (

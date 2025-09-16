@@ -305,7 +305,7 @@ Have an idea? We'd love to hear it! Open an issue with:
 
 ### **MIT License**
 ```
-Copyright (c) 2025 Godsplan - HiringAgent
+Copyright (c) 2025 HiringAgent
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -338,6 +338,6 @@ copies or substantial portions of the Software.
 
 **Made with ❤️ for the Nigerian Tech Ecosystem**
 
-*© 2025 Godsplan - HiringAgent: AI-Driven Applicant Selection Tool*
+*© 2025 HiringAgent: AI-Driven Applicant Selection Tool*
 
 </div>
