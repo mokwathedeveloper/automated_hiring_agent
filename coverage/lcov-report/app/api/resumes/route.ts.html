@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>0/18</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>0/17</span>
             </div>
         
             
@@ -96,29 +96,22 @@
 <a name='L31'></a><a href='#L31'>31</a>
 <a name='L32'></a><a href='#L32'>32</a>
 <a name='L33'></a><a href='#L33'>33</a>
-<a name='L34'></a><a href='#L34'>34</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -127,49 +120,68 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// src/app/api/resumes/route.ts
-&nbsp;
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
+import { createRouteHandlerClient } from <span class="cstat-no" title="statement not covered" >'@supabase/auth-helpers-nextjs';</span>
+import { cookies } from <span class="cstat-no" title="statement not covered" >'next/headers';</span>
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, db } from <span class="cstat-no" title="statement not covered" >'@/lib/supabase';</span>
+import { createErrorResponse, createSuccessResponse, withCORS } from <span class="cstat-no" title="statement not covered" >'@/lib/security';</span>
 &nbsp;
-export async function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >GET(r</span></span>eq: NextRequest) {
+export const <span class="cstat-no" title="statement not covered" >dynamic </span>= <span class="cstat-no" title="statement not covered" >'force-dynamic';</span>
+&nbsp;
+export async function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >GET(</span></span>request: NextRequest) {
+  const supabase = <span class="cstat-no" title="statement not covered" >createRouteHandlerClient({ cookies });</span>
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  try {</span>
-    const { data: { user }, error: authError } = <span class="cstat-no" title="statement not covered" >await supabase.auth.getUser();</span>
-    
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (authError || !user) {</span>
-<span class="cstat-no" title="statement not covered" >      return NextResponse.json(</span>
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const {
+      data: { session },
+    } = <span class="cstat-no" title="statement not covered" >await supabase.auth.getSession();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!session) {</span>
+<span class="cstat-no" title="statement not covered" >      return withCORS(createErrorResponse('Unauthorized', 401), request);</span>
     }
 &nbsp;
-    const { data: resumes, error } = <span class="cstat-no" title="statement not covered" >await db.getUserResumes(user.id);</span>
-    
+    const { data: resumes, error } = <span class="cstat-no" title="statement not covered" >await supabase</span>
+      .from('resumes')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (error) {</span>
-<span class="cstat-no" title="statement not covered" >      return NextResponse.json(</span>
-        { error: 'Failed to fetch resumes' },
-        { status: 500 }
-      );
+<span class="cstat-no" title="statement not covered" >      console.error('Error fetching resumes:', error);</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error(error.message);</span>
     }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return NextResponse.json({ resumes });</span>
-  } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('Resumes API error:', error);</span>
-<span class="cstat-no" title="statement not covered" >    return NextResponse.json(</span>
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+<span class="cstat-no" title="statement not covered" >    return withCORS(createSuccessResponse(resumes), request);</span>
+  } catch (error: any) {
+<span class="cstat-no" title="statement not covered" >    console.error('Error in /api/resumes:', error);</span>
+<span class="cstat-no" title="statement not covered" >    return withCORS(createErrorResponse(error.message || 'Internal Server Error', 500), request);</span>
   }
-}</pre></td></tr></table></pre>
+}
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-06T00:16:50.623Z
+                at 2025-09-16T08:22:42.721Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
