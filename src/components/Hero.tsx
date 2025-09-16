@@ -16,7 +16,11 @@ interface StatsData {
   companiesSupported: StatItem;
 }
 
-export default function Hero() {
+interface HeroProps {
+  onWatchDemo?: () => void;
+}
+
+export default function Hero({ onWatchDemo }: HeroProps) {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
@@ -115,6 +119,7 @@ export default function Hero() {
           >
             <Button
               variant="outline"
+              onClick={onWatchDemo}
               className="border-2 border-gray-600 dark:border-gray-300 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-600 dark:hover:bg-gray-300 hover:text-white dark:hover:text-gray-900 transition-all duration-200"
             >
               Watch Demo
