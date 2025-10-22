@@ -11,7 +11,7 @@
 
 **Transforming Nigerian Recruitment with Intelligent AI-Driven Candidate Selection**
 
-[🎥 Live Demo](https://automated-hiring-agent.vercel.app) • [📖 Documentation](./doc/) • [🎪 Hackathon Demo](./doc/HACKATHON_DEMO_NOTES.md) • [🚀 Quick Start](#-quick-start)
+[🎥 Live Demo]([https://automated-hiring-agent.vercel.app](https://automated-hiring-agent-2.vercel.app/)) • [📖 Documentation](./doc/) • [🎪 Hackathon Demo](./doc/HACKATHON_DEMO_NOTES.md) • [🚀 Quick Start](#-quick-start)
 
 </div>
 
@@ -332,7 +332,7 @@ copies or substantial portions of the Software.
 
 **Transforming Nigerian Recruitment with AI Innovation**
 
-[![Live Demo](https://img.shields.io/badge/🎥-Live%20Demo-blue?style=for-the-badge)](https://automated-hiring-agent.vercel.app)
+[![Live Demo](https://img.shields.io/badge/🎥-Live%20Demo-blue?style=for-the-badge)]([https://automated-hiring-agent.vercel.app](https://automated-hiring-agent-2.vercel.app/))
 [![Documentation](https://img.shields.io/badge/📚-Documentation-green?style=for-the-badge)](./doc/)
 [![GitHub](https://img.shields.io/badge/⭐-Star%20on%20GitHub-yellow?style=for-the-badge)](https://github.com/mokwathedeveloper/automated_hiring_agent)
 
